@@ -21,22 +21,20 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Optimize>false</Optimize>
-    <OutputPath>.\bin\Debug</OutputPath>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;</DefineConstants>
     <GeneratePDB>True</GeneratePDB>
     <GenerateMDB>True</GenerateMDB>
-    <EnableAsserts>True</EnableAsserts>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <CaptureConsoleOutput>False</CaptureConsoleOutput>
     <StartMode>Project</StartMode>
-    <RegisterForComInterop>False</RegisterForComInterop>
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <XmlDoc>False</XmlDoc>
     <XmlDocWarningLevel>WarningOnPublicMembers</XmlDocWarningLevel>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
-    <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
+    <SuppressWarnings />
+    <FutureHelperClassName />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
@@ -71,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Options.pas" />
     <Compile Include="Program.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Content Include="Properties\App.ico" />
@@ -105,6 +104,8 @@
     <PreBuildEvent />
     <PostBuildEvent />
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PostBuildEvent />
   </PropertyGroup>
 </Project>

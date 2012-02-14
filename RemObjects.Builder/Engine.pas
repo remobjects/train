@@ -23,12 +23,17 @@ type
 
   Engine = public class
   private
+    method fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
+    method fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
+    method fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
+    method fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
     fRoot, fEnvironment: Environment;
     fEngine: EcmaScriptComponent;
   protected
   public
     constructor(aRoot, aParent: Environment; aScriptPath: string);
     property Engine: EcmaScriptComponent read fEngine;
+    property Logger: ILogger;
 
     method Run;
   end;
@@ -38,12 +43,14 @@ type
     method LogMessage(s: string);
     method LogWarning(s: string);
     method LogHint(s: string);
+    method LogDebug(s: string);
   end;  
 
 extension method ILogger.LogError(s: string; arg0: Object; params args: array of Object);
 extension method ILogger.LogMessage(s: string; arg0: Object; params args: array of Object);
 extension method ILogger.LogWarning(s: string; arg0: Object; params args: array of Object);
 extension method ILogger.LogHint(s: string; arg0: Object; params args: array of Object);
+extension method ILogger.LogDebug(s: string; arg0: Object; params args: array of Object);
 
 implementation
 
@@ -65,6 +72,11 @@ end;
 extension method ILogger.LogHint(s: string; arg0: Object; params args: array of Object);
 begin
   self.LogHint(String.Format(s, arg0, args));
+end;
+
+extension method ILogger.LogDebug(s: string; arg0: Object; params args: array of Object);
+begin
+  self.LogDebug(String.Format(s, arg0, args));
 end;
 
 
@@ -98,6 +110,11 @@ begin
   fRoot := aRoot;
   fEnvironment := new Environment(coalesce(aParent, aRoot));
   fEngine := new EcmaScriptComponent;
+  fEngine.DebugTracePoint += fEngineDebugTracePoint;
+  fEngine.DebugException += fEngineDebugException;
+  fEngine.DebugFrameEnter += fEngineDebugFrameEnter;
+  fEngine.DebugFrameExit += fEngineDebugFrameExit;
+  fEngine.Debug := true;
   fEngine.Source := File.ReadAllText(aScriptPath);
   fEngine.SourceFileName := aScriptPath;
   var lSettings := Path.ChangeExtension(aScriptPath, 'settings');
@@ -111,7 +128,36 @@ end;
 
 method Engine.Run;
 begin
-  fEngine.Run();
+  Logger:LogMessage('Running script {0}', fEngine.SourceFileName);
+  try
+    fEngine.Run();
+  except
+    on e: Exception do
+    Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
+  finally
+    Logger:LogMessage('Done running script {0}', fEngine.SourceFileName);
+  end;
 end;
+
+method Engine.fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
+begin
+  if assigned(e.SourceSpan:File) then
+    Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
+end;
+
+method Engine.fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
+begin
+  Logger:LogDebug('Exception {0}',e.Exception:Message);
+end;
+
+method Engine.fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
+begin
+  Logger:LogDebug('Frame enter {0}', e.Name);
+end;
+
+method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
+begin
+  Logger:LogDebug('Frame exit {0}', e.Name);
+end; 
 
 end.
