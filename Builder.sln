@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Builder", "Builder\Builder.oxygene", "{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.Builder", "RemObjects.Builder\RemObjects.Builder.oxygene", "{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.Script", "Script\Source\RemObjects.Script\RemObjects.Script.oxygene", "{CAF9C919-D826-4452-910E-D8BA4861CD72}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|Default.ActiveCfg = Debug
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|Default.Build.0 = Debug
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|Default.ActiveCfg = Release
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|Default.Build.0 = Release
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|Default.ActiveCfg = Debug
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|Default.Build.0 = Debug
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|Default.ActiveCfg = Release
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|Default.Build.0 = Release
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|Default.ActiveCfg = Debug
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|Default.Build.0 = Debug
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|Default.ActiveCfg = Release
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|Default.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
