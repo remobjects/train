@@ -4,7 +4,7 @@
     <ProductVersion>3.5</ProductVersion>
     <RootNamespace>Builder</RootNamespace>
     <StartupClass />
-    <OutputType>exe</OutputType>
+    <OutputType>Exe</OutputType>
     <AssemblyName>Builder</AssemblyName>
     <AllowGlobals>False</AllowGlobals>
     <AllowLegacyWith>False</AllowLegacyWith>
@@ -13,9 +13,12 @@
     <AllowUnsafeCode>False</AllowUnsafeCode>
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Builder</Name>
     <ProjectGuid>{bd3c0f3c-4943-488f-9886-4bc65ffe4dc4}</ProjectGuid>
+    <DefaultUses />
+    <InternalAssemblyName />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>false</Optimize>
@@ -83,8 +86,24 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RemObjects.Builder\RemObjects.Builder.oxygene">
+      <Name>RemObjects.Builder</Name>
+      <Project>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</Project>
+      <Private>True</Private>
+      <HintPath>..\RemObjects.Builder\bin\Debug\RemObjects.Builder.dll</HintPath>
+    </ProjectReference>
+    <ProjectReference Include="..\Script\Source\RemObjects.Script\RemObjects.Script.oxygene">
+      <Name>RemObjects.Script</Name>
+      <Project>{caf9c919-d826-4452-910e-d8ba4861cd72}</Project>
+      <Private>True</Private>
+      <HintPath>..\Script\Source\RemObjects.Script\..\..\Bin\RemObjects.Script.dll</HintPath>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PreBuildEvent />
     <PostBuildEvent />
   </PropertyGroup>
