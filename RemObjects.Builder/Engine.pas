@@ -7,22 +7,10 @@ uses
   RemObjects.Script, 
   System.Collections.Generic, 
   RemObjects.Script.EcmaScript,
+  RemObjects.Builder.API,
   System.IO;
 
 type
-  Environment = public class(Dictionary<string, Object>)
-  private
-    method get_Item(s : String): Object;
-    method set_Item(s : String; value: Object);
-  public
-    constructor; empty;
-    constructor(aEnv: Environment);
-    property Previous: Environment;
-    property Item[s: string]: Object read get_Item write set_Item; reintroduce;
-    method SetGlobal(aName, aValue: string);
-    method LoadIni(aPath: String);
-    method LoadSystem;
-  end;
 
 
   Engine = public class
@@ -34,13 +22,17 @@ type
     fEnvironment: Environment;
     fEngine: EcmaScriptComponent;
   protected
+    method WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
+    method CallAsync(aScope: ExecutionContext; aSelf: Object; params args: Array of Object): Object;
   public
-    constructor(aParent: Environment; aScriptPath: string);
+    constructor(aParent: Environment; aScriptPath: string; aScript: string := nil);
     property Engine: EcmaScriptComponent read fEngine;
     property Logger: ILogger;
     property Environment: Environment read fEnvironment;
 
     method Run;
+
+    method CreateChildEngine: Engine;
   end;
 
   ILogger = public interface
@@ -85,53 +77,7 @@ begin
 end;
 
 
-method Environment.get_Item(s: String): Object;
-begin
-  var lSelf := self;
-  while assigned(lSelf) do begin
-    if TryGetValue(s, out result) then exit;
-    lSelf := lSelf.Previous;
-  end;
-end;
-
-method Environment.set_Item(s: String; value: Object);
-begin
-  inherited Item[s] := value;
-end;
-
-constructor Environment(aEnv: Environment);
-begin
-  Previous := aEnv;
-end;
-
-method Environment.LoadIni(aPath: String);
-begin
-  var lIni := new IniFile();
-  lIni.LoadFromFile(aPath);
-  for each el in lIni.Sections.SelectMany(a->a.Item2, (a,b) -> new Tuple<string, string>(if string.IsNullOrEmpty(a.Item1) then b.Key else a.Item1+'.'+b.Key, b.Value)) do 
-    Add(el.Item1, el.Item2);
-end;
-
-method Environment.LoadSystem;
-begin
-  for each el: System.Collections.DictionaryEntry in System.Environment.GetEnvironmentVariables() do begin
-    Item[el.Key:ToString] := el.Value:ToString;
-  end;
-end;
-
-method Environment.SetGlobal(aName: string; aValue: string);
-begin
-  var lSelf := self;
-  while assigned(lSelf) do begin
-    if lSelf.Previous = nil then 
-      lSelf[aName] := aValue 
-    else
-      lSelf.Remove(aName);
-    lSelf := lSelf.Previous;
-  end;
-end;
-
-constructor Engine(aParent: Environment; aScriptPath: string);
+constructor Engine(aParent: Environment; aScriptPath: string; aScript: string := nil);
 begin
   fEnvironment := new Environment(aParent);
   fEngine := new EcmaScriptComponent;
@@ -140,7 +86,7 @@ begin
   fEngine.DebugFrameEnter += fEngineDebugFrameEnter;
   fEngine.DebugFrameExit += fEngineDebugFrameExit;
   fEngine.Debug := true;
-  fEngine.Source := File.ReadAllText(aScriptPath);
+  fEngine.Source := coalesce(aScript, File.ReadAllText(aScriptPath));
   fEngine.SourceFileName := aScriptPath;
   var lSettings := Path.ChangeExtension(aScriptPath, 'settings');
   if File.Exists(lSettings) then
@@ -169,6 +115,8 @@ begin
     .AddValue('hint', Utilities.SimpleFunction(self, a-> Logger.LogHint(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
     .AddValue('debug', Utilities.SimpleFunction(self, a-> Logger.LogDebug(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
   );
+  fEngine.GlobalObject.AddValue('async', new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(fEngine.GlobalObject, 'async', @CallAsync, 1, false, true));
+  fEngine.GlobalObject.AddValue('waitFor', Utilities.SimpleFunction(self, (a,b,c) -> begin WaitFor(a,RemObjects .Script.EcmaScript.Utilities.GetArgAsEcmaScriptObject(c, 0, a), RemObjects.Script.EcmaScript.Utilities.GetArgAsInteger(c, 1, a));  exit Undefined.Instance; end));
 
   Logger:LogMessage('Running script {0}', fEngine.SourceFileName);
   try
@@ -200,6 +148,38 @@ end;
 method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
 begin
   Logger:LogDebug('Frame exit {0}', e.Name);
-end; 
+end;
+
+method Engine.CreateChildEngine: Engine;
+begin
+  result := new Engine(Environment, Engine.SourceFileName, Engine.Source, Logger := Logger);
+end;
+
+method Engine.CallAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+begin
+  var lStart := new System.Threading.Tasks.Task(method begin
+    var lEngine := CreateChildEngine;
+    // Clone the state here!
+   
+  end);
+  lStart.Start();
+  exit lStart;
+end;
+
+method Engine.WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
+begin
+  var lTasks := new List<System.Threading.Tasks.Task>;
+  for i: Integer := 0 to RemObjects.Script.EcmaScript.Utilities.GetObjAsInteger(args.Get(ec, 0, 'length'), ec) -1 do begin
+    var lItem := args.Get(ec, 0, i.ToString());
+    if lItem is System.Threading.Tasks.Task then 
+    lTasks.Add(System.Threading.Tasks.Task(lItem));
+  end;
+  if length(lTasks) = 0 then ec.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'More than 0 items expected in the first parameter array');
+  if aTimeout <0 then
+    System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
+  else
+    System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout);
+end;
+
 
 end.

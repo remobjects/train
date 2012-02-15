@@ -107,7 +107,7 @@ begin
     exit 1;
   end;
   try
-    var lRoot := new Environment();
+    var lRoot := new RemObjects.Builder.API.Environment();
     lRoot.LoadSystem;
     if File.Exists(lGlobalSettings) then 
       lRoot.LoadIni(lGlobalSettings);
