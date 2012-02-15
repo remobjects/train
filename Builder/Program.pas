@@ -80,15 +80,17 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   var lLogger := new Logger;
+  var lGlobalVars := new Dictionary<string, string>;
   var lOptions := new OptionSet();
   var lShowHelp: Boolean := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
-  lOptions.Add('o|options=', 'Override the ini file with the global options for the ini', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
+  lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('w|warning', 'Show warning messages', v-> begin lLogger.ShowWarning := assigned(v); end);
   lOptions.Add('i|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
+  lOptions.Add('D|define=', 'Defines global vars; sets {0:name}={1:value}', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
   var lArgs: List<String>;
   try
     lArgs := lOptions.Parse(args);
@@ -107,14 +109,20 @@ begin
   try
     var lRoot := new Environment();
     lRoot.LoadSystem;
+    if File.Exists(lGlobalSettings) then 
+      lRoot.LoadIni(lGlobalSettings);
+    for each el in lGlobalVars do lRoot[el.Key] := el.Value;
     for each el in lArgs do begin
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
       lEngine.Run();
     end;
   except
-    on e: Exception do
-      lLogger.LogError('Could not load file {0}', e.Message);
+    on e: Exception do begin
+      lLogger.LogError('Exception: {0}', e.Message);
+
+      exit 1;
+    end;
   end;
 end;
 

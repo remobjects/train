@@ -20,7 +20,7 @@ type
     property Previous: Environment;
     property Item[s: string]: Object read get_Item write set_Item; reintroduce;
     method SetGlobal(aName, aValue: string);
-    method Load(aPath: String);
+    method LoadIni(aPath: String);
     method LoadSystem;
   end;
 
@@ -104,7 +104,7 @@ begin
   Previous := aEnv;
 end;
 
-method Environment.Load(aPath: String);
+method Environment.LoadIni(aPath: String);
 begin
   var lIni := new IniFile();
   lIni.LoadFromFile(aPath);
@@ -144,11 +144,11 @@ begin
   fEngine.SourceFileName := aScriptPath;
   var lSettings := Path.ChangeExtension(aScriptPath, 'settings');
   if File.Exists(lSettings) then
-    fEnvironment.Load(lSettings);
+    fEnvironment.LoadIni(lSettings);
 
   lSettings := Path.ChangeExtension(aScriptPath, 'usersettings');
   if File.Exists(lSettings) then
-    fEnvironment.Load(lSettings);
+    fEnvironment.LoadIni(lSettings);
 end;
 
 method Engine.Run;

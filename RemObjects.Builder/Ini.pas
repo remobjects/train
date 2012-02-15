@@ -45,7 +45,7 @@ end;
 
 method IniSection.set_Item(s : String; value: String);
 begin
-  Item[s] := value;
+  inherited Item[s] := value;
 end;
 
 method IniFile.set_Keys(i : Int32; value: String);
@@ -90,7 +90,8 @@ method IniFile.LoadFromStream(sr: StreamReader);
 begin
   var lCurrentSection: IniSection;
   loop begin
-    var s := sr.ReadLine().Trim();
+    var s := sr.ReadLine():Trim();
+    if s = nil then break;
     if s = '' then continue;
     if s.StartsWith('#') then continue;
     if s.StartsWith('[') then begin
