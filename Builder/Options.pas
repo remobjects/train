@@ -1,3 +1,4 @@
+{$HIDE  W27 }
 //
 // Options.Pas
 // Converted to Delphi Prism from original code by Anton Kasyanov

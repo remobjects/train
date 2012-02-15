@@ -26,7 +26,6 @@
     <DefineConstants>DEBUG;TRACE;</DefineConstants>
     <GeneratePDB>True</GeneratePDB>
     <GenerateMDB>True</GenerateMDB>
-    <CaptureConsoleOutput>False</CaptureConsoleOutput>
     <StartMode>Project</StartMode>
     <CpuType>anycpu</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
@@ -35,6 +34,8 @@
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <SuppressWarnings />
     <FutureHelperClassName />
+    <DebugClass />
+    <AssertMethodName />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
@@ -105,6 +106,8 @@
     <PostBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
   </PropertyGroup>

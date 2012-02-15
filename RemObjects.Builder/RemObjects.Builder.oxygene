@@ -69,9 +69,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Environment.pas" />
     <Compile Include="Engine.pas" />
     <Compile Include="Ini.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
+    <Compile Include="Utilities.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
@@ -82,6 +84,7 @@
     <Compile Include="Properties\Settings.Designer.pas" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="API" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +100,10 @@
     <PreBuildEvent />
     <PostBuildEvent />
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
     <PostBuildEvent />
   </PropertyGroup>
 </Project>

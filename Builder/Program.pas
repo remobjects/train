@@ -35,6 +35,7 @@ implementation
 
 method Logger.LogDebug(s: System.String);
 begin
+  if not ShowDebug then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.DarkBlue;
   Console.WriteLine(s);
@@ -51,6 +52,7 @@ end;
 
 method Logger.LogHint(s: System.String);
 begin
+  if not ShowHint then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Magenta;
   Console.WriteLine(s);
@@ -59,6 +61,7 @@ end;
 
 method Logger.LogMessage(s: System.String);
 begin
+  if not ShowMessage then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Gray;
   Console.WriteLine(s);
@@ -67,6 +70,7 @@ end;
 
 method Logger.LogWarning(s: System.String);
 begin
+  if not ShowWarning then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Yellow;
   Console.WriteLine(s);
@@ -82,9 +86,9 @@ begin
   lOptions.Add('o|options=', 'Override the ini file with the global options for the ini', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('w|warning', 'Show warning messages', v-> begin lLogger.ShowWarning := assigned(v); end);
-  lOptions.Add('h|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
+  lOptions.Add('i|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
-  lOptions.Add("h|?", "show help", v -> begin lShowHelp := assigned(v); end );
+  lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
   var lArgs: List<String>;
   try
     lArgs := lOptions.Parse(args);
@@ -102,8 +106,9 @@ begin
   end;
   try
     var lRoot := new Environment();
+    lRoot.LoadSystem;
     for each el in lArgs do begin
-      var lEngine := new Engine(lRoot, nil, el);
+      var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
       lEngine.Run();
     end;
