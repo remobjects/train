@@ -105,6 +105,7 @@ begin
   var lGlobalVars := new Dictionary<string, string>;
   var lOptions := new OptionSet();
   var lShowHelp: Boolean := false;
+  var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin lLogger.ShowDebug := assigned(v); end);
@@ -113,6 +114,7 @@ begin
   lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
   lOptions.Add('D|define=', 'Defines global vars; sets {0:name}={1:value}', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   var lArgs: List<String>;
   try
     lArgs := lOptions.Parse(args);
@@ -145,6 +147,11 @@ begin
       lLogger.LogError('Exception: {0}', e.Message);
 
       exit 1;
+    end;
+  finally
+    if lWait then begin
+      console.WriteLine('Waiting for enter to continue');
+      Console.ReadLine;
     end;
   end;
 end;
