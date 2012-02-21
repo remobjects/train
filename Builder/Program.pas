@@ -24,6 +24,8 @@ type
     method LogMessage(s: System.String);
     method LogHint(s: System.String);
     method LogError(s: System.String);
+    method Enter(aScript: String; params args: array of String);
+    method &Exit(aScript: String; params args: array of String);
 
     property ShowDebug: Boolean := false;
     property ShowWarning: Boolean := true;
@@ -77,6 +79,26 @@ begin
   Console.ForegroundColor := lCol;
 end;
 
+method Logger.Enter(aScript: String; params args:  array of String);
+begin
+  var lCol := Console.ForegroundColor;
+  Console.ForegroundColor := ConsoleColor.White;
+  var lArgs := String.Join(', ', args);
+  if length(lArgs) > 0 then lArgs := ' '+lArgs;
+  Console.WriteLine('Enter: '+aScript+ lArgs);
+  Console.ForegroundColor := lCol;
+end;
+
+method Logger.&Exit(aScript: String; params  args:array of  String);
+begin
+  var lCol := Console.ForegroundColor;
+  Console.ForegroundColor := ConsoleColor.White;
+  var lArgs := String.Join(', ', args);
+  if length(lArgs) > 0 then lArgs := ' '+lArgs;
+  Console.WriteLine('Exit: '+aScript+ lArgs);
+  Console.ForegroundColor := lCol;
+end;
+
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   var lLogger := new Logger;
@@ -116,6 +138,7 @@ begin
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
       lEngine.Run();
+      lEngine.Logger := nil;
     end;
   except
     on e: Exception do begin

@@ -27,7 +27,7 @@
     <GeneratePDB>True</GeneratePDB>
     <GenerateMDB>True</GenerateMDB>
     <StartMode>Project</StartMode>
-    <CpuType>anycpu</CpuType>
+    <CpuType>x86</CpuType>
     <RuntimeVersion>v25</RuntimeVersion>
     <XmlDoc>False</XmlDoc>
     <XmlDocWarningLevel>WarningOnPublicMembers</XmlDocWarningLevel>
@@ -103,10 +103,10 @@
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
     <PostBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />

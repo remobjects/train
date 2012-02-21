@@ -18,7 +18,38 @@ type
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
   end;
 
+  SLinkedListNode<T> = public readonly class
+  private
+    fValue : T;
+    fNext : SLinkedListNode<T>;
+  public
+    constructor(aNext: SLinkedListNode<T>; aValue: T);
+    property Value: T read fValue;
+    property Next: SLinkedListNode<T> read fNext;
+    class method Enumerate(aValue: SLinkedListNode<T>): sequence of T; iterator; // DO NOT MAKE INSTANCE; has to allow calls on NIL
+    class operator Add(aLeft: T; aRight: SLinkedListNode<T>): SLinkedListNode<T>;
+  end;
+
 implementation
+
+constructor SLinkedListNode<T>(aNext: SLinkedListNode<T>; aValue: T);
+begin
+  fNext := aNext;
+  fValue := aValue;
+end;
+
+class operator SLinkedListNode<T>.Add(aLeft: T; aRight: SLinkedListNode<T>): SLinkedListNode<T>;
+begin
+  exit new SLinkedListNode<T>(aRight, aLeft);
+end;
+
+class method SLinkedListNode<T>.Enumerate(aValue: SLinkedListNode<T>): sequence of  T;
+begin
+  while assigned(aValue) do begin
+    yield aValue.Value;
+    aValue := aValue.Next;
+  end;
+end;
 
 class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
 begin
@@ -34,5 +65,6 @@ class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: Func<array of O
 begin
   exit SimpleFunction(aOwner, (a,b,c) -> aDelegate(c));
 end;
+
 
 end.

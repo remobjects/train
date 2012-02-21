@@ -11,12 +11,14 @@ type
   public
     constructor(aEngine: RemObjects.Builder.Engine);
     property variables: JVariables read fVars;
+    method setGlobal(aKey: string; aValue: Object);
   end;
 
   JVariables = public class(EcmaScriptObject)
   private
     fOwner: Engine;
   public
+    property Owner: Engine read fOwner;
     constructor(aOwner: Engine);
     method DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean; override;
     method GetOwnProperty(aName: String): PropertyValue; override;
@@ -33,12 +35,27 @@ type
     constructor(aEnv: Environment);
     property Previous: Environment read fPrevious;
     property Item[s: string]: Object read get_Item write set_Item; reintroduce;
-    method SetGlobal(aName, aValue: string);
+    method SetGlobal(aName: string; aValue: Object);
     method LoadIni(aPath: String);
     method LoadSystem;
   end;
 
+  [PluginRegistration]
+  EnvironmentRegistration = public class(IPluginRegistration)
+  private
+  public
+    method &Register(aServices: IApiRegistrationServices);
+  end;
+
 implementation
+
+method EnvironmentRegistration.&Register(aServices: IApiRegistrationServices);
+begin
+  var lEnv := new RemObjects.Builder.API.JEnvironment(Engine(aServices));
+  aServices.RegisterValue('environment', lEnv);
+  aServices.RegisterValue('vars', lEnv);
+  aServices.RegisterProperty('base', -> lEnv.variables.Owner.Environment['base'], a-> begin lEnv.variables.Owner.Environment['base'] := a end);
+end;
 
 method JVariables.DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean;
 begin
@@ -61,6 +78,13 @@ end;
 constructor JEnvironment(aEngine: RemObjects.Builder.Engine);
 begin
   fVars := new JVariables(aEngine);
+end;
+
+method JEnvironment.setGlobal(aKey: string; aValue: Object);
+begin
+  if aValue is EcmaScriptObject then   // Make sure the value in the environment is NEVER a js object.
+    aValue := Utilities.GetObjectAsPrimitive(fVars.Root.ExecutionContext, EcmaScriptObject(aValue), PrimitiveType.None);
+  fVars.Owner.Environment.SetGlobal(aKey, aValue);
 end;
 
 method Environment.get_Item(s: String): Object;
@@ -104,9 +128,9 @@ begin
   end;
 end;
 
-method Environment.SetGlobal(aName: string; aValue: string);
+method Environment.SetGlobal(aName: string; aValue: Object);
 begin
-  var lSelf := self;
+var lSelf := self;
   while assigned(lSelf) do begin
     if lSelf.Previous = nil then 
       lSelf[aName] := aValue 
