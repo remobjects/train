@@ -82,6 +82,35 @@ begin
       Utilities.GetArgAsInteger(c, 1, a));  
       exit Undefined.Instance; 
     end));
+  aServices.RegisterValue('ignoreErrors', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+    begin 
+      try
+        result := (c.FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(1):ToArray);
+      except
+        on e: Exception do begin
+          aServices.Engine.Logger.LogError('Ignoring error: '+e);
+          result := Undefined.Instance; 
+        end;
+      end;
+
+    end));
+  aServices.RegisterValue('retry', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+    begin
+      var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
+      loop begin
+        try
+          dec(lCount);
+          result := (c.Skip(1).FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(2):ToArray);
+          break;
+        except
+          on e: Exception where lCount > 0 do begin
+            aServices.Engine.Logger.LogError('Ignoring error: '+e);
+            continue;
+          end;
+        end;
+      end;
+
+    end));
 
 end;
 

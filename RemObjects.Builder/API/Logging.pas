@@ -39,13 +39,15 @@ implementation
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);
 begin
   var lLogger := aServices.Engine;
-  aServices.RegisterValue('log', new EcmaScriptObject(aServices.Globals)
+  aServices.RegisterValue('log', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogMessage(a:FirstOrDefault:ToString, a:&Skip(1):ToArray))
     .AddValue('error', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogError(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
     .AddValue('message', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogMessage(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
     .AddValue('warning', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogWarning(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
     .AddValue('hint', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogHint(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
     .AddValue('debug', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogDebug(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
   );
+  aServices.RegisterValue('error', Utilities.SimpleFunction(aServices.Engine, a-> begin 
+    raise new Exception(a:FirstOrDefault:ToString)end ));
 end;
 
 extension method ILogger.LogError(s: string; params args: array of Object);

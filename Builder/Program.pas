@@ -107,13 +107,15 @@ begin
   var lShowHelp: Boolean := false;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
+  var lIncludes: List<string> := new List<string>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('w|warning', 'Show warning messages', v-> begin lLogger.ShowWarning := assigned(v); end);
   lOptions.Add('i|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
-  lOptions.Add('D|define=', 'Defines global vars; sets {0:name}={1:value}', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('v|v=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   var lArgs: List<String>;
   try
@@ -123,7 +125,7 @@ begin
       lShowHelp := true;
   end;
   if  lShowHelp then begin
-    Console.WriteLine('Build script...');
+    Console.WriteLine('TrainRunner.exe <script.js> [options]');
     lOptions.WriteOptionDescriptions(Console.Out);
     exit 1;
   end else if lArgs.Count = 0 then begin
@@ -139,6 +141,8 @@ begin
     for each el in lArgs do begin
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
+      for each incl in lIncludes do
+        lEngine.LoadInclude(incl);
       lEngine.Run();
       lEngine.Logger := nil;
     end;

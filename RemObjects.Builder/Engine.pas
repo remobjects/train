@@ -34,6 +34,7 @@ type
     property Environment: Environment read fEnvironment;
 
     method Initialize;
+    method LoadInclude(aInclude: string);
     method Run;
 
     method CreateChildEngine: Engine;
@@ -149,6 +150,11 @@ begin
     el.Register(selF);
   end;
 
+end;
+
+method Engine.LoadInclude(aInclude: string);
+begin
+  EcmaScriptObject(Globals.Get('run')).Call(Globals.ExecutionContext, aInclude);
 end;
 
 

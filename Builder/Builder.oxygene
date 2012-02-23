@@ -5,7 +5,7 @@
     <RootNamespace>Builder</RootNamespace>
     <StartupClass />
     <OutputType>Exe</OutputType>
-    <AssemblyName>Builder</AssemblyName>
+    <AssemblyName>TrainRunner</AssemblyName>
     <AllowGlobals>False</AllowGlobals>
     <AllowLegacyWith>False</AllowLegacyWith>
     <AllowLegacyOutParams>False</AllowLegacyOutParams>
@@ -102,6 +102,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />

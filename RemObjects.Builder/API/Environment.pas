@@ -5,15 +5,6 @@ uses
   RemObjects.Builder, RemObjects.Script.EcmaScript, System.Collections.Generic, System.Linq;
 
 type
-  JEnvironment = public class
-  private
-    fVars: JVariables;
-  public
-    constructor(aEngine: RemObjects.Builder.Engine);
-    property variables: JVariables read fVars;
-    method setGlobal(aKey: string; aValue: Object);
-  end;
-
   JVariables = public class(EcmaScriptObject)
   private
     fOwner: Engine;
@@ -51,10 +42,16 @@ implementation
 
 method EnvironmentRegistration.&Register(aServices: IApiRegistrationServices);
 begin
-  var lEnv := new RemObjects.Builder.API.JEnvironment(Engine(aServices));
-  aServices.RegisterValue('environment', lEnv);
-  aServices.RegisterValue('vars', lEnv);
-  aServices.RegisterProperty('base', -> lEnv.variables.Owner.Environment['base'], a-> begin lEnv.variables.Owner.Environment['base'] := a end);
+  var lEnv := new RemObjects.Builder.API.JVariables(aServices.Engine);
+  aServices.RegisterValue('env', lEnv);
+  aServices.RegisterProperty('wd', -> lEnv.Owner.Environment['wd'], a-> begin lEnv.Owner.Environment['wd'] := a end);
+  aServices.RegisterValue('export', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, a-> begin
+    var lValue := a.Skip(1):FirstOrDefault();
+    if lValue is EcmaScriptObject then 
+    lValue := Utilities.GetObjectAsPrimitive(aSErvices.Globals.ExecutionContext, EcmaScriptObject(lValue), PrimitiveType.None);
+    lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
+    exit Undefined.Instance;
+  end));
 end;
 
 method JVariables.DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean;
@@ -75,17 +72,7 @@ begin
   fOwner := aOwner;
 end;
 
-constructor JEnvironment(aEngine: RemObjects.Builder.Engine);
-begin
-  fVars := new JVariables(aEngine);
-end;
 
-method JEnvironment.setGlobal(aKey: string; aValue: Object);
-begin
-  if aValue is EcmaScriptObject then   // Make sure the value in the environment is NEVER a js object.
-    aValue := Utilities.GetObjectAsPrimitive(fVars.Root.ExecutionContext, EcmaScriptObject(aValue), PrimitiveType.None);
-  fVars.Owner.Environment.SetGlobal(aKey, aValue);
-end;
 
 method Environment.get_Item(s: String): Object;
 begin
