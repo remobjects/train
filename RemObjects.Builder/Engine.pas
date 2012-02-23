@@ -14,7 +14,9 @@ type
   Engine = public class(IApiRegistrationServices)
   private
     class var fGlobalPlugins: SLinkedListNode<IPluginRegistration>;
+    fWorkDir : String;
     method fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
+    method set_WorkDir(value: String);
     method fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
     method fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
     method fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
@@ -28,10 +30,12 @@ type
   public
     class constructor;
     constructor(aParent: Environment; aScriptPath: string; aScript: string := nil);
+    property WorkDir: string read fWorkDir write set_WorkDir;
     property Plugins: SLinkedListNode<IPluginRegistration>;
     property Engine: EcmaScriptComponent read fEngine;
     property Logger: ILogger;
     property Environment: Environment read fEnvironment;
+    property DryRun: Boolean;
 
     method Initialize;
     method LoadInclude(aInclude: string);
@@ -106,7 +110,7 @@ end;
 
 method Engine.CreateChildEngine: Engine;
 begin
-  result := new Engine(Environment, Engine.SourceFileName, Engine.Source, Logger := Logger);
+  result := new Engine(Environment, Engine.SourceFileName, Engine.Source, Logger := Logger, WorkDir := WorkDir, DryRun := DryRun);
 end;
 
 
@@ -155,6 +159,15 @@ end;
 method Engine.LoadInclude(aInclude: string);
 begin
   EcmaScriptObject(Globals.Get('run')).Call(Globals.ExecutionContext, aInclude);
+end;
+
+method Engine.set_WorkDir(value: String);
+begin
+  value := Path.GetFullPath(value); // resolve it
+  if value <> fWorkDir then begin
+    fWorkDir := Value;
+    Logger.LogMessage('Changing directory to '+value);
+  end;
 end;
 
 

@@ -105,6 +105,7 @@ begin
   var lGlobalVars := new Dictionary<string, string>;
   var lOptions := new OptionSet();
   var lShowHelp: Boolean := false;
+  var lDryRun: Boolean := false;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
   var lIncludes: List<string> := new List<string>;
@@ -114,9 +115,10 @@ begin
   lOptions.Add('i|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
   lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
-  lOptions.Add('v|v=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
+  lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
   var lArgs: List<String>;
   try
     lArgs := lOptions.Parse(args);
@@ -141,6 +143,7 @@ begin
     for each el in lArgs do begin
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
+      lEngine.DryRun := lDryRun;
       for each incl in lIncludes do
         lEngine.LoadInclude(incl);
       lEngine.Run();
