@@ -16,6 +16,7 @@ type
     class method SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<Object, array of Object, Object>): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
+    class method Windows: Boolean;
   end;
 
   SLinkedListNode<T> = public readonly class
@@ -64,6 +65,11 @@ end;
 class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
 begin
   exit SimpleFunction(aOwner, (a,b,c) -> aDelegate(c));
+end;
+
+class method Utilities.Windows: Boolean;
+begin
+  exit Environment.OSVersion.Platform in [PlatformID.Win32NT, PlatformID.Win32S, PlatformID.Win32Windows, PlatformID.WinCE];
 end;
 
 
