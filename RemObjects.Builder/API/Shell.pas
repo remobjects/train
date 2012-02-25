@@ -1,7 +1,7 @@
 ﻿namespace RemObjects.Builder.API;
 
 interface
-uses System.Collections.Generic, System.Diagnostics;
+uses System.Collections.Generic, System.Diagnostics, RemObjects.Script.EcmaScript;
 type
   [PluginRegistration]
   ShellRegistration = public class(IPluginRegistration)
@@ -14,8 +14,8 @@ type
   private
     fEngine: IApiRegistrationServices;
 
-    method GetProcess(aCommand, aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
   public
+    class method ExecuteProcess(aCommand, aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
     constructor(aItem: IApiRegistrationServices);
     method Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
       method ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
@@ -26,18 +26,147 @@ implementation
 
 method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  // TODO: Implement
+  var lCMD := Utilities.GetArgAsString(args, 0, ec);
+  var lArg := Utilities.GetArgAsString(args, 1, ec);
+  var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
+  var lEnv := new List<KeyValuePair<string, string>>;
+  var lTimeout: nullable TimeSpan := nil;
+  var lCaptureMode: Boolean := false;
+  var lCaptureFunc: EcmaScriptBaseFunctionObject := nil;
+  if lOpt <> nil then begin
+    var lVal := lOpt.Get('capture');
+    if (lVal <> nil) and (lVal <> Undefined.Instance) then begin
+      lCaptureFunc := EcmaScriptBaseFunctionObject(lVal);
+      if (lCaptureFunc = nil) and (Utilities.GetObjAsBoolean(lVal, ec)) then begin
+        lCaptureMode := true;
+      end;
+    end;
+
+    lVal := lOpt.Get('timeout');
+    if (lVal <> nil) and (lVal <> Undefined.Instance) then 
+      lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
+    lVal := lOpt.Get('environment');
+    var lObj := EcmaScriptObject(lVal);
+    if lObj  <> nil then begin
+      for each el in lObj.Values do begin
+        lEnv.Add(new KeyValuePair<string,string>(el.Key, Utilities.GetObjAsString(el.Value, ec)));
+      end;
+    end;
+  end;
+
+  fEngine.Engine.Logger.Enter(STring.Format('exec({0}, {1})', lCMD, lArg));
+  try
+    if fEngine.Engine.DryRun then begin
+      fEngine.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var sb := new System.Text.StringBuilder;
+    var lExit := ExecuteProcess(lCMD, lArg, false, a-> begin
+      locking(sb) do begin
+        sb.Append(a);
+      end;
+      if assigned(lCaptureFunc) then begin
+        try
+          lCaptureFunc.Call(ec, a);
+        except
+        end;
+      end;
+    end, a-> begin
+      locking(sb) do sb.Append(a);
+      if assigned(lCaptureFunc) then begin
+        try
+          lCaptureFunc.Call(ec, a);
+        except
+        end;
+      end;
+    end, lEnv.ToArray, lTimeout);
+    fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+    if 0 <> lExit then begin
+      var lErr := 'Failed with error code: '+lExit;
+      fEngine.Engine.Logger.LogError(lErr);
+      raise new Exception(lErr);
+    end;
+    if lCaptureMode then 
+      exit sb.ToString()
+    else
+      exit Undefined.Instance;
+  finally
+    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+  end;
 end;
 
 method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  // TODO: Implement
+  var lCMD := Utilities.GetArgAsString(args, 0, ec);
+  var lArg := Utilities.GetArgAsString(args, 1, ec);
+  var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
+  var lEnv := new List<KeyValuePair<string, string>>;
+  var lTimeout: nullable TimeSpan := nil;
+  if lOpt <> nil then begin
+    var lVal := lOpt.Get('timeout');
+    if (lVal <> nil) and (lVal <> Undefined.Instance) then 
+      lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
+    lVal := lOpt.Get('environment');
+    var lObj := EcmaScriptObject(lVal);
+    if lObj  <> nil then begin
+      for each el in lObj.Values do begin
+        lEnv.Add(new KeyValuePair<string,string>(el.Key, Utilities.GetObjAsString(el.Value, ec)));
+      end;
+    end;
+  end;
+  var lTask := new System.Threading.Tasks.Task(method begin
+    fEngine.Engine.Logger.Enter(STring.Format('exec({0}, {1})', lCMD, lArg));
+    try
+      if fEngine.Engine.DryRun then begin
+        fEngine.Engine.Logger.LogMessage('Dry run.');
+        exit '';
+      end;
+      var sb := new System.Text.StringBuilder;
+      var lExit := ExecuteProcess(lCMD, lArg, false, a-> begin
+        locking(sb) do begin
+          sb.Append(a);
+        end;
+      end, a-> begin
+        locking(sb) do sb.Append(a);
+      end, lEnv.ToArray, lTimeout);
+      fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+      if 0 <> lExit then begin
+        var lErr := 'Failed with error code: '+lExit;
+        fEngine.Engine.Logger.LogError(lErr);
+        raise new Exception(lErr);
+      end;
+    finally
+      fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+    end;
+  end);
+  exit new TaskWrapper(fEngine.Engine.Engine.GlobalObject, fEngine.AsyncWorker.TaskProto, Task := lTask);
 end;
 
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  
-  // TODO: Implement
+  var lArg := Utilities.GetArgAsString(args, 0, ec);
+  fEngine.Engine.Logger.Enter(STring.Format('system({0})', lArg));
+  try
+    if fEngine.Engine.DryRun then begin
+      fEngine.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var sb := new System.Text.StringBuilder;
+    var lExit := ExecuteProcess(nil, lArg, true, a-> begin
+      locking(sb) do sb.Append(a);
+    end, a-> begin
+      locking(sb) do sb.Append(a)
+    end, nil, nil);
+    fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+    if 0 <> lExit then begin
+      var lErr := 'Failed with error code: '+lExit;
+      fEngine.Engine.Logger.LogError(lErr);
+      raise new Exception(lErr);
+    end;
+    exit sb.ToString();
+  finally
+    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+  end;
 end;
 
 constructor Shell(aItem: IApiRegistrationServices);
@@ -45,15 +174,19 @@ begin
   fEngine := aItem;
 end;
 
-method Shell.GetProcess(aCommand: string; aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
+class method Shell.ExecuteProcess(aCommand: string; aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
 begin
   var lProcess := new Process();
   if lProcess.StartInfo = nil then lProcess.StartInfo := new ProcessStartInfo();
   if aComSpec then begin
     lProcess.StartInfo.FileName := if RemObjects.Builder.Utilities.Windows then coalesce(System.Environment.GetEnvironmentVariable('COMSPEC'), 'CMD.EXE') else coalesce(System.Environment.GetEnvironmentVariable('SHELL'), '/bin/sh');
-    if not aCommand.StartsWith('"') then 
-      aCommand := '"'+aCommand.Replace('"', '""')+'"';
-    lProcess.StartInfo.Arguments := (if RemObjects.Builder.Utilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
+    if String.IsNullOrEmpty(aCommand) then begin
+      lProcess.StartInfo.Arguments := (if RemObjects.Builder.Utilities.Windows then '-c ' else '/C ')+ aArgs;
+    end else begin
+      if not aCommand.StartsWith('"') then 
+        aCommand := '"'+aCommand.Replace('"', '""')+'"';
+      lProcess.StartInfo.Arguments := (if RemObjects.Builder.Utilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
+    end;
   end else begin
     lProcess.StartInfo.FileName := aCommand;
     lProcess.StartInfo.Arguments := aArgs;
@@ -72,8 +205,15 @@ begin
       aTargetOutput:Invoke(ar.Data);
     end;
   end;
+
+  for each el in environment do begin
+    lProcess.StartInfo.EnvironmentVariables.Add(el.Key, el.Value);
+  end;
+
   try 
     if not lProcess.Start then raise new Exception('Could not start process');
+    if aTargetOutput <> nil then lProcess.BeginOutputReadLine;
+    if aTargetError <> nil then lProcess.BeginErrorReadLine;
     if aTimeout = nil then
       lProcess.WaitForExit()
     else 

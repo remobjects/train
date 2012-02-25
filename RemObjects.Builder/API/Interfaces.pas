@@ -14,6 +14,8 @@ type
     property Environment: Environment read;
     property Globals: GlobalObject read;
     property Engine: Engine read;
+    property Logger: ILogger read;
+    property AsyncWorker: AsyncWorker read write;
   end;
 
   IPluginRegistration = public interface

@@ -33,6 +33,7 @@ type
     fTaskProto: EcmaScriptObject;
   public
     constructor(aEngine: Engine);
+    property TaskProto: EcmaScriptObject read fTaskProto;
     method CallAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
     method WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
   end;
@@ -73,6 +74,7 @@ end;
 method AsyncRegistration.&Register(aServices: IApiRegistrationServices);
 begin
   var lAsync := new AsyncWorker(aServices.Engine);
+  aServices.AsyncWorker := lAsync;
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'async', @lAsync.CallAsync, 1, false, true));

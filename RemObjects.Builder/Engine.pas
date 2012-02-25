@@ -34,6 +34,7 @@ type
     property Plugins: SLinkedListNode<IPluginRegistration>;
     property Engine: EcmaScriptComponent read fEngine;
     property Logger: ILogger;
+    property AsyncWorker: AsyncWorker;
     property Environment: Environment read fEnvironment;
     property DryRun: Boolean;
 
