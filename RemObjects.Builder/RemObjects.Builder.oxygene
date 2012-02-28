@@ -55,7 +55,13 @@
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>Libraries\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="Renci.SshNet">
+      <HintPath>Libraries\Renci.SshNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -72,6 +78,7 @@
   <ItemGroup>
     <Compile Include="API\Async.pas" />
     <Compile Include="API\Environment.pas" />
+    <Compile Include="API\File.pas" />
     <Compile Include="API\Interfaces.pas" />
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Shell.pas" />
@@ -110,6 +117,10 @@
     <PreBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
+    <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
