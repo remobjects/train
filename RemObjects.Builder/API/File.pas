@@ -11,7 +11,6 @@ type
   FileTools = public class
   private
     fservices: IApiRegistrationServices;
-    method ResolveWithBase(s: string): string;
   protected
   public
     constructor(aServices: IApiRegistrationServices);
@@ -51,81 +50,138 @@ end;
 
 method FileTools.File_Copy(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  var lVal2 := ResolveWithBase(Utilities.GetArgAsString(args, 1, ec));
-  if lVal2 = nil then exit Undefined.Instance;
-  if System.IO.Directory.Exists(lVAl2) then
-    System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), true)
-  else
-    System.IO.File.Copy(lVal, lVal2, true);
+  fServices.Logger.Enter('file.copy', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    var lVal2 := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 1, ec));
+    if lVal2 = nil then exit Undefined.Instance;
+    if System.IO.Directory.Exists(lVAl2) then
+      System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), true)
+    else
+      System.IO.File.Copy(lVal, lVal2, true);
     
-  exit Undefined.Instance;
+    exit Undefined.Instance;
+  finally
+    fservices.Logger.exit('file.copy');
+  end;
 end;
 
 method FileTools.File_Delete(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  System.IO.File.Delete(lVal);
-  exit Undefined.Instance;
+  fServices.Logger.Enter('file.delete', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    System.IO.File.Delete(lVal);
+    exit Undefined.Instance;
+  finally
+    fservices.Logger.exit('file.delete');
+  end;
+
 end;
 
 method FileTools.File_Read(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  exit System.IO.File.ReadAllText(lVal);
+  fServices.Logger.Enter('file.read', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    exit System.IO.File.ReadAllText(lVal);
+  finally
+    fservices.Logger.exit('file.read');
+  end;
 end;
 
 method FileTools.File_Write(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  System.IO.File.WriteAllText(lVal, Utilities.GetArgAsString(args, 1, ec));
-  exit Undefined.Instance;
+  fServices.Logger.Enter('file.write', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    System.IO.File.WriteAllText(lVal, Utilities.GetArgAsString(args, 1, ec));
+    exit Undefined.Instance;
+  finally
+    fservices.Logger.exit('file.write');
+  end;
 end;
 
 method FileTools.File_Append(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  System.IO.File.AppendAllText(lVal, Utilities.GetArgAsString(args, 1, ec));
-  exit Undefined.Instance;
+  fServices.Logger.Enter('file.append', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    System.IO.File.AppendAllText(lVal, Utilities.GetArgAsString(args, 1, ec));
+    exit Undefined.Instance;
+  finally
+    fservices.Logger.exit('file.append');
+  end;
 end;
 
 method FileTools.File_Exists(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
   exit System.IO.File.Exists(lVal);
 end;
 
 method FileTools.Folder_Exists(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
   exit System.IO.Directory.Exists(lVal);
 end;
 
 method FileTools.Folder_Create(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  System.IO.Directory.CreateDirectory(lVal);
+  fServices.Logger.Enter('folder.create', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    System.IO.Directory.CreateDirectory(lVal);
+  finally
+    fservices.Logger.exit('folder.create');
+  end;
 end;
 
 method FileTools.Folder_Delete(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
-  if lVal = nil then exit Undefined.Instance;
-  System.IO.Directory.Delete(lVal, Utilities.GetArgAsBoolean(args, 1, ec));
+  fServices.Logger.Enter('folder.delete', args); try 
+    if fservices.Engine.DryRun then begin
+      fservices.Engine.Logger.LogMessage('Dry run.');
+      exit '';
+    end;
+    var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+    if lVal = nil then exit Undefined.Instance;
+    System.IO.Directory.Delete(lVal, Utilities.GetArgAsBoolean(args, 1, ec));
+  finally
+    fservices.Logger.exit('folder.delete');
+  end;
 end;
 
 method FileTools.Path_Combine(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   if length(args) = 0 then exit Undefined.Instance;
-  var lCurrent :=  ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lCurrent :=  fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   for i: Integer := 1 to length(args) -1 do
     lCurrent := System.IO.Path.Combine(lCurrent, Utilities.GetArgAsString(args, i, ec));
   exit lCurrent;
@@ -133,7 +189,7 @@ end;
 
 method FileTools.Path_Resolve(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
 
   var lVal2 := Utilities.GetArgAsString(args, 1, ec);
@@ -165,14 +221,14 @@ end;
 
 method FileTools.Path_GetFoldername(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
   exit System.IO.Path.GetDirectoryName(lVal);
 end;
 
 method FileTools.File_List(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
   var lRes := new EcmaScriptArrayObject(0, fservices.Globals);
   for each el in System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(lVal), System.IO.Path.GetFileName(lVal), 
@@ -183,21 +239,13 @@ end;
 
 method FileTools.Folder_List(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lVal := ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
+  var lVal := fServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec));
   if lVal = nil then exit Undefined.Instance;
   var lRes := new EcmaScriptArrayObject(0, fservices.Globals);
   for each el in System.IO.Directory.GetDirectories(lVal, '*',
     if Utilities.GetArgAsBoolean(args, 1, ec) then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do
     lRes.AddValue(el);
   exit lRes;
-end;
-
-method FileTools.ResolveWithBase(s: string): string;
-begin
-  if s = nil then exit nil;
-  if System.IO.Path.IsPathRooted(s) then
-    exit s;
-  exit System.IO.Path.Combine(fservices.Engine.WorkDir, s)
 end;
 
 method FilePlugin.&Register(aServices: IApiRegistrationServices);

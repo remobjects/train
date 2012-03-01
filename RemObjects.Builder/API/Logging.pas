@@ -24,8 +24,8 @@ type
     method LogWarning(s: string);
     method LogHint(s: string);
     method LogDebug(s: string);
-    method Enter(aScript: string; params args: array of string);
-    method &Exit(aScript: string; params args: array of string);
+    method Enter(aScript: string; params args: array of Object);
+    method &Exit(aScript: string; params args: array of Object);
   end;  
 
 extension method ILogger.LogError(s: string; params args: array of Object);

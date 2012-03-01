@@ -24,8 +24,8 @@ type
     method LogMessage(s: System.String);
     method LogHint(s: System.String);
     method LogError(s: System.String);
-    method Enter(aScript: String; params args: array of String);
-    method &Exit(aScript: String; params args: array of String);
+    method Enter(aScript: String; params args: array of Object);
+    method &Exit(aScript: String; params args: array of Object);
 
     property ShowDebug: Boolean := false;
     property ShowWarning: Boolean := true;
@@ -79,8 +79,12 @@ begin
   Console.ForegroundColor := lCol;
 end;
 
-method Logger.Enter(aScript: String; params args:  array of String);
+method Logger.Enter(aScript: String; params args:  array of Object);
 begin
+  if (length(args) = 1) and (args[0] is array of Object) then begin
+    args := Array of Object(args[0]);
+  end;
+
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;
   var lArgs := String.Join(', ', args);
@@ -89,7 +93,7 @@ begin
   Console.ForegroundColor := lCol;
 end;
 
-method Logger.&Exit(aScript: String; params  args:array of  String);
+method Logger.&Exit(aScript: String; params  args:array of  Object);
 begin
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;

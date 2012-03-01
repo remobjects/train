@@ -30,6 +30,7 @@ type
   public
     class constructor;
     constructor(aParent: Environment; aScriptPath: string; aScript: string := nil);
+    method ResolveWithBase(s: String): String;
     property WorkDir: string read fWorkDir write set_WorkDir;
     property Plugins: SLinkedListNode<IPluginRegistration>;
     property Engine: EcmaScriptComponent read fEngine;
@@ -169,6 +170,14 @@ begin
     fWorkDir := Value;
     Logger.LogMessage('Changing directory to '+value);
   end;
+end;
+
+method Engine.ResolveWithBase(s: String): String;
+begin
+  if s = nil then exit nil;
+  if System.IO.Path.IsPathRooted(s) then
+    exit s;
+  exit System.IO.Path.Combine(WorkDir, s)
 end;
 
 

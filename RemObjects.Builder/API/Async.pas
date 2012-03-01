@@ -114,19 +114,24 @@ end;
 
 method AsyncWorker.WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
 begin
-  var lTasks := new List<System.Threading.Tasks.Task>;
-  for i: Integer := 0 to RemObjects.Script.EcmaScript.Utilities.GetObjAsInteger(args.Get(ec, 0, 'length'), ec) -1 do begin
-    var lItem := args.Get(ec, 0, i.ToString());
-    if lItem is TaskWrapper then begin
-    lTasks.Add(TaskWrapper(lItem).Task);
-    end else 
-      raise new Exception('Array element '+i+' in call to waitFor is not a task');
+  fEngine.Logger.Enter('waitFor', ''+args+' '+aTimeout);
+  try
+    var lTasks := new List<System.Threading.Tasks.Task>;
+    for i: Integer := 0 to RemObjects.Script.EcmaScript.Utilities.GetObjAsInteger(args.Get(ec, 0, 'length'), ec) -1 do begin
+      var lItem := args.Get(ec, 0, i.ToString());
+      if lItem is TaskWrapper then begin
+      lTasks.Add(TaskWrapper(lItem).Task);
+      end else 
+        raise new Exception('Array element '+i+' in call to waitFor is not a task');
+    end;
+    if length(lTasks) = 0 then ec.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'More than 0 items expected in the first parameter array');
+    if aTimeout <=0 then
+      System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
+    else
+      if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks');
+  finally
+    fEngine.Logger.Exit('waitFor');
   end;
-  if length(lTasks) = 0 then ec.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'More than 0 items expected in the first parameter array');
-  if aTimeout <=0 then
-    System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
-  else
-    if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks');
 end;
 
 constructor AsyncWorker(aEngine: Engine);

@@ -10,7 +10,7 @@ uses
 type
   IniFile = public class
   private
-    method WriteSection(ssw: StreamWriter; aItem: IniSection);
+    method WriteSection(ssw: TextWriter; aItem: IniSection);
     method set_Keys(i : Int32; value: String);
     fSections: List<Tuple<string, IniSection>> := new List<Tuple<string, IniSection>>;
   public
@@ -22,10 +22,12 @@ type
 
     method AddSection(s: string): IniSection;
     method RemoveAt(i: Integer);
+    method Remove(s: string): Boolean;
 
-    method SaveToStream(sr: StreamWriter);
+    method SaveToStream(sr: TextWriter);
+    method ToString: string; override;
     method SaveToFile(s: string);
-    method LoadFromStream(sr: StreamReader);
+    method LoadFromStream(sr: TextReader);
     method LoadFromFile(s: string);
   end;
   IniSection = public class(Dictionary<string, string>)
@@ -67,7 +69,7 @@ begin
   fSEctions.RemoveAt(i);
 end;
 
-method IniFile.SaveToStream(sr: StreamWriter);
+method IniFile.SaveToStream(sr: TextWriter);
 begin
   var lItem := Item[''];
   if lItem <> nil then begin
@@ -86,7 +88,7 @@ begin
   using sr := new StreamWriter(s) do SaveToStream(sr);
 end;
 
-method IniFile.LoadFromStream(sr: StreamReader);
+method IniFile.LoadFromStream(sr: TextReader);
 begin
   var lCurrentSection: IniSection;
   loop begin
@@ -114,11 +116,26 @@ begin
     LoadFromStream(sr);
 end;
 
-method IniFile.WriteSection(ssw: StreamWriter; aItem: IniSection);
+method IniFile.WriteSection(ssw: TextWriter; aItem: IniSection);
 begin
   for each el in aItem do begin
     ssw.WriteLine('{0}={1}', el.Key, el.Value);
   end;
+end;
+
+method IniFile.ToString: string;
+begin
+  var sr := new StringWriter();
+  SaveToStream(sr);
+  exit sr.GetStringBuilder().ToString;
+end;
+
+method IniFile.&Remove(s: string): Boolean;
+begin
+  var n := fSections.FindIndex(a->a.Item1 = s);
+  if n < 0 then exit false;
+  RemoveAt(n);
+  exit true;
 end;
 
 end.

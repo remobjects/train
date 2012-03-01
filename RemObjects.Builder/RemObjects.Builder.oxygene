@@ -79,6 +79,7 @@
     <Compile Include="API\Async.pas" />
     <Compile Include="API\Environment.pas" />
     <Compile Include="API\File.pas" />
+    <Compile Include="API\Ini.pas" />
     <Compile Include="API\Interfaces.pas" />
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Shell.pas" />
@@ -110,15 +111,15 @@
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
+    <PreBuildEvent />
     <PostBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />

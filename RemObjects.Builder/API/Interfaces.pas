@@ -16,6 +16,7 @@ type
     property Engine: Engine read;
     property Logger: ILogger read;
     property AsyncWorker: AsyncWorker read write;
+    method ResolveWithBase(s: string): string;
   end;
 
   IPluginRegistration = public interface

@@ -46,14 +46,21 @@ begin
   aServices.RegisterValue('env', lEnv);
   aServices.RegisterProperty('wd', -> aServices.Engine.WorkDir, a-> begin aServices.Engine.WorkDir := Utilities.GetObjAsString(a, aServices.Globals.ExecutionContext) end);
   aServices.RegisterValue('export', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, a-> begin
-    var lValue := a.Skip(1):FirstOrDefault();
-    if lValue is EcmaScriptObject then 
-    lValue := Utilities.GetObjectAsPrimitive(aSErvices.Globals.ExecutionContext, EcmaScriptObject(lValue), PrimitiveType.None);
-    lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
-    exit Undefined.Instance;
+    aServices.Logger.Enter('export', a);
+    try
+      var lValue := a.Skip(1):FirstOrDefault();
+      if lValue is EcmaScriptObject then 
+      lValue := Utilities.GetObjectAsPrimitive(aSErvices.Globals.ExecutionContext, EcmaScriptObject(lValue), PrimitiveType.None);
+      lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
+      exit Undefined.Instance;
+    finally
+      aServices.Logger.Exit('export');
+    end;
   end));
   aServices.RegisterValue('ignoreErrors', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
+    aServices.Logger.Enter('ignoreErrors', c);
+    try
       try
         result := (c.FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(1):ToArray);
       except
@@ -62,24 +69,30 @@ begin
           result := Undefined.Instance; 
         end;
       end;
-
+    finally
+      aServices.Logger.Exit('ignoreErrors');
+    end;
     end));
   aServices.RegisterValue('retry', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
-      var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
-      loop begin
-        try
-          dec(lCount);
-          result := (c.Skip(1).FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(2):ToArray);
-          break;
-        except
-          on e: Exception where lCount > 0 do begin
-            aServices.Engine.Logger.LogError('Ignoring error: '+e);
-            continue;
+      aServices.Logger.Enter('retry', c);
+      try
+        var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
+        loop begin
+          try
+            dec(lCount);
+            result := (c.Skip(1).FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(2):ToArray);
+            break;
+          except
+            on e: Exception where lCount > 0 do begin
+              aServices.Engine.Logger.LogError('Ignoring error: '+e);
+              continue;
+            end;
           end;
         end;
+      finally
+        aServices.Logger.Exit('retry');
       end;
-
     end));
 
  end;
