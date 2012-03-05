@@ -83,6 +83,7 @@
     <Compile Include="API\Interfaces.pas" />
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Shell.pas" />
+    <Compile Include="API\Web.pas" />
     <Compile Include="Engine.pas" />
     <Compile Include="Ini.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
@@ -110,6 +111,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />

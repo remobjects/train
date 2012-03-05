@@ -220,7 +220,6 @@ begin
      lValue := lValue.Substring(1, lValue.Length -2);
    exit utilities.GetObjAsString(aScope.LexicalScope.GetBindingValue(lValue, false), aScope);
   end);
-  //Log.de
 end;
 
 end.
