@@ -31,10 +31,14 @@ type
     method MakeSafe(aInput: GlobalObject; aValue: Object): Object;
     fEngine: Engine;
     fTaskProto: EcmaScriptObject;
+    fRegEx: System.Text.RegularExpressions.Regex;
   public
     constructor(aEngine: Engine);
     property TaskProto: EcmaScriptObject read fTaskProto;
     method CallAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+    method run(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+    method runAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+    method expand(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
     method WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
   end;
 
@@ -77,7 +81,16 @@ begin
   aServices.AsyncWorker := lAsync;
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
-    'async', @lAsync.CallAsync, 1, false, true));
+    'async', @lAsync.CallAsync, 1, false, true));  
+  aServices.RegisterValue('run', 
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+    'run', @lAsync.run, 1, false, true));
+  aServices.RegisterValue('runAsync', 
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+    'runAsync', @lAsync.runAsync, 1, false, true));
+  aServices.RegisterValue('expand', 
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+    'expand', @lAsync.expand, 1, false, true));
   aServices.RegisterValue('waitFor', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a,b,c) -> 
     begin 
       lAsync.WaitFor(a, Utilities.GetArgAsEcmaScriptObject(c, 0, a), 
@@ -158,6 +171,56 @@ begin
   if aValue is EcmaScriptObject then
     exit Utilities.GetObjectAsPrimitive(aInput.ExecutionContext, EcmaScriptObject(aValue), PrimitiveType.None);
   exit aValue;
+end;
+
+method AsyncWorker.run(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+begin
+  result := undefined.Instance;
+  fEngine.Logger.Enter('run', args);
+  try
+    if fEngine.DryRun then exit;
+    var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
+    
+    new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
+  finally
+    fEngine.Logger.Exit('run', args);
+  end;
+  
+end;
+
+method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+begin
+  result := undefined.Instance;
+  fEngine.Logger.Enter('runAsync', args);
+  try
+    var lTask := new Task(method begin
+      if fEngine.DryRun then exit;
+      var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
+    
+      new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
+    end);
+    lTask.Start;
+    exit new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
+  finally
+    fEngine.Logger.Exit('runAsync', args);
+  end;
+end;
+
+method AsyncWorker.expand(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
+begin
+  var lArg := coalesce(Utilities.GetArgAsString(args, 0, aScope), '');
+  
+
+  if fRegex = nil then 
+    fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
+  exit fRegEx.Replace(lArg, method (match: System.Text.RegularExpressions.Match) begin
+   var lValue := match.Groups['value']:Value;
+   if lValue = '' then exit '$';
+   if lValue.StartsWith('(') and lValue.EndsWith(')') then 
+     lValue := lValue.Substring(1, lValue.Length -2);
+   exit utilities.GetObjAsString(aScope.LexicalScope.GetBindingValue(lValue, false), aScope);
+  end);
+  //Log.de
 end;
 
 end.
