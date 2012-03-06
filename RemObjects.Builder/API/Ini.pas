@@ -45,7 +45,7 @@ begin
     aServices.Logger.Enter('toString', args);
     try 
       var lSelf := aSelf as IniFileWrapper;
-      exit lSelf.ToString;
+      exit lSelf.Ini.ToString;
     finally
       aServices.Logger.Exit('toString');
     end;
