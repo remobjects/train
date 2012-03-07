@@ -73,7 +73,7 @@ begin
       lArgs.RemoveAt(0);
     end;
     if fWrapInfo.WantSelf then begin
-      lList.Add(aSelf);
+      lList.Add(Convert(aSelf, lArgs[0].ParameterType, nil));
       lArgs.RemoveAt(0);
     end;
 
@@ -105,7 +105,7 @@ begin
   if (aVal = nil) or (aVal = RemObjects.Script.EcmaScript.Undefined.Instance) then aVal := aDefault;
   if aVal = DBNull.Value then aVal := nil;
   if aVal is WrapperObject then 
-    aVal := WrapperObject(aVal).Val else 
+    exit WrapperObject(aVal).Val else 
   if (aDestType.IsArray) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptArrayObject) then begin
     var lArr := RemObjects.Script.EcmaScript.EcmaScriptArrayObject(aval);
     Result := Array.CreateInstance(aDestType.GetElementType(), lARr.Length);

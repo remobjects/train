@@ -50,13 +50,14 @@ begin
   lProto.AddValue('upload', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(sshReg), 'SftpDownload'));
   lProto.AddValue('close', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(sshReg), 'SftpClose'));
   aServices.RegisterValue('sftp', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-  .AddValue('connect', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(sshReg), 'sftpConnect', lProto)));
+  .AddValue('connect', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(sshReg), 'SftpConnect', lProto)));
 end;
 
 class method SSHReg.SshExecute(aServices: IApiRegistrationServices; aConnectionString: String; aCMD: String; aUSername: String; aPassword: String): String;
 begin
-  using fs := if string.IsNullOrEmpty(aPassword) then new Renci.SshNet.SshClient(aConnectionString, 25, aUSername, fKeys.ToArray) else 
-  new Renci.SshNet.SshClient(aConnectionString, 25, aUSername, aPassword) do begin
+  using fs := if string.IsNullOrEmpty(aPassword) then new Renci.SshNet.SshClient(aConnectionString, 22, aUSername, fKeys.ToArray) else 
+  new Renci.SshNet.SshClient(aConnectionString, 22, aUSername, aPassword) do begin
+    fs.Connect;
     using cmd := fs.CreateCommand(aCMD) do begin
       cmd.CommandTimeout := new TimeSpan(0,0, 60);
       exit cmd.Execute();
@@ -71,9 +72,11 @@ end;
 
 class method SSHReg.SftpConnect(aServices: IApiRegistrationServices; aServer, aRootpath, aUsername, aPassword: String): Renci.SshNet.SftpClient;
 begin
-  result := if string.IsNullOrEmpty(aPassword) then new Renci.SshNet.SftpClient(aServer, 25, aUSername, fKeys.ToArray) else 
-  new Renci.SshNet.SftpClient(aServer, 25, aUSername, aPassword) ;
+  result := if string.IsNullOrEmpty(aPassword) then new Renci.SshNet.SftpClient(aServer, 22, aUSername, fKeys.ToArray) else 
+  new Renci.SshNet.SftpClient(aServer, 22, aUSername, aPassword) ;
   result.Connect();
+  if not string.IsNullOrEmpty(aRootpath) then 
+    result.ChangeDirectory(aRootpath);
 end;
 
 class method SSHReg.SftpClose(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient);
