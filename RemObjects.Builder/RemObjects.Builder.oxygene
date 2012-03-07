@@ -85,6 +85,7 @@
     <Compile Include="API\Mail.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\Web.pas" />
+    <Compile Include="API\Wrapper.pas" />
     <Compile Include="API\XML.pas" />
     <Compile Include="Engine.pas" />
     <Compile Include="Ini.pas" />
@@ -125,6 +126,8 @@
     <PreBuildEvent />
     <PreBuildEvent />
     <PreBuildEvent />
+    <PreBuildEvent />
+    <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
     <PostBuildEvent />
