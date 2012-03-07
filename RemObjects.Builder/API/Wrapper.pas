@@ -13,9 +13,10 @@ type
     fMethod: System.Reflection.MethodInfo;
     fWrapInfo: WrapAsAttribute;
     fServices: IApiRegistrationServices;
+    fProto: RemObjects.Script.EcmaScript.EcmaScriptObject;
   protected
   public
-    constructor(aServices: IApiRegistrationServices; aMethod: System.Reflection.MethodInfo);
+    constructor(aServices: IApiRegistrationServices; aMethod: System.Reflection.MethodInfo; aProto: RemObjects.Script.EcmaScript.EcmaScriptObject);
 
     method Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 
@@ -29,7 +30,14 @@ type
     constructor(aLogName: string);
     property WantExecutionContext: Boolean;
     property WantSelf: Boolean;
+    property SkipDryRun: Boolean;
     property LogName: string read fLogName;
+  end;
+
+  WrapperObject = public class(RemObjects.Script.EcmaScript.EcmaScriptObject)
+  private
+  public
+    property Val: Object;
   end;
 
 implementation
@@ -39,9 +47,10 @@ begin
   fLogName := aLogName;
 end;
 
-constructor Wrapper(aServices: IApiRegistrationServices; aMethod: System.Reflection.MethodInfo);
+constructor Wrapper(aServices: IApiRegistrationServices; aMethod: System.Reflection.MethodInfo; aProto: RemObjects.Script.EcmaScript.EcmaScriptObject);
 begin
   fMethod := aMethod;
+  fProto := aProto;
   fServices := aServices;
   fWrapInfo := array of WrapAsAttribute(aMethod.GetCustomAttributes(typeof(WrapAsAttribute), false)):First;
 end;
@@ -51,7 +60,7 @@ begin
   result := RemObjects.Script.EcmaScript.Undefined.Instance;
   fServices.Logger.Enter(fWrapInfo.LogName, aArgs);
   try
-    if fServices.Engine.DryRun then exit;
+    if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then exit;
     var lList := new List<Object>;
     var lArgs := fMethod.GetParameters().ToList();
     if largs.FirstOrDefault:ParameteRType = typeof(IApiRegistrationServices) then begin
@@ -95,6 +104,8 @@ method Wrapper.Convert(aVal: Object; aDestType: &Type; aDefault: Object): Object
 begin
   if (aVal = nil) or (aVal = RemObjects.Script.EcmaScript.Undefined.Instance) then aVal := aDefault;
   if aVal = DBNull.Value then aVal := nil;
+  if aVal is WrapperObject then 
+    aVal := WrapperObject(aVal).Val else 
   if (aDestType.IsArray) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptArrayObject) then begin
     var lArr := RemObjects.Script.EcmaScript.EcmaScriptArrayObject(aval);
     Result := Array.CreateInstance(aDestType.GetElementType(), lARr.Length);
@@ -117,6 +128,16 @@ end;
 
 method Wrapper.ConvertBack(aVal: Object): Object;
 begin
+  if aVal = nil then exit nil;
+  if aVal is ARray then begin
+    var lArr := new RemObjects.Script.EcmaScript.EcmaScriptArrayObject(0, fServices.Globals);
+    for i: Integer := 0 to Array(aVal).Length -1 do
+      lArr.addValue(ConvertBack(array(aVal).GetValue(i)));
+    exit lArr;
+  end;
+
+  if &Type.GetTypeCode(aVal.GetType()) = TypeCode.Object then
+    exit new WrapperObject(fServices.Globals, fProto, &Class := aval.GetType().Name, Val := aVal);
   exit aVal;
 end;
 

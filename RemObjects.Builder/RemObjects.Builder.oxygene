@@ -84,6 +84,7 @@
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Mail.pas" />
     <Compile Include="API\Shell.pas" />
+    <Compile Include="API\SSH.pas" />
     <Compile Include="API\Web.pas" />
     <Compile Include="API\Wrapper.pas" />
     <Compile Include="API\XML.pas" />

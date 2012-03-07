@@ -16,7 +16,7 @@ type
     class method SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<Object, array of Object, Object>): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
-    class method SimpleFunction(aOwner: Engine; aType: &Type; aMethod: string): EcmaScriptFunctionObject;
+    class method SimpleFunction(aOwner: Engine; aType: &Type; aMethod: string; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
     class method Windows: Boolean;
   end;
 
@@ -73,9 +73,9 @@ begin
   exit Environment.OSVersion.Platform in [PlatformID.Win32NT, PlatformID.Win32S, PlatformID.Win32Windows, PlatformID.WinCE];
 end;
 
-class method Utilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: string): EcmaScriptFunctionObject;
+class method Utilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: string; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
 begin
-  var lRes := new RemObjects.Builder.API.Wrapper(aOwner, aType.GetMethod(aMethod));
+  var lRes := new RemObjects.Builder.API.Wrapper(aOwner, aType.GetMethod(aMethod), aProto);
 
   exit new EcmaScriptFunctionObject(aOwner.Engine.GlobalObject, aMEthod, @lRes.Run, 0);
 end;
