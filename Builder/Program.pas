@@ -105,6 +105,7 @@ end;
 
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
+  Console.WriteLine('TrainRunner copyright (c) 2012 RemObjects Software');
   var lLogger := new Logger;
   var lGlobalVars := new Dictionary<string, string>;
   var lOptions := new OptionSet();
