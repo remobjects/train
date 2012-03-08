@@ -22,6 +22,8 @@ type
     method fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
     method RegisterValue(aName: string; aValue: Object); 
     method RegisterProperty(aName: string; aGet: Func<Object>; aSet: Action<Object>);
+    method RegisterObjectValue(aName: string): EcmaScriptObject;
+
     property Globals: GlobalObject read fEngine.GlobalObject;
     property IntEngine: Engine read self; implements IApiRegistrationServices.Engine;
     fEnvironment: Environment;
@@ -178,6 +180,12 @@ begin
   if System.IO.Path.IsPathRooted(s) then
     exit s;
   exit System.IO.Path.Combine(WorkDir, s)
+end;
+
+method Engine.RegisterObjectValue(aName: string): EcmaScriptObject;
+begin
+  result := new EcmaScriptObject(Globals);
+  RegisterValue(aName, result);
 end;
 
 

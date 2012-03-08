@@ -9,6 +9,7 @@ uses
 type
   IApiRegistrationServices = public interface
     method RegisterValue(aName: string; aValue: Object); 
+    method RegisterObjectValue(aName: string): EcmaScriptObject;
     method RegisterProperty(aName: string; aGet: Func<Object>; aSet: Action<Object>);
     
     property Environment: Environment read;
