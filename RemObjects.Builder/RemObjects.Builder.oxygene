@@ -95,6 +95,7 @@
     <Compile Include="API\Web.pas" />
     <Compile Include="API\Wrapper.pas" />
     <Compile Include="API\XML.pas" />
+    <Compile Include="API\Zip.pas" />
     <Compile Include="Engine.pas" />
     <Compile Include="Ini.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
