@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Async.pas" />
+    <Compile Include="API\Delphi.pas" />
     <Compile Include="API\Environment.pas" />
     <Compile Include="API\File.pas" />
     <Compile Include="API\Ini.pas" />
