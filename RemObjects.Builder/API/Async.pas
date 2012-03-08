@@ -106,6 +106,8 @@ begin
   lEngine.Engine.JustFunctions := true;
   lEngine.Initialize;
   lEngine.Engine.Run; // should do nothing now.
+  var lLogger := new DelayedLogger;
+  lEngine.Logger := lLogger;
   
   CloneScope(aScope.LexicalScope, lEngine.Engine.GlobalObject);
   for i: Integer := 1 to length(args) -1 do begin
@@ -122,14 +124,15 @@ begin
   
   var lStart := new System.Threading.Tasks.Task(@lRun.Run);
   lStart.Start();
+  fEngine.RegisterTask(lStart, String.Format('[{0}] async command', lStart.Id), lLogger);
   exit new TaskWrapper(fEngine.Engine.GlobalObject, fTaskProto, Task := lStart);
 end;
 
 method AsyncWorker.WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
 begin
   fEngine.Logger.Enter('waitFor', ''+args+' '+aTimeout);
-  try
     var lTasks := new List<System.Threading.Tasks.Task>;
+  try
     for i: Integer := 0 to RemObjects.Script.EcmaScript.Utilities.GetObjAsInteger(args.Get(ec, 0, 'length'), ec) -1 do begin
       var lItem := args.Get(ec, 0, i.ToString());
       if lItem is TaskWrapper then begin
@@ -138,11 +141,14 @@ begin
         raise new Exception('Array element '+i+' in call to waitFor is not a task');
     end;
     if length(lTasks) = 0 then ec.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'More than 0 items expected in the first parameter array');
+    
     if aTimeout <=0 then
       System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
     else
-      if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks');
+      if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks: ');
   finally
+    for each el in lTasks.Where(a->a.IsCompleted) do
+      fEngine.UnregisterTask(el);
     fEngine.Logger.Exit('waitFor');
   end;
 end;
@@ -192,14 +198,16 @@ method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args
 begin
   result := undefined.Instance;
   fEngine.Logger.Enter('runAsync', args);
+  var lLogger := new DelayedLogger;
+  var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
   try
     var lTask := new Task(method begin
       if fEngine.DryRun then exit;
-      var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
     
-      new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
+      new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := lLogger).Run();
     end);
     lTask.Start;
+    fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope))), lLogger);
     exit new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
   finally
     fEngine.Logger.Exit('runAsync', args);

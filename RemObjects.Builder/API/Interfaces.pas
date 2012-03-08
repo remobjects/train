@@ -11,6 +11,8 @@ type
     method RegisterValue(aName: string; aValue: Object); 
     method RegisterObjectValue(aName: string): EcmaScriptObject;
     method RegisterProperty(aName: string; aGet: Func<Object>; aSet: Action<Object>);
+    method RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: string; aLogger: DelayedLogger);
+    method UnregisterTask(aTask: System.Threading.Tasks.Task);
     
     property Environment: Environment read;
     property Globals: GlobalObject read;

@@ -114,11 +114,12 @@ begin
       end;
     end;
   end;
+  var lLogger := new RemObjects.Builder.DelayedLogger;
   var lTask := new System.Threading.Tasks.Task(method begin
-    fEngine.Engine.Logger.Enter(STring.Format('exec({0}, {1})', lCMD, lArg));
+    lLogger.Enter(STring.Format('exec({0}, {1})', lCMD, lArg));
     try
       if fEngine.Engine.DryRun then begin
-        fEngine.Engine.Logger.LogMessage('Dry run.');
+        lLogger.LogMessage('Dry run.');
         exit '';
       end;
       var sb := new System.Text.StringBuilder;
@@ -129,16 +130,17 @@ begin
       end, a-> begin
         locking(sb) do sb.Append(a);
       end, lEnv.ToArray, lTimeout);
-      fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+      lLogger.LogMessage('Output: '#13#10+sb.ToString);
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
-        fEngine.Engine.Logger.LogError(lErr);
+        lLogger.LogError(lErr);
         raise new Exception(lErr);
       end;
     finally
-      fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+      lLogger.Exit(STring.Format('system({0})', lArg));
     end;
   end);
+  fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
   exit new TaskWrapper(fEngine.Engine.Engine.GlobalObject, fEngine.AsyncWorker.TaskProto, Task := lTask);
 end;
 

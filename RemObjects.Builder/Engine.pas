@@ -14,6 +14,7 @@ type
   Engine = public class(IApiRegistrationServices)
   private
     class var fGlobalPlugins: SLinkedListNode<IPluginRegistration>;
+    var fTasks: List<Tuple<System.Threading.Tasks.Task, String, DelayedLogger>> := new List<Tuple<System.Threading.Tasks.Task, String, DelayedLogger>>;
     fWorkDir : String;
     method fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
     method set_WorkDir(value: String);
@@ -33,6 +34,8 @@ type
     class constructor;
     constructor(aParent: Environment; aScriptPath: string; aScript: string := nil);
     method ResolveWithBase(s: String): String;
+    method UnregisterTask(aTask: System.Threading.Tasks.Task);
+    method RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: String; aLogger: DelayedLogger);
     property WorkDir: string read fWorkDir write set_WorkDir;
     property Plugins: SLinkedListNode<IPluginRegistration>;
     property Engine: EcmaScriptComponent read fEngine;
@@ -83,12 +86,22 @@ begin
   Logger.Enter('script {0}', fEngine.SourceFileName);
   try
     fEngine.Run();
+    for each el in fTasks do begin
+      Logger.LogWarning('Unfinished task was never waited for: {0}', el.Item2);
+    end;
+    if fTasks.Count > 0 then begin
+      Logger.LogMessage('Waiting for unfinished tasks');
+      if not System.Threading.Tasks.Task.WaitAll(fTasks.Select(a->a.Item1).ToArray,  TimeSpan.FromSeconds(60)) then 
+        Logger.LogMessage('Unfinished tasks timed out');
+    end;
   except
     on e: Exception do begin
       Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
       raise;
     end;
   finally
+    for each el in fTasks.ToArray do 
+      UnregisterTask(el.Item1);
     Logger.Exit('script {0}', fEngine.SourceFileName);
   end;
 end;
@@ -188,6 +201,30 @@ method Engine.RegisterObjectValue(aName: string): EcmaScriptObject;
 begin
   result := new EcmaScriptObject(Globals);
   RegisterValue(aName, result);
+end;
+
+method Engine.UnregisterTask(aTask: System.Threading.Tasks.Task);
+begin
+  for each el in fTasks do begin
+    if (el.Item1 = aTask) then begin
+      if el.Item1.IsCompleted then
+        Logger.Enter('Finished Task: '+el.Item2) 
+      else
+        Logger.Enter('Unfinished Task: '+el.Item2);
+      el.Item3.Replay(Logger);
+      Logger.Exit('Finished Task: '+el.Item2);
+
+
+      fTasks.Remove(el);
+      break;
+    end;
+  end;
+end;
+
+method Engine.RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: String; aLogger: DelayedLogger);
+begin
+  Logger.LogMessage('Started Task: '+aSignature);
+  fTasks.Add(Tuple.Create(aTask, aSignature, aLogger));
 end;
 
 
