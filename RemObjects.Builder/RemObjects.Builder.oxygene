@@ -55,6 +55,9 @@
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DiscUtils">
+      <HintPath>Libraries\DiscUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -80,6 +83,7 @@
     <Compile Include="API\Delphi.pas" />
     <Compile Include="API\Environment.pas" />
     <Compile Include="API\File.pas" />
+    <Compile Include="API\Images.pas" />
     <Compile Include="API\Ini.pas" />
     <Compile Include="API\InnoSetup.pas" />
     <Compile Include="API\Interfaces.pas" />
