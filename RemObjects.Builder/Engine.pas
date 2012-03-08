@@ -57,6 +57,8 @@ constructor Engine(aParent: Environment; aScriptPath: string; aScript: string :=
 begin
   fEnvironment := new Environment(aParent);
   fEngine := new EcmaScriptComponent;
+  if not String.IsNullOrEmpty(aScriptPath) then
+  WorkDir := Path.GetDirectoryName(aScriptPath);
   fEngine.DebugTracePoint += fEngineDebugTracePoint;
   fEngine.DebugException += fEngineDebugException;
   fEngine.DebugFrameEnter += fEngineDebugFrameEnter;
@@ -170,7 +172,7 @@ begin
   value := Path.GetFullPath(value); // resolve it
   if value <> fWorkDir then begin
     fWorkDir := Value;
-    Logger.LogMessage('Changing directory to '+value);
+    Logger:LogMessage('Changing directory to '+value);
   end;
 end;
 
