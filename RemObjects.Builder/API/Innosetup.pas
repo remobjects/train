@@ -21,6 +21,8 @@ type
   InnoSetupOptions = public class
   public
     property destinationFolder: string;
+    property extraArgs: string;
+    property defines: array of string;
   end;
 
 implementation
@@ -46,9 +48,18 @@ begin
   if not string.IsNullOrEmpty(aOptions:destinationFolder) then
     sb.AppendFormat(' /O"{0}"', aOptions.destinationFolder);
 
+
+ if aOptions <> nil then begin
+    for each el in aOptions.defines do
+      sb.AppendFormat(' /d"{0}"', el);
+    
+    sb.Append(aOptions.extraArgs);
+ end;
+
  var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(lPath, sb.ToString, false,
   a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+
 
   aServices.Logger.LogMessage(lOutput.ToSTring);
 
