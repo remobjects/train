@@ -26,18 +26,13 @@ type
     method LogError(s: System.String);
     method Enter(aScript: String; params args: array of Object);
     method &Exit(aScript: String; aFailMode: FailMode; params args: array of Object);
-
-    property ShowDebug: Boolean := false;
-    property ShowWarning: Boolean := true;
-    property ShowMessage: Boolean := true;
-    property ShowHint: Boolean := true;
   end;
 
 implementation
 
 method Logger.LogDebug(s: System.String);
 begin
-  if not ShowDebug then exit;
+  if not LoggerSettings. ShowDebug then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.DarkBlue;
   Console.WriteLine(s);
@@ -54,7 +49,7 @@ end;
 
 method Logger.LogHint(s: System.String);
 begin
-  if not ShowHint then exit;
+  if not LoggerSettings. ShowHint then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Magenta;
   Console.WriteLine(s);
@@ -63,7 +58,7 @@ end;
 
 method Logger.LogMessage(s: System.String);
 begin
-  if not ShowMessage then exit;
+  if not LoggerSettings. ShowMessage then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Gray;
   Console.WriteLine(s);
@@ -72,7 +67,7 @@ end;
 
 method Logger.LogWarning(s: System.String);
 begin
-  if not ShowWarning then exit;
+  if not LoggerSettings. ShowWarning then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Yellow;
   Console.WriteLine(s);
@@ -106,21 +101,23 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('TrainRunner copyright (c) 2012 RemObjects Software');
-  var lLogger := new Logger;
+  var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<string, string>;
   var lOptions := new OptionSet();
   var lShowHelp: Boolean := false;
   var lDryRun: Boolean := false;
+  var lXMLOut: string := nil;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
   var lIncludes: List<string> := new List<string>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
-  lOptions.Add('d|debug', 'Show debugging messages', v-> begin lLogger.ShowDebug := assigned(v); end);
-  lOptions.Add('w|warning', 'Show warning messages', v-> begin lLogger.ShowWarning := assigned(v); end);
-  lOptions.Add('i|hint', 'Show hint messages', v-> begin lLogger.ShowDebug := assigned(v); end);
-  lOptions.Add('m|message', 'Show info messages', v-> begin lLogger.ShowMessage := assigned(v); end);
+  lOptions.Add('d|debug', 'Show debugging messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
+  lOptions.Add('w|warning', 'Show warning messages', v-> begin LoggerSettings.ShowWarning := assigned(v); end);
+  lOptions.Add('i|hint', 'Show hint messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
+  lOptions.Add('m|message', 'Show info messages', v-> begin LoggerSettings.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
   lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('x|xml=', 'Write XML log to file', (v) -> begin lXMLOut := v; end);
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
@@ -139,7 +136,13 @@ begin
     lLogger.LogError('No files specified');
     exit 1;
   end;
+  var lMulti: MultiLogger := new MultiLogger;
   try
+    lMulti.Loggers.Add(lLogger);
+    lLogger := lMulti;
+    if not String.IsNullOrEmpty(lXMLOut) then begin
+      lMulti.Loggers.Add(new XmlLogger(new FileStream(lXMLOut, FileMode.Create, FileAccess.Write)));
+    end;
     var lRoot := new RemObjects.Builder.API.Environment();
     lRoot.LoadSystem;
     if File.Exists(lGlobalSettings) then 
@@ -161,6 +164,7 @@ begin
       exit 1;
     end;
   finally
+    lMulti.Dispose;
     if lWait then begin
       console.WriteLine('Waiting for enter to continue');
       Console.ReadLine;

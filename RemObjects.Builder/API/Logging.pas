@@ -30,11 +30,12 @@ type
     method &Exit(aScript: string; aFailMode: FailMode; params args: array of Object);
   end;  
 
-  MultiLogger = public class(ILogger)
+  MultiLogger = public class(ILogger, IDisposable)
   private
   public
     constructor;
     property Loggers: List<ILogger> := new List<ILogger>; readonly;
+    method Dispose;
     method LogError(s: string); locked;
     method LogMessage(s: string);locked;
     method LogWarning(s: string);locked;
@@ -58,11 +59,15 @@ type
     method LogDebug(s: string);locked;
     method Enter(aScript: string; params args: array of Object);locked;
     method &Exit(aScript: string; aFailMode: FailMode; params args: array of Object);locked;
+  end;
 
-    property ShowDebug: Boolean := false;
-    property ShowWarning: Boolean := true;
-    property ShowMessage: Boolean := true;
-    property ShowHint: Boolean := true;
+  LoggerSettings = public static class
+  private
+  public
+    class property ShowDebug: Boolean := false;
+    class property ShowWarning: Boolean := true;
+    class property ShowMessage: Boolean := true;
+    class property ShowHint: Boolean := true;
   end;
 
 extension method ILogger.LogError(s: string; params args: array of Object);
@@ -94,25 +99,25 @@ end;
 
 method XmlLogger.LogMessage(s: string);
 begin
-  if ShowMessage then
+  if LoggerSettings. ShowMessage then
     fXmlData.Add(new XElement('message', s));
 end;
 
 method XmlLogger.LogWarning(s: string);
 begin
-  if ShowWarning then
+  if LoggerSettings. ShowWarning then
     fXmlData.Add(new XElement('warning', s));
 end;
 
 method XmlLogger.LogHint(s: string);
 begin
-  if ShowHint then
+  if LoggerSettings. ShowHint then
     fXmlData.Add(new XElement('hint', s));
 end;
 
 method XmlLogger.LogDebug(s: string);
 begin
-  if ShowDebug then
+  if LoggerSettings. ShowDebug then
     fXmlData.Add(new XElement('debug', s));
 end;
 
@@ -126,7 +131,11 @@ end;
 
 method XmlLogger.&Exit(aScript: string; aFailMode: FailMode; params args: array of Object);
 begin
-  fXmlData.Add(new XAttribute('result', Integer(aFailMode)));
+  fXmlData.Add(new XAttribute('result', case aFailMode of
+    FailMode.No: '1';
+    FailMode.Recovered: '2';
+  else '0';
+  end));
   fXmlData := fXmlData.Parent;
 end;
 
@@ -168,6 +177,11 @@ end;
 method MultiLogger.&Exit(aScript: string; aFailMode: FailMode; params args: array of Object);
 begin
   Loggers.ForEach(a->a.Exit(aScript, aFailMode,args ));
+end;
+
+method MultiLogger.Dispose;
+begin
+  Loggers.ForEach(a->IDisposable(a):Dispose);
 end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);

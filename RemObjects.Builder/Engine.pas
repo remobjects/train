@@ -16,6 +16,7 @@ type
     class var fGlobalPlugins: SLinkedListNode<IPluginRegistration>;
     var fTasks: List<Tuple<System.Threading.Tasks.Task, String, DelayedLogger>> := new List<Tuple<System.Threading.Tasks.Task, String, DelayedLogger>>;
     fWorkDir : String;
+    fErrorPos: nullable PositionPair;
     method fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
     method set_WorkDir(value: String);
     method fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
@@ -84,7 +85,7 @@ method Engine.Run;
 begin
   Initialize;
   var lFail := false;
-  Logger.Enter('script {0}', fEngine.SourceFileName);
+  Logger.Enter('script', fEngine.SourceFileName);
   try
     fEngine.Run();
     for each el in fTasks do begin
@@ -98,18 +99,22 @@ begin
   except
     on e: Exception do begin
       lFail := true;
-      Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
+      if fErrorPos <> nil then
+        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fengine.SourceFileName, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
+      else
+        Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
       raise;
     end;
   finally
     for each el in fTasks.ToArray do 
       UnregisterTask(el.Item1);
-    Logger.Exit('script {0}', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
+    Logger.Exit('script', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
   end;
 end;
 
 method Engine.fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
 begin
+  fErrorPos := e.SourceSpan;
   if assigned(e.SourceSpan:File) then
     Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
 end;

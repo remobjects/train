@@ -25,7 +25,7 @@ type
     [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true)]
     class method ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: string);
     [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true)]
-    class method ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
+    class method _ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
     [WrapAs('ini', SkipDryRun := false)]
     class method Ctor(aServices: IApiRegistrationServices): IniFile;
     [WrapAs('ini.getString', SkipDryRun := true, wantSelf := true)]
@@ -48,7 +48,7 @@ method IniPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   var lProto := new EcmaScriptObject(aServices.Globals);
   lProto.AddValue('toFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine,typeof(IniPlugin), 'ToFile'));
-  lProto.AddValue('toString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine,typeof(IniPlugin), 'ToString'));
+  lProto.AddValue('toString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine,typeof(IniPlugin), '_ToString'));
 
   var lCtor := RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'Ctor');
   aServices.RegisterValue('ini', lCtor);
@@ -109,7 +109,7 @@ begin
   aSelf.SaveToFile(aServices.ResolveWithBase(aFN));
 end;
 
-class method IniPlugin.ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
+class method IniPlugin._ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
 begin
   exit aSelf.ToString;
 end;
