@@ -83,6 +83,7 @@ end;
 method Engine.Run;
 begin
   Initialize;
+  var lFail := false;
   Logger.Enter('script {0}', fEngine.SourceFileName);
   try
     fEngine.Run();
@@ -96,13 +97,14 @@ begin
     end;
   except
     on e: Exception do begin
+      lFail := true;
       Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
       raise;
     end;
   finally
     for each el in fTasks.ToArray do 
       UnregisterTask(el.Item1);
-    Logger.Exit('script {0}', fEngine.SourceFileName);
+    Logger.Exit('script {0}', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
   end;
 end;
 
@@ -212,7 +214,9 @@ begin
       else
         Logger.Enter('Unfinished Task: '+el.Item2);
       el.Item3.Replay(Logger);
-      Logger.Exit('Finished Task: '+el.Item2);
+      Logger.Exit('Finished Task: '+el.Item2, if  el.Item1.IsFaulted then FailMode.Yes else FailMode.No);
+
+      el.Item1.Dispose;
 
 
       fTasks.Remove(el);

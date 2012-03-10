@@ -5,6 +5,7 @@ interface
 uses 
   RemObjects.Builder,
   RemObjects.Script.EcmaScript, 
+  System.Linq,
   RemObjects.Script.EcmaScript.Internal, 
   System.IO,
   System.Runtime.InteropServices;
@@ -15,12 +16,30 @@ type
   private
   public
     method &Register(aServices: IApiRegistrationServices);
-  end;
 
-  IniFileWrapper = public class(EcmaScriptObject)
-  private
-  public
-    property Ini: IniFile;
+    [WrapAs('ini.fromFile', SkipDryRun := true)]
+    class method FromFile(aServices: IApiRegistrationServices; aFN: string): IniFile;
+    [WrapAs('ini.fromString', SkipDryRun := false)]
+    class method FromString(aServices: IApiRegistrationServices; aString: string): IniFile;
+
+    [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true)]
+    class method ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: string);
+    [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true)]
+    class method ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
+    [WrapAs('ini', SkipDryRun := false)]
+    class method Ctor(aServices: IApiRegistrationServices): IniFile;
+    [WrapAs('ini.getString', SkipDryRun := true, wantSelf := true)]
+    class method GetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: string; aDefault: Object := nil): Object;
+    [WrapAs('ini.setString', SkipDryRun := true, wantSelf := true)]
+    class method SetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: string; aValue: Object);
+    [WrapAs('ini.deleteSection', SkipDryRun := true, wantSelf := true)]
+    class method DeleteSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String);
+    [WrapAs('ini.deleteValue', SkipDryRun := true, wantSelf := true)]
+    class method DeleteValue(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String);
+    [WrapAs('ini.keysInSection', SkipDryRun := true, wantSelf := true)]
+    class method KeysInSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String): array of STring;
+    [WrapAs('ini.sections', SkipDryRun := true, wantSelf := true)]
+    class method Sections(aServices: IApiRegistrationServices; aSelf: IniFile): array of STring;
   end;
 
 implementation
@@ -28,53 +47,22 @@ implementation
 method IniPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   var lProto := new EcmaScriptObject(aServices.Globals);
-  lProto.AddValue('toFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('toFile', args);
-    try 
-      if aservices.Engine.DryRun then begin
-        aservices.Engine.Logger.LogMessage('Dry run.');
-        exit '';
-      end;
-      var lSelf := aSelf as IniFileWrapper;
-      lSelf.Ini.SaveToFile(aSErvices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec)));
-    finally
-      aServices.Logger.Exit('toFile');
-    end;
-  end)); 
-  lProto.AddValue('toString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('toString', args);
-    try 
-      var lSelf := aSelf as IniFileWrapper;
-      exit lSelf.Ini.ToString;
-    finally
-      aServices.Logger.Exit('toString');
-    end;
-  end)); 
+  lProto.AddValue('toFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine,typeof(IniPlugin), 'ToFile'));
+  lProto.AddValue('toString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine,typeof(IniPlugin), 'ToString'));
 
-  lProto.AddValue('getString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('getString', args);
-    try 
-      var lSelf := aSelf as IniFileWrapper;
-      var lSec := lSelf.Ini.Item[Utilities.GetArgAsString(args, 0, ec)];
-      if lSec = nil then exit Utilities.GetArgAsString(args, 2, ec);
-      var lRes: string;
-      if lSec.TryGetValue(Utilities.GetArgAsString(args, 1, ec), out lRes) then exit lRes;
-      exit Utilities.GetArgAsString(args, 0, ec);
-    finally
-      aServices.Logger.Exit('getString');
-    end;
-  end)); 
-  lProto.AddValue('setString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('setString', args);
-    try 
-      var lSelf := aSelf as IniFileWrapper;
-      var lSec := lSelf.Ini.addsection(Utilities.GetArgAsString(args, 0, ec));
-      lSEc[Utilities.GetArgAsString(args, 1, ec)] := Utilities.GetArgAsString(args, 2, ec);
-      exit Undefined.Instance;
-    finally
-      aServices.Logger.Exit('setString');
-    end;
-  end)); 
+  var lCtor := RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'Ctor');
+  aServices.RegisterValue('ini', lCtor);
+  lCtor.Class := 'ini';
+  lCtor.AddValue('fromFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'FromFile'));
+  lCtor.AddValue('fromString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'FromString'));
+
+
+  lProto.AddValue('getString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'GetString'));
+  lProto.AddValue('setString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'SetString'));
+  lProto.AddValue('deleteSection', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'DeleteSection'));
+  lProto.AddValue('deleteValue', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'DeleteValue'));
+  lProto.AddValue('keysInSection', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(IniPlugin), 'KeysInSection'));
+  (*  
   lProto.AddValue('keysInSection', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('keysInSection', args);
     try 
@@ -89,14 +77,6 @@ begin
       aServices.Logger.Exit('keysInSection');
     end;
   end)); 
-  lProto.AddValue('deleteSection', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('deleteSection', args);
-    try 
-      var lSelf := aSelf as IniFileWrapper;
-      exit lSelf.Ini.Remove(Utilities.GetArgAsString(args, 0, ec));
-    finally
-      aServices.Logger.Exit('deleteSection');
-    end;
   end)); 
   lProto.AddValue('deleteValue', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('deleteValue', args);
@@ -108,34 +88,75 @@ begin
     finally
       aServices.Logger.Exit('deleteValue');
     end;
-  end)); 
+  end)); *)
 
-  aServices.RegisterValue('ini', new EcmaScriptFunctionObject(aServices.Globals, 'ini', method begin
-    exit new IniFileWrapper(aServices.Globals, Ini := new IniFile, &Class := 'ini');
-  end, 0)
-  .AddValue('fromFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('fromFile', args);
-    try 
-      var lRes := new IniFileWrapper(aServices.Globals, &Class := 'ini');
-      lRes.Ini := new IniFile;
-      lRes.Ini.LoadFromFile(aServices.ResolveWithBase(Utilities.GetArgAsString(args, 0, ec)));
-      exit lRes;
-    finally
-      aServices.Logger.Exit('fromFile');
-    end;
-  end))
-  .AddValue('fromString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
-    aServices.Logger.Enter('fromString', args);
-    try 
-      var lRes := new IniFileWrapper(aServices.Globals, &Class := 'ini');
-      lRes.Ini := new IniFile;
-      lRes.Ini.LoadFromStream(new StringReader(Utilities.GetArgAsString(args, 0, ec)));
-      exit lRes;  
-    finally
-      aServices.Logger.Exit('fromString');
-    end;
-  end))
- );
+end;
+
+class method IniPlugin.FromFile(aServices: IApiRegistrationServices; aFN: string): IniFile;
+begin
+  result := new IniFile();
+  result.LoadFromFile(aServices.ResolveWithBase(aFN));
+end;
+
+class method IniPlugin.FromString(aServices: IApiRegistrationServices; aString: string): IniFile;
+begin
+  result := new IniFile();
+  result.LoadFromStream(new StringReader(aString));
+end;
+
+class method IniPlugin.ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: string);
+begin
+  aSelf.SaveToFile(aServices.ResolveWithBase(aFN));
+end;
+
+class method IniPlugin.ToString(aServices: IApiRegistrationServices; aSelf: IniFile): string;
+begin
+  exit aSelf.ToString;
+end;
+
+class method IniPlugin.Ctor(aServices: IApiRegistrationServices): IniFile;
+begin
+  exit new IniFile();
+end;
+
+class method IniPlugin.GetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: string; aKey: string; aDefault: Object): Object;
+begin
+  var lSec := aSelf.Item[aSEction];
+  if lSec = nil then exit aDefault;
+  var lRes: string;
+  if lSec.TryGetValue(aKey, out lRes) then exit lRes;
+  exit aDefault;
+end;
+
+class method IniPlugin.SetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: string; aKey: string; aValue: Object);
+begin
+  var lSec := aSelf.addsection(aSection);
+  lSec.Item[aKey] := aValue:ToString;
+end;
+
+class method IniPlugin.DeleteSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String);
+begin
+  aSelf.Remove(aSection);
+end;
+
+class method IniPlugin.DeleteValue(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String; aKey: String);
+begin
+  var lSec := aSelf.Item[aSection];
+  if lSec <> nil then
+    lSec.Remove(aKey);
+end;
+
+class method IniPlugin.KeysInSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String): array of STring;
+begin
+  var lSec := aSelf.Item[aSection];
+  if lSec <> nil then
+    exit lSec.Keys.ToArray();
+  exit [];
+end;
+
+class method IniPlugin.Sections(aServices: IApiRegistrationServices; aSelf: IniFile): array of STring;
+begin
+  exit aSelf.Sections.Select(a->a.Item1).ToArray;
 end;
 
 end.

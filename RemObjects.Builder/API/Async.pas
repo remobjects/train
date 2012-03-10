@@ -130,6 +130,7 @@ end;
 
 method AsyncWorker.WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
 begin
+  var lFail := true;
   fEngine.Logger.Enter('waitFor', ''+args+' '+aTimeout);
     var lTasks := new List<System.Threading.Tasks.Task>;
   try
@@ -146,10 +147,11 @@ begin
       System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
     else
       if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks: ');
+    lFail := false;
   finally
     for each el in lTasks.Where(a->a.IsCompleted) do
       fEngine.UnregisterTask(el);
-    fEngine.Logger.Exit('waitFor');
+    fEngine.Logger.Exit('waitFor', if lFail then FailMode.Yes else FailMode.No);
   end;
 end;
 
@@ -182,14 +184,16 @@ end;
 method AsyncWorker.run(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
 begin
   result := undefined.Instance;
+  var lFail := true;
   fEngine.Logger.Enter('run', args);
   try
     if fEngine.DryRun then exit;
     var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
     
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
+    lFail := false;
   finally
-    fEngine.Logger.Exit('run', args);
+    fEngine.Logger.Exit('run', if lFail then FailMode.Yes else FailMode.No, lFail);
   end;
   
 end;
@@ -197,6 +201,7 @@ end;
 method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
 begin
   result := undefined.Instance;
+  var lFail := true;
   fEngine.Logger.Enter('runAsync', args);
   var lLogger := new DelayedLogger;
   var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
@@ -208,9 +213,10 @@ begin
     end);
     lTask.Start;
     fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope))), lLogger);
-    exit new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
+    result := new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
+    lFail := false;
   finally
-    fEngine.Logger.Exit('runAsync', args);
+    fEngine.Logger.Exit('runAsync', if lFail then FailMode.Yes else FailMode.No, args);
   end;
 end;
 

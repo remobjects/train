@@ -27,6 +27,7 @@ implementation
 method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lCMD := Utilities.GetArgAsString(args, 0, ec);
+  var lFail := true;
   var lArg := Utilities.GetArgAsString(args, 1, ec);
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<string, string>>;
@@ -90,8 +91,9 @@ begin
       exit sb.ToString()
     else
       exit Undefined.Instance;
+    lFail := false;
   finally
-    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg), if lFail then RemObjects.Builder.FailMode.Yes else RemObjects.Builder.FailMode.No);
   end;
 end;
 
@@ -99,6 +101,7 @@ method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf:
 begin
   var lCMD := Utilities.GetArgAsString(args, 0, ec);
   var lArg := Utilities.GetArgAsString(args, 1, ec);
+  var lFail := true;
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<string, string>>;
   var lTimeout: nullable TimeSpan := nil;
@@ -136,8 +139,9 @@ begin
         lLogger.LogError(lErr);
         raise new Exception(lErr);
       end;
+      lFail := false;
     finally
-      lLogger.Exit(STring.Format('system({0})', lArg));
+      lLogger.Exit(STring.Format('system({0})', lArg), if lFail then RemObjects.Builder.FailMode.Yes else RemObjects.Builder.FailMode.No);
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
@@ -147,6 +151,7 @@ end;
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lArg := Utilities.GetArgAsString(args, 0, ec);
+  var lFail := true;
   fEngine.Engine.Logger.Enter(STring.Format('system({0})', lArg));
   try
     if fEngine.Engine.DryRun then begin
@@ -165,9 +170,10 @@ begin
       fEngine.Engine.Logger.LogError(lErr);
       raise new Exception(lErr);
     end;
+    lFail := false;
     exit sb.ToString();
   finally
-    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg));
+    fEngine.Engine.Logger.Exit(STring.Format('system({0})', lArg), if lFail then RemObjects.Builder.FailMode.Yes else RemObjects.Builder.FailMode.No);
   end;
 end;
 

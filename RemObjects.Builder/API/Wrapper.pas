@@ -59,8 +59,9 @@ method Wrapper.Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Obj
 begin
   result := RemObjects.Script.EcmaScript.Undefined.Instance;
   fServices.Logger.Enter(fWrapInfo.LogName, aArgs);
+  var lFail := true;
   try
-    if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then exit;
+    if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then begin lFail := false; exit; end;
     var lList := new List<Object>;
     var lArgs := fMethod.GetParameters().ToList();
     if largs.FirstOrDefault:ParameteRType = typeof(IApiRegistrationServices) then begin
@@ -79,9 +80,14 @@ begin
 
     var lInArgs := aArgs.ToList;
     while (lInArgs.Count>0) and (lARgs.Count > 0) do begin
-      lList.Add(Convert(lInargs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
-      lArgs.RemoveAt(0);
-      lInArgs.RemoveAt(0);
+      if (lArgs.First.ParameterType.IsArray) and (Length(lArgs.First.GetCustomAttributes(typeof(ParamArrayAttribute), true)) > 0) then begin
+        lList.Add(Convert(lInargs[0], lArgs[0].ParameterType.GetElementType, nil));
+        lInArgs.RemoveAt(0);
+      end else begin
+        lList.Add(Convert(lInargs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
+        lArgs.RemoveAt(0);
+        lInArgs.RemoveAt(0);
+      end;
     end;
     while lArgs.Count > 0 do begin
       if lArgs[0].RawDefaultValue = DBNull.Value then
@@ -91,12 +97,13 @@ begin
       lArgs.RemoveAt(0);
     end;
 
-    exit ConvertBack(fMethod.Invoke(nil, lList.ToArray));
+    result := ConvertBack(fMethod.Invoke(nil, lList.ToArray));
+    lFail := false;
   except
     on e: System.Reflection.TargetInvocationException do
       raise e.InnerException;
   finally
-    fServices.Logger.Exit(fWrapInfo.LogName, aArgs);
+    fServices.Logger.Exit(fWrapInfo.LogName, if lFail then RemObjects.Builder.FailMode.Yes else RemObjects.Builder.FailMode.No, aArgs );
   end;
 end;
 

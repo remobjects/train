@@ -54,28 +54,31 @@ begin
       lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
       exit Undefined.Instance;
     finally
-      aServices.Logger.Exit('export');
+      aServices.Logger.Exit('export', FailMode.No);
     end;
   end));
   aServices.RegisterValue('ignoreErrors', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
     aServices.Logger.Enter('ignoreErrors', c);
+    var lFail := false;
     try
       try
         result := (c.FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(1):ToArray);
       except
         on e: Exception do begin
+          lFail := true;
           aServices.Engine.Logger.LogError('Ignoring error: '+e);
           result := Undefined.Instance; 
         end;
       end;
     finally
-      aServices.Logger.Exit('ignoreErrors');
+      aServices.Logger.Exit('ignoreErrors', if lFail then FailMode.Recovered else FailMode.No);
     end;
     end));
   aServices.RegisterValue('retry', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
       aServices.Logger.Enter('retry', c);
+      var lFailMode := FailMode.No;
       try
         var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
         loop begin
@@ -84,14 +87,19 @@ begin
             result := (c.Skip(1).FirstOrDefault as EcmaScriptObject):Call(a, c.Skip(2):ToArray);
             break;
           except
-            on e: Exception where lCount > 0 do begin
-              aServices.Engine.Logger.LogError('Ignoring error: '+e);
-              continue;
+            on e: Exception do begin
+              
+              if lCount > 0 then begin
+                lFailMode := FailMode.Recovered;
+                aServices.Engine.Logger.LogError('Ignoring error: '+e);
+                continue;
+              end;
+              lFailMode := FailMode.Yes;
             end;
           end;
         end;
       finally
-        aServices.Logger.Exit('retry');
+        aServices.Logger.Exit('retry', lFailMode);
       end;
     end));
 

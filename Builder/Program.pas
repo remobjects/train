@@ -25,7 +25,7 @@ type
     method LogHint(s: System.String);
     method LogError(s: System.String);
     method Enter(aScript: String; params args: array of Object);
-    method &Exit(aScript: String; params args: array of Object);
+    method &Exit(aScript: String; aFailMode: FailMode; params args: array of Object);
 
     property ShowDebug: Boolean := false;
     property ShowWarning: Boolean := true;
@@ -93,7 +93,7 @@ begin
   Console.ForegroundColor := lCol;
 end;
 
-method Logger.&Exit(aScript: String; params  args:array of  Object);
+method Logger.&Exit(aScript: String; aFailMode: FailMode; params  args:array of  Object);
 begin
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;
