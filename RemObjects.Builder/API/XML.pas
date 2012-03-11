@@ -41,7 +41,7 @@ begin
   lProto.AddValue('toFile', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(self), 'xmlToFile')); 
   lProto.AddValue('toString', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(self), 'xmlToString')); 
   lProto.AddValue('xpath', RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(self), 'xmlXpath'));
-  lProto.DefineOwnProperty('toFile', new PropertyValue(PropertyAttributes.Enumerable, RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(self), 'xmlToFile'), nil)); 
+  lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemOBjects.Builder.Utilities.SimpleFunction(aSErvices.Engine, typeof(self), 'xmlValue'), nil)); 
   
   
 
