@@ -57,7 +57,7 @@ begin
  end;
 
  var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(lPath, sb.ToString, false,
+  Shell.ExecuteProcess(lPath, sb.ToString, nil,false ,
   a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
 
 

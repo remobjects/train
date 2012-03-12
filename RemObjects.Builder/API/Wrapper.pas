@@ -79,15 +79,21 @@ begin
     end;
 
     var lInArgs := aArgs.ToList;
+    var lPargs: System.Collections.ArrayList := nil;
     while (lInArgs.Count>0) and (lARgs.Count > 0) do begin
       if (lArgs.First.ParameterType.IsArray) and (Length(lArgs.First.GetCustomAttributes(typeof(ParamArrayAttribute), true)) > 0) then begin
-        lList.Add(Convert(lInargs[0], lArgs[0].ParameterType.GetElementType, nil));
+        if lPargs = nil then lPargs := new System.Collections.ArrayList;
+        lPargs.add(Convert(lInargs[0], lArgs[0].ParameterType.GetElementType, nil));
         lInArgs.RemoveAt(0);
       end else begin
         lList.Add(Convert(lInargs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
         lArgs.RemoveAt(0);
         lInArgs.RemoveAt(0);
       end;
+    end;
+    if lPargs <> nil then begin
+      lArgs.RemoveAt(0);
+      lList.Add(lPargs.ToArray(fMethod.GetParameters().Last.ParameterType.GetElementType));
     end;
     while lArgs.Count > 0 do begin
       if lArgs[0].RawDefaultValue = DBNull.Value then

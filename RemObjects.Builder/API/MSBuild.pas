@@ -71,7 +71,7 @@ begin
   end;
 
   var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, false,
+  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false,
   a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToSTring);
@@ -94,7 +94,7 @@ begin
     sb.Append(aOptions.extraArgs);
   end;
  var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, false,
+  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToSTring);
@@ -117,7 +117,7 @@ begin
     sb.Append(aOptions.extraArgs);
   end;
  var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, false,
+  Shell.ExecuteProcess(string(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToSTring);

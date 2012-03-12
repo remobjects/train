@@ -15,7 +15,7 @@ type
     fEngine: IApiRegistrationServices;
 
   public
-    class method ExecuteProcess(aCommand, aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
+    class method ExecuteProcess(aCommand, aArgs, AWD: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
     constructor(aItem: IApiRegistrationServices);
     method Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
     method ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
@@ -34,6 +34,7 @@ begin
   var lTimeout: nullable TimeSpan := nil;
   var lCaptureMode: Boolean := false;
   var lCaptureFunc: EcmaScriptBaseFunctionObject := nil;
+  var LWD: string := nil;
   if lOpt <> nil then begin
     var lVal := lOpt.Get('capture');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then begin
@@ -42,6 +43,9 @@ begin
         lCaptureMode := true;
       end;
     end;
+    lVAl := lOpt.Get('workdir');
+    if lVAl is String then
+      lWD := fEngine.ResolveWithBase(String(lVal));
 
     lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
@@ -62,7 +66,7 @@ begin
       exit '';
     end;
     var sb := new System.Text.StringBuilder;
-    var lExit := ExecuteProcess(lCMD, lArg, false, a-> begin
+    var lExit := ExecuteProcess(lCMD, lArg, lWD,false , a-> begin
       locking(sb) do begin
         sb.Append(a);
       end;
@@ -105,10 +109,14 @@ begin
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<string, string>>;
   var lTimeout: nullable TimeSpan := nil;
+  var lWD: string;
   if lOpt <> nil then begin
     var lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
+    lVAl := lOpt.Get('workdir');
+    if lVAl is String then
+      lWD := fEngine.ResolveWithBase(String(lVal));
     lVal := lOpt.Get('environment');
     var lObj := EcmaScriptObject(lVal);
     if lObj  <> nil then begin
@@ -126,7 +134,7 @@ begin
         exit '';
       end;
       var sb := new System.Text.StringBuilder;
-      var lExit := ExecuteProcess(lCMD, lArg, false, a-> begin
+      var lExit := ExecuteProcess(lCMD, lArg, LWD, false, a-> begin
         locking(sb) do begin
           sb.Append(a);
         end;
@@ -151,6 +159,7 @@ end;
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lArg := Utilities.GetArgAsString(args, 0, ec);
+  var lWD := Utilities.GetArgAsString(args, 1, ec);
   var lFail := true;
   fEngine.Engine.Logger.Enter(STring.Format('system({0})', lArg));
   try
@@ -159,7 +168,7 @@ begin
       exit '';
     end;
     var sb := new System.Text.StringBuilder;
-    var lExit := ExecuteProcess(nil, lArg, true, a-> begin
+    var lExit := ExecuteProcess(nil, lArg, lWD,true , a-> begin
       locking(sb) do sb.Append(a);
     end, a-> begin
       locking(sb) do sb.Append(a)
@@ -182,7 +191,7 @@ begin
   fEngine := aItem;
 end;
 
-class method Shell.ExecuteProcess(aCommand: string; aArgs: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
+class method Shell.ExecuteProcess(aCommand: string; aArgs, aWD: string; aComSpec: Boolean; aTargetError: Action<string>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
 begin
   var lProcess := new Process();
   if lProcess.StartInfo = nil then lProcess.StartInfo := new ProcessStartInfo();
@@ -200,6 +209,8 @@ begin
     lProcess.StartInfo.Arguments := aArgs;
   end;
 
+  if assigned(aWD) then
+    lProcess.StartInfo.WorkingDirectory := aWD;
   lProcess.StartInfo.UseShellExecute := false;
   if aTargetError <> nil then begin
     lProcess.StartInfo.RedirectStandardError := true;

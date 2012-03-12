@@ -20,7 +20,7 @@ type
     class method File_Copy(aServices: IApiRegistrationServices; aLeft, aRight: string);
     [WrapAs('file.list', SkipDryRun := true)]
     class method File_List(aServices: IApiRegistrationServices; aPathAndMask: string; aRecurse: Boolean): array of string;
-    [WrapAs('file.delete', SkipDryRun := true)]
+    [WrapAs('file.remove', SkipDryRun := true)]
     class method File_Delete(aServices: IApiRegistrationServices; AFN: String);
     [WrapAs('file.read', SkipDryRun := true)]
     class method File_Read(aServices: IApiRegistrationServices; AFN: String): String;
@@ -36,7 +36,7 @@ type
     class method Folder_Exists(aServices: IApiRegistrationServices; aFN: String): Boolean;
     [WrapAs('folder.create', SkipDryRun := true)]
     class method Folder_Create(aServices: IApiRegistrationServices; aFN: String);
-    [WrapAs('folder.delete', SkipDryRun := true)]
+    [WrapAs('folder.remove', SkipDryRun := true)]
     class method Folder_Delete(aServices: IApiRegistrationServices; aFN: String; aRecurse: Boolean := true);
     [WrapAs('path.combine', SkipDryRun := true)]
     class method Path_Combine(aServices: IApiRegistrationServices; params args: array of string): string;
@@ -61,7 +61,7 @@ begin
     new EcmaScriptObject(aServices.Globals)
     .AddValue('copy', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Copy'))
     .AddValue('list', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_List'))
-    .AddValue('delete', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Delete'))
+    .AddValue('remove', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Delete'))
     .AddValue('read', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Read'))
     .AddValue('write', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Write'))
     .AddValue('append', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'File_Append'))
@@ -73,7 +73,7 @@ begin
     .AddValue('list', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'Folder_List'))
     .AddValue('exists', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'Folder_Exists'))
     .AddValue('create', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'Folder_Create'))
-    .AddValue('delete', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'Folder_Delete'))
+    .AddValue('remove', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(FilePlugin), 'Folder_Delete'))
   );
 
   aServices.RegisterValue('path', 
@@ -151,6 +151,7 @@ end;
 class method FilePlugin.Folder_Delete(aServices: IApiRegistrationServices; aFN: string; aRecurse: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(aFN);
+  if System.IO.Directory.Exists(lVAL) then 
   System.IO.Directory.Delete(lVal, aRecurse);
 end;
 
