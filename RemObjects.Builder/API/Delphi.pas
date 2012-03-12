@@ -24,6 +24,7 @@ type
   DelphiOptions = public class
   private
   public
+    property dcc: string; // overrides any version
     property version: string;
     property platform: string;
     property aliases: string;
@@ -52,26 +53,30 @@ begin
   var lRootPath: string;
   var lVer := aOptions.version.Trim();
   if lVer.StartsWith('d') or lVer.StartsWith('D') then lVer := lVer.Substring(1);
-  case lVer of
-    '6': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\Delphi\6.0', 'RootDir', '') as string;
-    '7': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\Delphi\7.0', 'RootDir', '') as string;
-    '8': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\2.0', 'RootDir', '') as string;
-    '2005', '9': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\3.0', 'RootDir', '') as string;
-    '2006, 10': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\4.0', 'RootDir', '') as string;
-    '2007, 11': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\5.0', 'RootDir', '') as string;
-    '2009, 13': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\6.0', 'RootDir', '') as string;
-    '2010, 14': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\7.0', 'RootDir', '') as string;
-    'XE', '2011', '15': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\8.0', 'RootDir', '') as string;
-    'XE2', '2012', '16': lRootPath := Microsoft.Win32.Registry.GetValue('HKCU\Software\Borland\BDS\9.0', 'RootDir', '') as string;
-  else
-    raise new Exception('Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
+  if not string.IsNullOrEmpty(aOptions.dcc) then
+    lRootPath:= aOptions.dcc
+  else begin
+    case lVer of
+      '6': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as string;
+      '7': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as string;
+      '8': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as string;
+      '2005', '9': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as string;
+      '2006, 10': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as string;
+      '2007, 11': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as string;
+      '2009, 13': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\6.0', 'RootDir', '') as string;
+      '2010, 14': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\7.0', 'RootDir', '') as string;
+      'XE', '2011', '15': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\8.0', 'RootDir', '') as string;
+      'XE2', '2012', '16': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\9.0', 'RootDir', '') as string;
+    else
+      raise new Exception('Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
+    end;
+    if aOptions:platform = 'osx' then
+    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') else
+    if aOptions:platform = '64' then
+    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') else
+    if string.IsNullOrEmpty(aOptions:platform) or (aOptions:platform = '32') then 
+    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe');
   end;
-  if aOptions:platform = 'osx' then
-  lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') else
-  if aOptions:platform = '64' then
-  lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') else
-  if string.IsNullOrEmpty(aOptions:platform) or (aOptions:platform = '32') then 
-  lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe');
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc32 not found: '+lRootPath);
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
