@@ -68,7 +68,7 @@ begin
     var sb := new System.Text.StringBuilder;
     var lExit := ExecuteProcess(lCMD, lArg, LWD,false , a-> begin
       locking(sb) do begin
-        sb.Append(a);
+        sb.AppendLine(a);
       end;
       if assigned(lCaptureFunc) then begin
         try
@@ -77,7 +77,7 @@ begin
         end;
       end;
     end, a-> begin
-      locking(sb) do sb.Append(a);
+      locking(sb) do sb.AppendLine(a);
       if assigned(lCaptureFunc) then begin
         try
           lCaptureFunc.Call(ec, a);
@@ -136,10 +136,10 @@ begin
       var sb := new System.Text.StringBuilder;
       var lExit := ExecuteProcess(lCMD, lArg, lWD, false, a-> begin
         locking(sb) do begin
-          sb.Append(a);
+          sb.AppendLine(a);
         end;
       end, a-> begin
-        locking(sb) do sb.Append(a);
+        locking(sb) do sb.AppendLine(a);
       end, lEnv.ToArray, lTimeout);
       lLogger.LogMessage('Output: '#13#10+sb.ToString);
       if 0 <> lExit then begin
@@ -169,9 +169,9 @@ begin
     end;
     var sb := new System.Text.StringBuilder;
     var lExit := ExecuteProcess(nil, lArg, lWD,true , a-> begin
-      locking(sb) do sb.Append(a);
+      locking(sb) do sb.AppendLine(a);
     end, a-> begin
-      locking(sb) do sb.Append(a)
+      locking(sb) do sb.AppendLine(a)
     end, nil, nil);
     fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
