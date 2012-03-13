@@ -110,7 +110,7 @@ begin
   var lDryRun: Boolean := false;
   var lXMLOut: String := nil;
   var lWait := false;
-  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
+  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
@@ -152,9 +152,8 @@ begin
     if File.Exists(lGlobalSettings) then 
       lRoot.LoadIni(lGlobalSettings);
     for each el in lGlobalVars do lRoot[el.Key] := el.Value;
-    for each el in lRoot do begin
-      lLogger.LogDebug('Root variable: {0}={1}', el.Key, el.Value);
-    end;
+    if LoggerSettings.ShowDebug then
+      lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
 
     for each el in lArgs do begin
       var lEngine := new Engine(lRoot, el);
