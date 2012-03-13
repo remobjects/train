@@ -162,7 +162,9 @@ method Environment.LoadSystem;
 begin
   locking self do begin
     for each el: System.Collections.DictionaryEntry in System.Environment.GetEnvironmentVariables() do begin
-      inherited Item[el.Key:ToString] := el.Value:ToString;
+      var lVal := el.Value:ToString:trim;
+      if not String.IsNullOrEmpty(lVal) then 
+        inherited Item[el.Key:ToString] := lVal;
     end;
   end;
 end;
