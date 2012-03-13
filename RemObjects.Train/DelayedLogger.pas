@@ -17,8 +17,8 @@ type
     method LogWarning(s: String);
     method LogHint(s: String);
     method LogDebug(s: String);
-    method Enter(aScript: String; params args: array of Object);
-    method &Exit(aScript: String; aFailMode: FailMode; params args: array of Object);
+    method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
+    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
 
     method Replay(aTarget: ILogger);
   end;
@@ -55,14 +55,16 @@ begin
   fDelayStore.AddLast(Tuple.Create(4, s, 0,array of Object(nil)));
 end;
 
-method DelayedLogger.Enter(aScript: String; params args: array of Object);
+method DelayedLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
+  if LoggerSettings.ShowDebug or aImportant then 
   locking fDelayStore do
   fDelayStore.AddLast(Tuple.Create(5, aScript, 0,args ));
 end;
 
-method DelayedLogger.&Exit(aScript: String; aFailMode: FailMode; params args: array of Object);
+method DelayedLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
 begin
+  if LoggerSettings.ShowDebug or aImportant then 
   locking fDelayStore do
   fDelayStore.AddLast(Tuple.Create(6, aScript, Integer(aFailMode),args ));
 end;
@@ -77,8 +79,8 @@ begin
       2: aTarget.LogWarning(lItem.Value.Item2);
       3: aTarget.LogHint(lItem.Value.Item2);
       4: aTarget.LogDebug(lItem.Value.Item2);
-      6: aTarget.Enter(lItem.Value.Item2, lItem.Value.Item4);
-      7: aTarget.Exit(lItem.Value.Item2, FailMode(lItem.Value.Item3), lItem.Value.Item4);
+      6: aTarget.Enter(true,lItem.Value.Item2, lItem.Value.Item4);
+      7: aTarget.Exit(true,lItem.Value.Item2, FailMode(lItem.Value.Item3), lItem.Value.Item4);
     end;
     lItem := lItem.Next;
   end;

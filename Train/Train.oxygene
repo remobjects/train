@@ -5,7 +5,7 @@
     <RootNamespace>RemObjects.Train</RootNamespace>
     <StartupClass />
     <OutputType>Exe</OutputType>
-    <AssemblyName>TrainRunner</AssemblyName>
+    <AssemblyName>Train</AssemblyName>
     <AllowGlobals>False</AllowGlobals>
     <AllowLegacyWith>False</AllowLegacyWith>
     <AllowLegacyOutParams>False</AllowLegacyOutParams>
@@ -14,7 +14,7 @@
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Builder</Name>
+    <Name>Train</Name>
     <ProjectGuid>{bd3c0f3c-4943-488f-9886-4bc65ffe4dc4}</ProjectGuid>
     <DefaultUses />
     <InternalAssemblyName />

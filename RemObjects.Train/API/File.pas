@@ -28,27 +28,27 @@ type
     class method File_Write(aServices: IApiRegistrationServices; aFN, aData: String);
     [WrapAs('file.append', SkipDryRun := true)]
     class method File_Append(aServices: IApiRegistrationServices; aFN, aData: String);
-    [WrapAs('file.exists')]
+    [WrapAs('file.exists', Important := false)]
     class method File_Exists(aServices: IApiRegistrationServices; aFN: String): Boolean;
-    [WrapAs('folder.list', SkipDryRun := true)]
+    [WrapAs('folder.list', SkipDryRun := true, Important := false)]
     class method Folder_List(aServices: IApiRegistrationServices; aPathAndMask: String; aRecurse: Boolean): array of String;
-    [WrapAs('folder.exists')]
+    [WrapAs('folder.exists', Important := false)]
     class method Folder_Exists(aServices: IApiRegistrationServices; aFN: String): Boolean;
     [WrapAs('folder.create', SkipDryRun := true)]
     class method Folder_Create(aServices: IApiRegistrationServices; aFN: String);
     [WrapAs('folder.remove', SkipDryRun := true)]
     class method Folder_Delete(aServices: IApiRegistrationServices; aFN: String; aRecurse: Boolean := true);
-    [WrapAs('path.combine', SkipDryRun := true)]
+    [WrapAs('path.combine', SkipDryRun := true, Important := false)]
     class method Path_Combine(aServices: IApiRegistrationServices; params args: array of String): String;
-    [WrapAs('path.resolve', SkipDryRun := true)]
+    [WrapAs('path.resolve', SkipDryRun := true, Important := false)]
     class method Path_Resolve(aServices: IApiRegistrationServices; aPath: String; aBase: String := nil): String;
-    [WrapAs('path.getFilename', SkipDryRun := true)]
+    [WrapAs('path.getFilename', SkipDryRun := true, Important := false)]
     class method Path_GetFilename(aServices: IApiRegistrationServices; aFN: String): String;
-    [WrapAs('path.getFilenameWithoutExtension', SkipDryRun := true)]
+    [WrapAs('path.getFilenameWithoutExtension', SkipDryRun := true, Important := false)]
     class method Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; aFN: String): String;
-    [WrapAs('path.getFilenameExtension', SkipDryRun := true)]
+    [WrapAs('path.getFilenameExtension', SkipDryRun := true, Important := false)]
     class method Path_GetFilenameExtension(aServices: IApiRegistrationServices; aFN: String): String;
-    [WrapAs('path.getFoldername', SkipDryRun := true)]
+    [WrapAs('path.getFoldername', SkipDryRun := true, Important := false)]
     class method Path_GetFoldername(aServices: IApiRegistrationServices; aFN: String): String;
   end;
 

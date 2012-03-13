@@ -30,6 +30,7 @@ type
     constructor(aLogName: String);
     property WantExecutionContext: Boolean;
     property WantSelf: Boolean;
+    property Important: Boolean := true;
     property SkipDryRun: Boolean;
     property LogName: String read fLogName;
   end;
@@ -58,7 +59,7 @@ end;
 method Wrapper.Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 begin
   result := RemObjects.Script.EcmaScript.Undefined.Instance;
-  fServices.Logger.Enter(fWrapInfo.LogName, aArgs);
+  fServices.Logger.Enter(fWrapInfo.Important, fWrapInfo.LogName, aArgs);
   var lFail := true;
   try
     if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then begin lFail := false; exit; end;
@@ -109,7 +110,7 @@ begin
     on e: System.Reflection.TargetInvocationException do
       raise e.InnerException;
   finally
-    fServices.Logger.Exit(fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
+    fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
   end;
 end;
 

@@ -22,23 +22,23 @@ type
     [WrapAs('ini.fromString', SkipDryRun := false)]
     class method FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
 
-    [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
     class method ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: String);
-    [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true)]
+    [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true, Important := false)]
     class method _ToString(aServices: IApiRegistrationServices; aSelf: IniFile): String;
     [WrapAs('ini', SkipDryRun := false)]
     class method Ctor(aServices: IApiRegistrationServices): IniFile;
-    [WrapAs('ini.getString', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.getValue', SkipDryRun := true, wantSelf := true, Important := false)]
     class method GetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String; aDefault: Object := nil): Object;
-    [WrapAs('ini.setString', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.setValue', SkipDryRun := true, wantSelf := true, Important := false)]
     class method SetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String; aValue: Object);
-    [WrapAs('ini.deleteSection', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.deleteSection', SkipDryRun := true, wantSelf := true, Important := false)]
     class method DeleteSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String);
-    [WrapAs('ini.deleteValue', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.deleteValue', SkipDryRun := true, wantSelf := true, Important := false)]
     class method DeleteValue(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String);
-    [WrapAs('ini.keysInSection', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.keysInSection', SkipDryRun := true, wantSelf := true, Important := false)]
     class method KeysInSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String): array of String;
-    [WrapAs('ini.sections', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('ini.sections', SkipDryRun := true, wantSelf := true, Important := false)]
     class method Sections(aServices: IApiRegistrationServices; aSelf: IniFile): array of String;
   end;
 
@@ -53,12 +53,12 @@ begin
   var lCtor := RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'Ctor');
   aServices.RegisterValue('ini', lCtor);
   lCtor.Class := 'ini';
-  lCtor.AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromFile'));
-  lCtor.AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromString'));
+  lCtor.AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromFile', lProto));
+  lCtor.AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromString', lProto));
 
 
-  lProto.AddValue('getString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'GetString'));
-  lProto.AddValue('setString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'SetString'));
+  lProto.AddValue('getValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'GetString'));
+  lProto.AddValue('setValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'SetString'));
   lProto.AddValue('deleteSection', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteSection'));
   lProto.AddValue('deleteValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteValue'));
   lProto.AddValue('keysInSection', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'KeysInSection'));

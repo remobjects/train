@@ -22,13 +22,13 @@ type
     [WrapAs('xml.fromString', SkipDryRun := true)]
     class method xmlFromString(aServices: IApiRegistrationServices; aString: String): XElement;
 
-    [WrapAs('xml.toFile', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('xml.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlToFile(aServices: IApiRegistrationServices; aSelf: XElement; aFN: String);
-    [WrapAs('xml.toString', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('xml.toString', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlToString(aServices: IApiRegistrationServices; aSelf: XElement): String;
-    [WrapAs('xml.xpath', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('xml.xpath', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
-    [WrapAs('xml.value', SkipDryRun := true, wantSelf := true)]
+    [WrapAs('xml.value', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;
   end;
 
@@ -46,8 +46,8 @@ begin
   
 
   aServices.RegisterObjectValue('xml')
-    .AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromFile'))
-    .AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromString'));
+    .AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromFile', lProto))
+    .AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromString', lProto));
 end;
 
 class method XmlPlugin.xmlFromFile(aServices: IApiRegistrationServices; aFN: String): XElement;

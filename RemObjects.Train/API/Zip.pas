@@ -17,7 +17,7 @@ type
     [WrapAs('zip.compress', SkipDryRun := true)]
     class method ZipCompress(aServices: IApiRegistrationServices; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean := true);
 
-    [WrapAs('zip.list', SkipDryRun := true)]
+    [WrapAs('zip.list', SkipDryRun := true, Important := false)]
     class method ZipList(aServices: IApiRegistrationServices; zip: String): array of ZipEntryData;
 
     [WrapAs('zip.extractFile', SkipDryRun := true)]
