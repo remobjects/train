@@ -30,9 +30,11 @@ type
     property IntEngine: Engine read self; implements IApiRegistrationServices.Engine;
     fEnvironment: Environment;
     fEngine: EcmaScriptComponent;
+    fRegEx: System.Text.RegularExpressions.Regex;
   protected
   public
     class constructor;
+    method Expand(ec: ExecutionContext; s: String): String;
     constructor(aParent: Environment; aScriptPath: String; aScript: String := nil);
     method ResolveWithBase(s: String): String;
     method UnregisterTask(aTask: System.Threading.Tasks.Task);
@@ -199,6 +201,7 @@ end;
 method Engine.ResolveWithBase(s: String): String;
 begin
   if s = nil then exit nil;
+  s := Expand(nil,s  );
   if s.StartsWith('~/') or s.StartsWith('~\') then
     s := Path.Combine(system.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), s.Substring(2));
   if System.IO.Path .DirectorySeparatorChar = '\' then
@@ -239,6 +242,25 @@ begin
   Logger.LogMessage('Started Task: '+aSignature);
   fTasks.Add(Tuple.Create(aTask, aSignature, aLogger));
 end;
+
+method Engine.Expand(ec: ExecutionContext; s: String): String;
+begin
+  if fRegEx = nil then 
+    fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
+  exit fRegEx.Replace(s, method (match: System.Text.RegularExpressions.Match) begin
+   var lValue := match.Groups['value']:Value;
+   if lValue = '' then exit '$';
+   if lValue.StartsWith('(') and lValue.EndsWith(')') then 
+     lValue := lValue.Substring(1, lValue.Length -2);
+    
+    var u := ec:LexicalScope:GetBindingValue(lValue, false);
+    var n := if (u = nil) or (u = Undefined.Instance) then nil else RemObjects.Script.EcmaScript.Utilities.GetObjAsString(u, ec);
+    if (n = nil) then n := Environment[lValue]:ToString;
+    
+    exit n;
+  end);
+end;
+    
 
 
 end.

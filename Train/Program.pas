@@ -160,7 +160,10 @@ begin
     end;
   except
     on e: Exception do begin
-      lLogger.LogError('Exception: {0}', e.Message);
+      if LoggerSettings.ShowDebug then
+        lLogger.LogError('Exception: {0}', e.ToString)
+      else
+        lLogger.LogError('Exception: {0}', e.Message);
 
       exit 1;
     end;

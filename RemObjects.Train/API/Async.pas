@@ -36,7 +36,6 @@ type
     method MakeSafe(aInput: GlobalObject; aValue: Object): Object;
     fEngine: Engine;
     fTaskProto: EcmaScriptObject;
-    fRegEx: System.Text.RegularExpressions.Regex;
   public
     constructor(aEngine: Engine);
     property TaskProto: EcmaScriptObject read fTaskProto;
@@ -243,15 +242,8 @@ begin
   var lArg := coalesce(Utilities.GetArgAsString(args, 0, aScope), '');
   
 
-  if fRegEx = nil then 
-    fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
-  exit fRegEx.Replace(lArg, method (match: System.Text.RegularExpressions.Match) begin
-   var lValue := match.Groups['value']:Value;
-   if lValue = '' then exit '$';
-   if lValue.StartsWith('(') and lValue.EndsWith(')') then 
-     lValue := lValue.Substring(1, lValue.Length -2);
-   exit Utilities.GetObjAsString(aScope.LexicalScope.GetBindingValue(lValue, false), aScope);
-  end);
+  exit fEngine.Expand(aScope, lArg);
 end;
+
 
 end.
