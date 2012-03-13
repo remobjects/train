@@ -12,7 +12,7 @@ uses
 type
   ConsoleApp = class
   public
-    class method Main(args: array of String): Integer;
+    class method Main(): Integer;
   end;
 
   Logger = public class(ILogger)
@@ -99,7 +99,7 @@ begin
   Console.ForegroundColor := lCol;
 end;
 
-class method ConsoleApp.Main(args: array of String): Integer;
+class method ConsoleApp.Main(): Integer;
 begin
   Console.WriteLine('TrainRunner copyright (c) 2012 RemObjects Software');
   var lLogger: ILogger := new Logger;
@@ -117,14 +117,15 @@ begin
   lOptions.Add('i|hint', 'Show hint messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
   lOptions.Add('m|message', 'Show info messages', v-> begin LoggerSettings.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
-  lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then lGlobalVars.Add(k, v); end);
+  lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then begin
+    lGlobalVars.Add(k, v); end; end);
   lOptions.Add('x|xml=', 'Write XML log to file', (v) -> begin lXMLOut := v; end);
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
   var lArgs: List<String>;
   try
-    lArgs := lOptions.Parse(args);
+    lArgs := lOptions.Parse(Environment.CommandLine);
   except
     on  Exception  do
       lShowHelp := true;
@@ -149,6 +150,10 @@ begin
     if File.Exists(lGlobalSettings) then 
       lRoot.LoadIni(lGlobalSettings);
     for each el in lGlobalVars do lRoot[el.Key] := el.Value;
+    for each el in lRoot do begin
+      lLogger.LogDebug('Root variable: {0}={1}', el.Key, el.Value);
+    end;
+
     for each el in lArgs do begin
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;

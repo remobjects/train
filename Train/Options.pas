@@ -1469,7 +1469,9 @@ class method OptionCommandLine.Parse(const commandLine: String): array of String
     if  (endIndex < startIndex)  then
       exit  (String.Empty);
 
-    exit  (source.Substring(startIndex, endIndex-startIndex+1));
+    result := (source.Substring(startIndex, endIndex-startIndex+1));
+    if result.StartsWith('"') and result.EndsWith('"') and (result.Length > 0) then
+      result := result.Substring(1, result.Length-2);
   end;
 begin
   if  (not  assigned(commandLine))  then
