@@ -95,6 +95,7 @@
     <Compile Include="API\SSH.pas" />
     <Compile Include="API\Web.pas" />
     <Compile Include="API\Wrapper.pas" />
+    <Compile Include="API\Xcode.pas" />
     <Compile Include="API\XML.pas" />
     <Compile Include="API\Zip.pas" />
     <Compile Include="DelayedLogger.pas" />
