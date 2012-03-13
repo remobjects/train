@@ -219,7 +219,7 @@ begin
     end;
   end;
   if aTargetOutput <> nil then begin
-    lProcess.StartInfo.RedirectStandardError := true;
+    lProcess.StartInfo.RedirectStandardOutput := true;
     lProcess.OutputDataReceived += method (o: Object; ar: DataReceivedEventArgs) begin
       aTargetOutput:Invoke(ar.Data);
     end;
