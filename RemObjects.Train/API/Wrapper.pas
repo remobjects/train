@@ -28,7 +28,6 @@ type
     fLogName : String;
   public
     constructor(aLogName: String);
-    property WantExecutionContext: Boolean;
     property WantSelf: Boolean;
     property Important: Boolean := true;
     property SkipDryRun: Boolean;
@@ -69,8 +68,8 @@ begin
       lList.Add(fServices);
       lArgs.RemoveAt(0);
     end;
-    if fWrapInfo.WantExecutionContext then begin
-      if lArgs.First.ParameterType <> typeOf(RemObjects.Script.EcmaScript.ExecutionContext) then raise new Exception('No EC as first parameter');
+    if lArgs.FirstOrDefault:ParameterType = typeOf(RemObjects.Script.EcmaScript.ExecutionContext) then begin
+//      if lArgs.First.ParameterType <> typeOf(RemObjects.Script.EcmaScript.ExecutionContext) then raise new Exception('No EC as first parameter');
       lList.Add(ec);
       lArgs.RemoveAt(0);
     end;

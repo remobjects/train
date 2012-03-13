@@ -130,7 +130,7 @@ begin
   var lSelf := self;
   while assigned(lSelf) do begin
     locking lSelf do begin
-      if TryGetValue(s, out result) then exit;
+      if lSelf.TryGetValue(s, out result) then exit;
     end;
     lSelf := lSelf.Previous;
   end;

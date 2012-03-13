@@ -36,7 +36,7 @@ type
     class constructor;
     method Expand(ec: ExecutionContext; s: String): String;
     constructor(aParent: Environment; aScriptPath: String; aScript: String := nil);
-    method ResolveWithBase(s: String): String;
+    method ResolveWithBase(ec: ExecutionContext;s: String): String;
     method UnregisterTask(aTask: System.Threading.Tasks.Task);
     method RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: String; aLogger: DelayedLogger);
     property WorkDir: String read fWorkDir write set_WorkDir;
@@ -198,10 +198,10 @@ begin
   end;
 end;
 
-method Engine.ResolveWithBase(s: String): String;
+method Engine.ResolveWithBase(ec: ExecutionContext; s: String): String;
 begin
   if s = nil then exit nil;
-  s := Expand(nil,s  );
+  s := Expand(ec,s  );
   if s.StartsWith('~/') or s.StartsWith('~\') then
     s := Path.Combine(system.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), s.Substring(2));
   if System.IO.Path .DirectorySeparatorChar = '\' then

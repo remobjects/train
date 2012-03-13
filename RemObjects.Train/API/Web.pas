@@ -16,7 +16,7 @@ type
     [WrapAs('http.getUrl', SkipDryRun := true)]
     class method HttpGetUrl(aServices: IApiRegistrationServices; aUrl: String): String;
     [WrapAs('http.downloadUrl', SkipDryRun := true)]
-    class method HttpDownloadUrl(aServices: IApiRegistrationServices; aUrl: String; aTarget: String := nil): String;
+    class method HttpDownloadUrl(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aUrl: String; aTarget: String := nil): String;
   end;
 
 implementation
@@ -37,10 +37,10 @@ begin
   end;
 end;
 
-class method WebRegister.HttpDownloadUrl(aServices: IApiRegistrationServices; aUrl: String; aTarget: String := nil): String;
+class method WebRegister.HttpDownloadUrl(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aUrl: String; aTarget: String := nil): String;
 begin
   var lReq := System.Net.HttpWebRequest.Create(aUrl);
-  aTarget := aServices.ResolveWithBase(aTarget);
+  aTarget := aServices.ResolveWithBase(ec,aTarget);
   using res := lReq.GetResponse() do begin
     var lfn := res.Headers["Content-Disposition"];
     if not String.IsNullOrEmpty(lfn) then begin

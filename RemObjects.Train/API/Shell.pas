@@ -45,7 +45,7 @@ begin
     end;
     lVal := lOpt.Get('workdir');
     if lVal is String then
-      LWD := fEngine.ResolveWithBase(String(lVal));
+      LWD := fEngine.ResolveWithBase(ec,String (lVal));
 
     lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
@@ -116,7 +116,7 @@ begin
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
     lVal := lOpt.Get('workdir');
     if lVal is String then
-      lWD := fEngine.ResolveWithBase(String(lVal));
+      lWD := fEngine.ResolveWithBase(ec,String (lVal));
     lVal := lOpt.Get('environment');
     var lObj := EcmaScriptObject(lVal);
     if lObj  <> nil then begin

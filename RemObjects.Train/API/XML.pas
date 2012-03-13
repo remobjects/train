@@ -18,12 +18,12 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('xml.fromFile', SkipDryRun := true)]
-    class method xmlFromFile(aServices: IApiRegistrationServices; aFN: String): XElement;
+    class method xmlFromFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): XElement;
     [WrapAs('xml.fromString', SkipDryRun := true)]
     class method xmlFromString(aServices: IApiRegistrationServices; aString: String): XElement;
 
     [WrapAs('xml.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
-    class method xmlToFile(aServices: IApiRegistrationServices; aSelf: XElement; aFN: String);
+    class method xmlToFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: XElement; aFN: String);
     [WrapAs('xml.toString', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlToString(aServices: IApiRegistrationServices; aSelf: XElement): String;
     [WrapAs('xml.xpath', SkipDryRun := true, wantSelf := true, Important := false)]
@@ -50,9 +50,9 @@ begin
     .AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromString', lProto));
 end;
 
-class method XmlPlugin.xmlFromFile(aServices: IApiRegistrationServices; aFN: String): XElement;
+class method XmlPlugin.xmlFromFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): XElement;
 begin
-  XElement.Load(aServices.ResolveWithBase(aFN));
+  XElement.Load(aServices.ResolveWithBase(ec,aFN ));
 end;
 
 class method XmlPlugin.xmlFromString(aServices: IApiRegistrationServices; aString: String): XElement;
@@ -60,9 +60,9 @@ begin
   exit XElement.Parse(aString);
 end;
 
-class method XmlPlugin.xmlToFile(aServices: IApiRegistrationServices; aSelf: XElement; aFN: String);
+class method XmlPlugin.xmlToFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: XElement; aFN: String);
 begin
-  aSelf.Save(aServices.ResolveWithBase(aFN));
+  aSelf.Save(aServices.ResolveWithBase(ec,aFN ));
 end;
 
 class method XmlPlugin.xmlToString(aServices: IApiRegistrationServices; aSelf: XElement): String;

@@ -18,7 +18,7 @@ type
     [WrapAs('ssh.execute', SkipDryRun := true)]
     class method SshExecute(aServices: IApiRegistrationServices; aConnectionString, aCMD, aUSername, aPassword: String): String;
     [WrapAs('ssh.loadKey', SkipDryRun := true)]
-    class method SshLoadKey(aServices: IApiRegistrationServices; aFN, aPassword: String);
+    class method SshLoadKey(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext;  aFN, aPassword: String);
 
     [WrapAs('sftp.connect', SkipDryRun := true)]
     class method SftpConnect(aServices: IApiRegistrationServices; aServer, aRootpath, aUsername, aPassword: String): Renci.SshNet.SftpClient;
@@ -30,9 +30,9 @@ type
     [WrapAs('sftp.listFolders', SkipDryRun := true, wantSelf := true)]
     class method SftpListFolders(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient; aPath: String): array of String;
     [WrapAs('sftp.download', SkipDryRun := true, wantSelf := true)]
-    class method SftpDownload(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient; aRemote, aLocal: String);
+    class method SftpDownload(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Renci.SshNet.SftpClient; aRemote, aLocal: String);
     [WrapAs('sftp.upload', SkipDryRun := true, wantSelf := true)]
-    class method SftpUpload(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient; aLocal, aRemote: String);
+    class method SftpUpload(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext;  aSelf: Renci.SshNet.SftpClient; aLocal, aRemote: String);
   end;
 
 implementation
@@ -65,9 +65,9 @@ begin
   end;
 end;
 
-class method SSHReg.SshLoadKey(aServices: IApiRegistrationServices; aFN: String; aPassword: String);
+class method SSHReg.SshLoadKey(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aFN: String; aPassword: String);
 begin
-  fKeys.Add(new Renci.SshNet.PrivateKeyFile(aServices.ResolveWithBase(aFN), aPassword));
+  fKeys.Add(new Renci.SshNet.PrivateKeyFile(aServices.ResolveWithBase(ec,aFN), aPassword));
 end;
 
 class method SSHReg.SftpConnect(aServices: IApiRegistrationServices; aServer, aRootpath, aUsername, aPassword: String): Renci.SshNet.SftpClient;
@@ -92,15 +92,15 @@ begin
   exit aSelf.ListDirectory(aPath).Where(a->a.IsDirectory).Select(a->a.Name).ToArray;
 end;
 
-class method SSHReg.SftpDownload(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient; aRemote, aLocal: String);
+class method SSHReg.SftpDownload(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Renci.SshNet.SftpClient; aRemote, aLocal: String);
 begin
-  using sr := new System.IO.FileStream(aServices.ResolveWithBase(aLocal), System.IO.FileMode.Create) do
+  using sr := new System.IO.FileStream(aServices.ResolveWithBase(ec,aLocal), System.IO.FileMode.Create) do
     aSelf.DownloadFile(aRemote, sr);
 end;
 
-class method SSHReg.SftpUpload(aServices: IApiRegistrationServices; aSelf: Renci.SshNet.SftpClient; aLocal, aRemote: String);
+class method SSHReg.SftpUpload(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Renci.SshNet.SftpClient; aLocal, aRemote: String);
 begin
-  using sr := new System.IO.FileStream(aServices.ResolveWithBase(aLocal), System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read) do
+  using sr := new System.IO.FileStream(aServices.ResolveWithBase(ec,aLocal), System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read) do
     aSelf.UploadFile(sr,aRemote);
 end;
 

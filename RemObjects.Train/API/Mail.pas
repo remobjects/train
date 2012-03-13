@@ -15,7 +15,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('mail.send')]
-    class method MailSend(aServices: IApiRegistrationServices; 
+    class method MailSend(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;
       aFrom: String := nil; 
       aTo: String := nil;
       aSubject: String:= nil;
@@ -50,7 +50,7 @@ begin
   );
 end;
 
-class method MailReg.MailSend(aServices: IApiRegistrationServices; aFrom: String; aTo: String; aSubject: String; aBody: String; aOpt: MailOptions);
+class method MailReg.MailSend(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;aFrom: String; aTo: String; aSubject: String; aBody: String; aOpt: MailOptions);
 begin
   var lMailMsg := new System.Net.Mail.MailMessage(aFrom, aTo, aSubject, aBody);
   var lSMTPServer := String(aServices.Environment['SMTP_Server']);
@@ -71,7 +71,7 @@ begin
       if el.data <> nil then begin
         lMailMsg.Attachments.Add(new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(el.data)), el.name));
       end else begin
-        var lAtt2 := new System.Net.Mail.Attachment(aServices.ResolveWithBase(el.filename));
+        var lAtt2 := new System.Net.Mail.Attachment(aServices.ResolveWithBase(ec,el.filename));
         if el.name <> nil then lAtt2.Name := el.name;
         lMailMsg.Attachments.Add(lAtt2);
       end;

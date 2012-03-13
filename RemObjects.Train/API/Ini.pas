@@ -18,12 +18,12 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('ini.fromFile')]
-    class method FromFile(aServices: IApiRegistrationServices; aFN: String): IniFile;
+    class method FromFile(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext; aFN: String): IniFile;
     [WrapAs('ini.fromString', SkipDryRun := false)]
     class method FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
 
     [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
-    class method ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: String);
+    class method ToFile(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext;aSelf: IniFile; aFN: String);
     [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true, Important := false)]
     class method _ToString(aServices: IApiRegistrationServices; aSelf: IniFile): String;
     [WrapAs('ini', SkipDryRun := false)]
@@ -92,11 +92,11 @@ begin
 
 end;
 
-class method IniPlugin.FromFile(aServices: IApiRegistrationServices; aFN: String): IniFile;
+class method IniPlugin.FromFile(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;aFN: String): IniFile;
 begin
   result := new IniFile();
   if not aServices.Engine.DryRun then
-    result.LoadFromFile(aServices.ResolveWithBase(aFN));
+    result.LoadFromFile(aServices.ResolveWithBase(ec,aFN));
 end;
 
 class method IniPlugin.FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
@@ -105,9 +105,9 @@ begin
   result.LoadFromStream(new StringReader(aString));
 end;
 
-class method IniPlugin.ToFile(aServices: IApiRegistrationServices; aSelf: IniFile; aFN: String);
+class method IniPlugin.ToFile(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: IniFile; aFN: String);
 begin
-  aSelf.SaveToFile(aServices.ResolveWithBase(aFN));
+  aSelf.SaveToFile(aServices.ResolveWithBase(ec,aFN));
 end;
 
 class method IniPlugin._ToString(aServices: IApiRegistrationServices; aSelf: IniFile): String;

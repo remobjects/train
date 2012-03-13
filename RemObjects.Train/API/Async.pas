@@ -20,7 +20,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('include')]
-    class method Include(aServices: IApiRegistrationServices; aFN: String);
+    class method Include(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String);
     [WrapAs('sleep')]
     class method Sleep(aServices: IApiRegistrationServices; msec: Int64);
   end;
@@ -105,9 +105,9 @@ begin
     end));
 end;
 
-class method AsyncRegistration.Include(aServices: IApiRegistrationServices; aFN: String);
+class method AsyncRegistration.Include(aServices: IApiRegistrationServices;ec: ExecutionContext;  aFN: String);
 begin
-  aFN := aServices.ResolveWithBase(aFN);
+  aFN := aServices.ResolveWithBase(ec,aFN );
   aServices.Engine.Engine.Include(aFN,System.IO.File.ReadAllText(aFN));
 end;
 
@@ -205,7 +205,7 @@ begin
   fEngine.Logger.Enter('run', args);
   try
     if fEngine.DryRun then exit;
-    var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
+    var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope));
     
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
     lFail := false;
@@ -221,7 +221,7 @@ begin
   var lFail := true;
   fEngine.Logger.Enter('runAsync', args);
   var lLogger := new DelayedLogger;
-  var lPath := fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope));
+  var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope));
   try
     var lTask := new Task(method begin
       if fEngine.DryRun then exit;
@@ -229,7 +229,7 @@ begin
       new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := lLogger).Run();
     end);
     lTask.Start;
-    fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(Utilities.GetArgAsString(args, 0, aScope))), lLogger);
+    fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope))), lLogger);
     result := new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
     lFail := false;
   finally
