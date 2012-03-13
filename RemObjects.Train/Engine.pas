@@ -199,6 +199,10 @@ end;
 method Engine.ResolveWithBase(s: String): String;
 begin
   if s = nil then exit nil;
+  if s.StartsWith('~/') or s.StartsWith('~\') then
+    s := Path.Combine(system.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), s.Substring(2));
+  if System.IO.Path .DirectorySeparatorChar = '\' then
+    s:= s.Replace('/', '\');
   if System.IO.Path.IsPathRooted(s) then
     exit s;
   exit System.IO.Path.Combine(WorkDir, s)
