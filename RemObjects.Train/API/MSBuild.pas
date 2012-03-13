@@ -21,11 +21,11 @@ type
     class method CheckSettings(aServices: IApiRegistrationServices);
 
     [WrapAs('msbuild.clean', SkipDryRun := false)]
-    class method MSBuildClean(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+    class method MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
     [WrapAs('msbuild.build', SkipDryRun := false)]
-    class method MSBuildBuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+    class method MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext;aProject: String; aOptions: MSBuildOptions);
     [WrapAs('msbuild.rebuild', SkipDryRun := false)]
-    class method MSBuildRebuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+    class method MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext;aProject: String; aOptions: MSBuildOptions);
   end;
   MSBuildOptions = public class
   private
@@ -53,9 +53,12 @@ begin
     raise new Exception('MSBuild_Path is not set in the environment path!');
 end;
 
-class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
+  aProject := aServices.ResolveWithBase(ec, aProject);
+  aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
+
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
   sb.Append('/nologo "'+aProject+'"');
@@ -77,8 +80,10 @@ begin
   aServices.Logger.LogMessage(lOutput.ToString);
 end;
 
-class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
+  aProject := aServices.ResolveWithBase(ec, aProject);
+  aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
@@ -100,9 +105,12 @@ begin
   aServices.Logger.LogMessage(lOutput.ToString);
 end;
 
-class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
+class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
+  aProject := aServices.ResolveWithBase(ec, aProject);
+  aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
+
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
   sb.Append('/nologo "'+aProject+'"');

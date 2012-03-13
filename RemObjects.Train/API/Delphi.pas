@@ -19,7 +19,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('delphi.build', SkipDryRun := false)]
-    class method DelphiBuild(aServices: IApiRegistrationServices; aProject: String; aOptions: DelphiOptions);
+    class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
   end;
   DelphiOptions = public class
   private
@@ -48,9 +48,11 @@ end;
 
 
 
-class method DelphiPlugin.DelphiBuild(aServices: IApiRegistrationServices; aProject: String; aOptions: DelphiOptions);
+class method DelphiPlugin.DelphiBuild(aServices: IApiRegistrationServices;ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
 begin
   var lRootPath: String;
+  aProject := aServices.ResolveWithBase(ec, aProject);
+  aServices.Logger.LogMessage('Building: '+aProject);
   var lVer := aOptions.version.Trim();
   if lVer.StartsWith('d') or lVer.StartsWith('D') then lVer := lVer.Substring(1);
   if not String.IsNullOrEmpty(aOptions.dcc) then
