@@ -101,7 +101,8 @@ end;
 
 class method ConsoleApp.Main(): Integer;
 begin
-  Console.WriteLine('TrainRunner copyright (c) 2012 RemObjects Software');
+  Console.WriteLine('RemObjects Train - JavaScript-based build automation');
+  Console.WriteLine('Copyright (c) RemObjects Software, 2012. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
@@ -109,7 +110,7 @@ begin
   var lDryRun: Boolean := false;
   var lXMLOut: String := nil;
   var lWait := false;
-  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
+  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
@@ -132,7 +133,7 @@ begin
       lShowHelp := true;
   end;
   if  lShowHelp then begin
-    Console.WriteLine('TrainRunner.exe <script.js> [options]');
+    Console.WriteLine('Train.exe <script.js> [options]');
     lOptions.WriteOptionDescriptions(Console.Out);
     exit 1;
   end else if lArgs.Count = 0 then begin
