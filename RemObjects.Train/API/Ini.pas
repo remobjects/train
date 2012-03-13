@@ -50,7 +50,7 @@ begin
   lProto.AddValue('toFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), 'ToFile'));
   lProto.AddValue('toString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), '_ToString'));
 
-  var lCtor := RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'Ctor');
+  var lCtor := RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'Ctor', lProto);
   aServices.RegisterValue('ini', lCtor);
   lCtor.Class := 'ini';
   lCtor.AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromFile', lProto));
