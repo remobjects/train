@@ -109,7 +109,7 @@ begin
   var lDryRun: Boolean := false;
   var lXMLOut: String := nil;
   var lWait := false;
-  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'builder.ini');
+  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);

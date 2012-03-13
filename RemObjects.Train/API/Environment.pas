@@ -153,7 +153,7 @@ begin
   locking self do begin
     var lIni := new IniFile();
     lIni.LoadFromFile(aPath);
-    for each el in lIni.Sections.SelectMany(a->a.Item2, (a,b) -> new Tuple<String, String>(if String.IsNullOrEmpty(a.Item1) then b.Key else a.Item1+'.'+b.Key, b.Value)) do 
+    for each el in lIni.Sections.SelectMany(a->a.Item2, (a,b) -> new Tuple<String, String>(if String.IsNullOrEmpty(a.Item1) or (a.Item1.ToLowerInvariant() = 'globals') then b.Key else a.Item1+'.'+b.Key, b.Value)) do 
       Add(el.Item1, el.Item2);
   end;
 end;
