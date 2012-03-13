@@ -84,7 +84,7 @@ begin
   var lAsync := new AsyncWorker(aServices.Engine);
   aServices.AsyncWorker := lAsync;
   aServices.RegisterValue('include', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
-  aServices.RegisterValue('sleep', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'sleep'));
+  aServices.RegisterValue('sleep', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Sleep'));
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'async', @lAsync.CallAsync, 1, false, true));  

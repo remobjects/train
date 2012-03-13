@@ -20,7 +20,7 @@ type
     method get_Item(s : String): Object;
     method set_Item(s : String; value: Object);
   public
-    constructor; empty;
+    constructor; 
     method &Add(key: String; value: Object); reintroduce;
     method Clear; reintroduce;
     constructor(aEnv: Environment);
@@ -188,6 +188,11 @@ end;
 method Environment.Clear;
 begin
   locking self do inherited Clear;
+end;
+
+constructor Environment;
+begin
+  inherited constructor(StringComparer.InvariantCultureIgnoreCase);
 end;
 
 
