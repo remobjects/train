@@ -136,7 +136,9 @@ begin
         el.SetValue(result, Convert(lEl, el.PropertyType, nil), []);
       end;
     end;
-  end else
+  end else if (aDestType = typeOf(String)) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptObject) then
+    exit aVal.ToString
+  else
     exit System.Convert.ChangeType(aVal, aDestType);
 end;
 

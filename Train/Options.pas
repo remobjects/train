@@ -821,7 +821,7 @@ begin
   if  (assigned(option))  then  begin
     var  lOptionValues: array of String;
     if  (assigned(optionContext.Option.ValueSeparators))  then
-      lOptionValues := option.Split(optionContext.Option.ValueSeparators, StringSplitOptions.None)
+      lOptionValues := option.Split(optionContext.Option.ValueSeparators, optionContext.Option.MaxValueCount, StringSplitOptions.None)
     else
       lOptionValues := [ option ];
     for each  lOptionValue: String  in  lOptionValues  do

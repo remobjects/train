@@ -51,6 +51,7 @@ begin
   zip := aServices.ResolveWithBase(zip);
   if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
   if String.IsNullOrEmpty(aFileMasks) then aFileMasks := '*';
+  aFileMasks := aFileMasks.Replace(',', ';');
   aInputFolder := aServices.ResolveWithBase(aInputFolder);
   if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;

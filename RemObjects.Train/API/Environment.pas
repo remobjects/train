@@ -144,6 +144,7 @@ end;
 
 constructor Environment(aEnv: Environment);
 begin
+  inherited constructor(StringComparer.InvariantCultureIgnoreCase);
   fPrevious := aEnv;
 end;
 
