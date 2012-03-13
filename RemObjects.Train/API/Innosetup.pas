@@ -57,12 +57,12 @@ begin
  end;
 
  var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(lPath, sb.ToString, nil,false ,
+  var n:= Shell.ExecuteProcess(lPath, sb.ToString, nil,false ,
   a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
 
   aServices.Logger.LogMessage(lOutput.ToString);
-
+  if n <> 0 then raise new Exception('InnoSetup failed');
 end;
 
 end.

@@ -74,10 +74,11 @@ begin
   end;
 
   var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false,
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToString);
+  if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
 class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -98,11 +99,12 @@ begin
       sb.Append(' "/property:OutputPath='+aOptions.destinationPath+'"');
     sb.Append(aOptions.extraArgs);
   end;
- var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
+  var lOutput:= new StringBuilder;
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToString);
+  if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
 class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -125,10 +127,11 @@ begin
     sb.Append(aOptions.extraArgs);
   end;
  var lOutput:= new StringBuilder;
-  Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
 
   aServices.Logger.LogMessage(lOutput.ToString);
+  if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
 end.
