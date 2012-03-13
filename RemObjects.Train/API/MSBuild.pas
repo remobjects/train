@@ -32,7 +32,7 @@ type
   public
     property configuration: String;
     property platform: String;
-    property destinationPath: String;
+    property destinationFolder: String;
     property extraArgs: String;
   end;  // MSBuild_Path
 
@@ -67,9 +67,9 @@ begin
     if not String.IsNullOrEmpty(aOptions.configuration) then
       sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.platform) then
-      sb.Append(' "/property:Platform='+aOptions.configuration+'"');
-    if not String.IsNullOrEmpty(aOptions.destinationPath) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationPath+'"');
+      sb.Append(' "/property:Platform='+aOptions.platform+'"');
+    if not String.IsNullOrEmpty(aOptions.destinationFolder) then
+      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
     sb.Append(aOptions.extraArgs);
   end;
 
@@ -95,8 +95,8 @@ begin
       sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.platform) then
       sb.Append(' "/property:Platform='+aOptions.configuration+'"');
-    if not String.IsNullOrEmpty(aOptions.destinationPath) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationPath+'"');
+    if not String.IsNullOrEmpty(aOptions.destinationFolder) then
+      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
     sb.Append(aOptions.extraArgs);
   end;
   var lOutput:= new StringBuilder;
@@ -122,8 +122,8 @@ begin
       sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.platform) then
       sb.Append(' "/property:Platform='+aOptions.configuration+'"');
-    if not String.IsNullOrEmpty(aOptions.destinationPath) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationPath+'"');
+    if not String.IsNullOrEmpty(aOptions.destinationFolder) then
+      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
     sb.Append(aOptions.extraArgs);
   end;
  var lOutput:= new StringBuilder;
