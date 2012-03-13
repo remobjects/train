@@ -16,7 +16,7 @@ type
   public
     property Count: Integer read fSections.Count;
     property Keys[i: Integer]: String read fSections[i].Item1  write set_Keys;
-    property Item[s: String]: IniSection read fSections.FirstOrDefault(a->a.Item1 = s):Item2;
+    property Item[s: String]: IniSection read fSections.FirstOrDefault(a-> String.Equals(a.Item1,s, StringComparison.InvariantCultureIgnoreCase)):Item2;
 
     property Sections: List<Tuple<String, IniSection>> read fSections;
 
@@ -35,6 +35,7 @@ type
     method get_Item(s : String): String;
     method set_Item(s : String; value: String);
   public
+    constructor;
     property Item[s: String]: String read get_Item write set_Item; reintroduce;
   end;
 
@@ -48,6 +49,11 @@ end;
 method IniSection.set_Item(s : String; value: String);
 begin
   inherited Item[s] := value;
+end;
+
+constructor IniSection;
+begin
+  inherited constructor(StringComparer.InvariantCultureIgnoreCase);
 end;
 
 method IniFile.set_Keys(i : Int32; value: String);
@@ -132,7 +138,7 @@ end;
 
 method IniFile.&Remove(s: String): Boolean;
 begin
-  var n := fSections.FindIndex(a->a.Item1 = s);
+  var n := fSections.FindIndex(a-> String.Equals(a.Item1, s, StringComparison.InvariantCultureIgnoreCase));
   if n < 0 then exit false;
   RemoveAt(n);
   exit true;

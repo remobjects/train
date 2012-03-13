@@ -21,6 +21,8 @@ type
 
     [WrapAs('include')]
     class method Include(aServices: IApiRegistrationServices; aFN: String);
+    [WrapAs('sleep')]
+    class method Sleep(aServices: IApiRegistrationServices; msec: Int64);
   end;
   TaskWrapper = public class(EcmaScriptObject)
   public
@@ -83,6 +85,7 @@ begin
   var lAsync := new AsyncWorker(aServices.Engine);
   aServices.AsyncWorker := lAsync;
   aServices.RegisterValue('include', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
+  aServices.RegisterValue('sleep', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'sleep'));
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'async', @lAsync.CallAsync, 1, false, true));  
@@ -107,6 +110,11 @@ class method AsyncRegistration.Include(aServices: IApiRegistrationServices; aFN:
 begin
   aFN := aServices.ResolveWithBase(aFN);
   aServices.Engine.Engine.Include(aFN,System.IO.File.ReadAllText(aFN));
+end;
+
+class method AsyncRegistration.Sleep(aServices: IApiRegistrationServices; msec: Int64);
+begin
+  System.Threading.Thread.Sleep(msec);
 end;
 
 
