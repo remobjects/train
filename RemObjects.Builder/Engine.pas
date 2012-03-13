@@ -100,7 +100,7 @@ begin
     on e: Exception do begin
       lFail := true;
       if fErrorPos <> nil then
-        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fengine.SourceFileName, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
+        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fErrorPos.File, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
       else
         Logger:LogError('Error while running script {0}: {1}', fengine.SourceFileName, e.Message);
       raise;
