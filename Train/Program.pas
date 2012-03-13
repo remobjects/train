@@ -125,7 +125,8 @@ begin
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
   var lArgs: List<String>;
   try
-    lArgs := lOptions.Parse(Environment.CommandLine);
+  
+    lArgs := lOptions.Parse(OptionCommandLine.Parse(Environment.CommandLine).Skip(1));
   except
     on  Exception  do
       lShowHelp := true;
