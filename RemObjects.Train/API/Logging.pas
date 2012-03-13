@@ -124,7 +124,7 @@ end;
 method XmlLogger.Enter(aScript: String; params args: array of Object);
 begin
   var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a->a.ToString()).ToArray);
-  var lNode := new XElement('action', new XAttribute('name', aScript), new Xattribute('args', lArgsString));
+  var lNode := new XElement('action', new XAttribute('name', aScript), new XAttribute('args', lArgsString));
   self.fXmlData.Add(lNode);
   fXmlData := lNode;
 end;

@@ -39,7 +39,7 @@ begin
   if String.IsNullOrEmpty(lPath) then
     lPath := String(Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 5_is1', 'InstallLocation', ''));
   if String.IsNullOrEmpty(lPath) then raise new Exception('"InnoSetup_Path" env var is set');
-  lPath := System.IO.Path.Combine(lPAth, 'ISCC.exe');
+  lPath := System.IO.Path.Combine(lPath, 'ISCC.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath+' could not be found');
   if aServices.Engine.DryRun then exit;
   
@@ -58,10 +58,10 @@ begin
 
  var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(lPath, sb.ToString, nil,false ,
-  a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
 
-  aServices.Logger.LogMessage(lOutput.ToSTring);
+  aServices.Logger.LogMessage(lOutput.ToString);
 
 end;
 

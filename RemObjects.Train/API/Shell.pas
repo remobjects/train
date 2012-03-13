@@ -43,9 +43,9 @@ begin
         lCaptureMode := true;
       end;
     end;
-    lVAl := lOpt.Get('workdir');
-    if lVAl is String then
-      lWD := fEngine.ResolveWithBase(String(lVal));
+    lVal := lOpt.Get('workdir');
+    if lVal is String then
+      LWD := fEngine.ResolveWithBase(String(lVal));
 
     lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
@@ -66,7 +66,7 @@ begin
       exit '';
     end;
     var sb := new System.Text.StringBuilder;
-    var lExit := ExecuteProcess(lCMD, lArg, lWD,false , a-> begin
+    var lExit := ExecuteProcess(lCMD, lArg, LWD,false , a-> begin
       locking(sb) do begin
         sb.Append(a);
       end;
@@ -114,8 +114,8 @@ begin
     var lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
-    lVAl := lOpt.Get('workdir');
-    if lVAl is String then
+    lVal := lOpt.Get('workdir');
+    if lVal is String then
       lWD := fEngine.ResolveWithBase(String(lVal));
     lVal := lOpt.Get('environment');
     var lObj := EcmaScriptObject(lVal);
@@ -134,7 +134,7 @@ begin
         exit '';
       end;
       var sb := new System.Text.StringBuilder;
-      var lExit := ExecuteProcess(lCMD, lArg, LWD, false, a-> begin
+      var lExit := ExecuteProcess(lCMD, lArg, lWD, false, a-> begin
         locking(sb) do begin
           sb.Append(a);
         end;
@@ -209,8 +209,8 @@ begin
     lProcess.StartInfo.Arguments := aArgs;
   end;
 
-  if assigned(aWD) then
-    lProcess.StartInfo.WorkingDirectory := aWD;
+  if assigned(AWD) then
+    lProcess.StartInfo.WorkingDirectory := AWD;
   lProcess.StartInfo.UseShellExecute := false;
   if aTargetError <> nil then begin
     lProcess.StartInfo.RedirectStandardError := true;

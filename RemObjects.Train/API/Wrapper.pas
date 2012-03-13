@@ -64,8 +64,8 @@ begin
     if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then begin lFail := false; exit; end;
     var lList := new List<Object>;
     var lArgs := fMethod.GetParameters().ToList();
-    if largs.FirstOrDefault:ParameteRType = typeOf(IApiRegistrationServices) then begin
-      lList.Add(fservices);
+    if lArgs.FirstOrDefault:ParameterType = typeOf(IApiRegistrationServices) then begin
+      lList.Add(fServices);
       lArgs.RemoveAt(0);
     end;
     if fWrapInfo.WantExecutionContext then begin
@@ -80,13 +80,13 @@ begin
 
     var lInArgs := aArgs.ToList;
     var lPargs: System.Collections.ArrayList := nil;
-    while (lInArgs.Count>0) and (lARgs.Count > 0) do begin
-      if (lArgs.First.ParameterType.IsArray) and (Length(lArgs.First.GetCustomAttributes(typeOf(ParamArrayAttribute), true)) > 0) then begin
+    while (lInArgs.Count>0) and (lArgs.Count > 0) do begin
+      if (lArgs.First.ParameterType.IsArray) and (length(lArgs.First.GetCustomAttributes(typeOf(ParamArrayAttribute), true)) > 0) then begin
         if lPargs = nil then lPargs := new System.Collections.ArrayList;
-        lPargs.add(Convert(lInargs[0], lArgs[0].ParameterType.GetElementType, nil));
+        lPargs.Add(Convert(lInArgs[0], lArgs[0].ParameterType.GetElementType, nil));
         lInArgs.RemoveAt(0);
       end else begin
-        lList.Add(Convert(lInargs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
+        lList.Add(Convert(lInArgs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
         lArgs.RemoveAt(0);
         lInArgs.RemoveAt(0);
       end;
@@ -120,7 +120,7 @@ begin
   if aVal is WrapperObject then 
     exit WrapperObject(aVal).Val else 
   if (aDestType.IsArray) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptArrayObject) then begin
-    var lArr := RemObjects.Script.EcmaScript.EcmaScriptArrayObject(aval);
+    var lArr := RemObjects.Script.EcmaScript.EcmaScriptArrayObject(aVal);
     Result := Array.CreateInstance(aDestType.GetElementType(), lArr.Length);
     for i: Integer := 0 to lArr.Length -1 do begin
       Array(Result).SetValue(Convert(lArr.Get(self.fServices.Globals.ExecutionContext, 0, i.ToString()), aDestType.GetElementType(), nil), i);

@@ -63,13 +63,13 @@ begin
   if aServices.Engine.DryRun then exit;
   if aOpt <> nil then begin
     if String.IsNullOrEmpty(aOpt.cc) then
-      lMailMsg.CC.add(aOpt.cc);
+      lMailMsg.CC.Add(aOpt.cc);
     if String.IsNullOrEmpty(aOpt.bcc) then
-      lMailMsg.BCC.add(aOpt.bcc);
+      lMailMsg.Bcc.Add(aOpt.bcc);
     for each el in aOpt.attachments do begin
       if (el.data = nil) and (el.filename = nil) then continue;
       if el.data <> nil then begin
-        lMailMSg.Attachments.Add(new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(el.data)), el.name));
+        lMailMsg.Attachments.Add(new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(el.data)), el.name));
       end else begin
         var lAtt2 := new System.Net.Mail.Attachment(aServices.ResolveWithBase(el.filename));
         if el.name <> nil then lAtt2.Name := el.name;

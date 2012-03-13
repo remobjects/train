@@ -92,7 +92,7 @@
       <Name>RemObjects.Train</Name>
       <Project>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</Project>
       <Private>True</Private>
-      <HintPath>..\RemObjects.Train\bin\Debug\RemObjects.Builder.dll</HintPath>
+      <HintPath>..\RemObjects.Train\bin\Debug\RemObjects.Train.dll</HintPath>
     </ProjectReference>
     <ProjectReference Include="..\Script\Source\RemObjects.Script\RemObjects.Script.oxygene">
       <Name>RemObjects.Script</Name>

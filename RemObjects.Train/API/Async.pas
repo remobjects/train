@@ -20,7 +20,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('include')]
-    class method Include(aServices: IApiRegistrationServices; aFN: string);
+    class method Include(aServices: IApiRegistrationServices; aFN: String);
   end;
   TaskWrapper = public class(EcmaScriptObject)
   public
@@ -62,7 +62,7 @@ begin
   if FuncName  <> nil then begin
     var lData := EcmaScriptObject(Engine.GlobalObject.Get(FuncName));
     if lData <> nil then begin
-      lData.Call(Engine.GlobalObject.ExecutionContext, args);
+      lData.Call(Engine.GlobalObject.ExecutionContext, Args);
       exit;
     end;
   end;
@@ -71,7 +71,7 @@ begin
   if lValue = nil then Engine.GlobalObject.RaiseNativeError(NativeErrorType.ReferenceError, 'First parameter in async has to be function');
 
   try
-  lValue.Call(Engine.GlobalObject.ExecutionContext, args);
+  lValue.Call(Engine.GlobalObject.ExecutionContext, Args);
   finally
     lValue := nil;
   end;
@@ -82,7 +82,7 @@ method AsyncRegistration.&Register(aServices: IApiRegistrationServices);
 begin
   var lAsync := new AsyncWorker(aServices.Engine);
   aServices.AsyncWorker := lAsync;
-  aServices.RegisterValue('include', RemObjects.Builder.Utilities.SimpleFunction(aServices.Engine, typeof(Self), 'Include'));
+  aServices.RegisterValue('include', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'async', @lAsync.CallAsync, 1, false, true));  
@@ -103,10 +103,10 @@ begin
     end));
 end;
 
-class method AsyncRegistration.Include(aServices: IApiRegistrationServices; aFN: string);
+class method AsyncRegistration.Include(aServices: IApiRegistrationServices; aFN: String);
 begin
   aFN := aServices.ResolveWithBase(aFN);
-  aServices.Engine.Engine.Include(aFn,System.IO.File.ReadAllText(aFn));
+  aServices.Engine.Engine.Include(aFN,System.IO.File.ReadAllText(aFN));
 end;
 
 
@@ -193,7 +193,7 @@ end;
 
 method AsyncWorker.run(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
 begin
-  result := undefined.Instance;
+  result := Undefined.Instance;
   var lFail := true;
   fEngine.Logger.Enter('run', args);
   try
@@ -210,7 +210,7 @@ end;
 
 method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
 begin
-  result := undefined.Instance;
+  result := Undefined.Instance;
   var lFail := true;
   fEngine.Logger.Enter('runAsync', args);
   var lLogger := new DelayedLogger;
@@ -235,14 +235,14 @@ begin
   var lArg := coalesce(Utilities.GetArgAsString(args, 0, aScope), '');
   
 
-  if fRegex = nil then 
+  if fRegEx = nil then 
     fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
   exit fRegEx.Replace(lArg, method (match: System.Text.RegularExpressions.Match) begin
    var lValue := match.Groups['value']:Value;
    if lValue = '' then exit '$';
    if lValue.StartsWith('(') and lValue.EndsWith(')') then 
      lValue := lValue.Substring(1, lValue.Length -2);
-   exit utilities.GetObjAsString(aScope.LexicalScope.GetBindingValue(lValue, false), aScope);
+   exit Utilities.GetObjAsString(aScope.LexicalScope.GetBindingValue(lValue, false), aScope);
   end);
 end;
 

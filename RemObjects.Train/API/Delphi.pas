@@ -108,8 +108,8 @@ begin
   end;
  var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(lRootPath, sb.ToString, nil, false,
-  a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToSTring);
+  aServices.Logger.LogMessage(lOutput.ToString);
 end;
 end.

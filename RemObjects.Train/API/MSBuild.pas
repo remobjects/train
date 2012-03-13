@@ -50,7 +50,7 @@ end;
 class method MSBuildPlugin.CheckSettings(aServices: IApiRegistrationServices);
 begin
   if not File.Exists(coalesce(aServices.Environment['MSBuild_Path']:ToString, '')) then
-    raise new eXception('MSBuild_Path is not set in the environment path!');
+    raise new Exception('MSBuild_Path is not set in the environment path!');
 end;
 
 class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
@@ -72,9 +72,9 @@ begin
 
   var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false,
-  a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToSTring);
+  aServices.Logger.LogMessage(lOutput.ToString);
 end;
 
 class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
@@ -95,9 +95,9 @@ begin
   end;
  var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToSTring);
+  aServices.Logger.LogMessage(lOutput.ToString);
 end;
 
 class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; aProject: String; aOptions: MSBuildOptions);
@@ -118,9 +118,9 @@ begin
   end;
  var lOutput:= new StringBuilder;
   Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking loutput do lOutput.Append(a),a-> locking Loutput do lOutput.Append(a), nil, nil);
+  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToSTring);
+  aServices.Logger.LogMessage(lOutput.ToString);
 end;
 
 end.
