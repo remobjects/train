@@ -270,7 +270,7 @@ begin
     var lRes: String := nil;
     while assigned(lScope) do begin
       if lScope.HasBinding(lValue) then begin
-        var n := ec.LexicalScope.GetBindingValue(lValue, false);
+        var n := lScope.GetBindingValue(lValue, false);
         if (n <> nil) and (n <> Undefined.Instance) then begin
           lRes := RemObjects.Script.EcmaScript.Utilities.GetObjAsString(n, ec);
           break;

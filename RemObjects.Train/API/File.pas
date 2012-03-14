@@ -21,6 +21,8 @@ type
 
     [WrapAs('file.copy', SkipDryRun := true)]
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
+    [WrapAs('file.move', SkipDryRun := true)]
+    class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
     [WrapAs('file.list', SkipDryRun := true)]
     class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean := false): array of String;
     [WrapAs('file.remove', SkipDryRun := true)]
@@ -63,6 +65,7 @@ begin
   aServices.RegisterValue('file', 
     new EcmaScriptObject(aServices.Globals)
     .AddValue('copy', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
+    .AddValue('move', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Move'))
     .AddValue('list', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_List'))
     .AddValue('remove', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Delete'))
     .AddValue('read', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Read'))
@@ -91,7 +94,43 @@ begin
   );
 end;
 
+class method FilePlugin.File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
+begin
+  var lVal := aServices.ResolveWithBase(ec, aLeft);
+  var lVal2 := aServices.ResolveWithBase(ec, aRight);
 
+  
+  if (lVal.IndexOfAny(['*', '?']) >= 0)  then begin
+    
+    var lMask := '';
+    var lDir := lVal;
+    lDir := System.IO.Path.GetDirectoryName(lVal);
+    lMask := System.IO.Path.GetFileName(lVal);
+    if lMask = '' then lMask := '*';
+
+    var lZero: Boolean := true;
+    for each el in System.IO.Directory.GetFiles(lDir, lMask, System.IO.SearchOption.TopDirectoryOnly) do begin
+      lZero := false;
+      var lTargetFN := el.Substring(lDir.Length+1);
+      lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
+      var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
+      if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
+      System.IO.File.Move(el, lTargetFN);
+      aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', el,  lTargetFN));
+    end;
+    if lZero then raise new Exception('Zero files moved!');
+    exit;
+  end;
+
+  if System.IO.Directory.Exists(lVal) then
+    System.IO.Directory.Move(lVal, lVal2)
+  else
+  if System.IO.Directory.Exists(lVal2) then
+    System.IO.File.Move(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)))
+  else
+    System.IO.File.Move(lVal, lVal2);
+  aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', lVal,  lVal2));
+end;
 
 class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
 begin
@@ -103,7 +142,7 @@ begin
     var lDir := lVal;
     lDir := System.IO.Path.GetDirectoryName(lVal);
     lMask := System.IO.Path.GetFileName(lVal);
-    if lMask = '' then lMask := '8';
+    if lMask = '' then lMask := '*';
 
     var lZero: Boolean := true;
     for each el in System.IO.Directory.GetFiles(lDir, lMask, 

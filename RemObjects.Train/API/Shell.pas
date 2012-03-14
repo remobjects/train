@@ -91,11 +91,11 @@ begin
       fEngine.Engine.Logger.LogError(lErr);
       raise new Exception(lErr);
     end;
+    lFail := false;
     if lCaptureMode then 
       exit sb.ToString()
     else
       exit Undefined.Instance;
-    lFail := false;
   except
     on e: Exception do begin
       fEngine.Engine.Logger.LogError('Error when calling Process.Execute: '+e.Message);
