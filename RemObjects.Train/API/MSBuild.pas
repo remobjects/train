@@ -70,7 +70,7 @@ begin
       sb.Append(' "/property:Platform='+aOptions.platform+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
       sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
-    sb.Append(aOptions.extraArgs);
+    sb.Append(' '+aOptions.extraArgs);
   end;
 
   var lTmp := new DelayedLogger();

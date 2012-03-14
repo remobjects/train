@@ -71,7 +71,7 @@ begin
       sb.Append(' -sdk "'+aOptions.sdk+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
       sb.Append(' SYMROOT="'+aOptions.destinationFolder+'"');
-    sb.Append(aOptions.extraArgs);
+    sb.Append(' '+aOptions.extraArgs);
   end;
   sb.Append(' '+aActions);
   //aServices.Logger.LogMessage(sb.ToString);
