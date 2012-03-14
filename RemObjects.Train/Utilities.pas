@@ -4,6 +4,7 @@ interface
 
 uses
   System.Collections.Generic,
+  System.Linq,
   RemObjects.Script.EcmaScript,
   RemObjects.Script.EcmaScript.Internal,
   System.Text;
@@ -18,6 +19,8 @@ type
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
     class method Windows: Boolean;
+
+    class method MyFormat(s: String; params args: array of Object): String;
   end;
 
   SLinkedListNode<T> = public readonly class
@@ -78,6 +81,16 @@ begin
   var lRes := new RemObjects.Train.API.Wrapper(aOwner, aType.GetMethod(aMethod), aProto);
 
   exit new EcmaScriptFunctionObject(aOwner.Engine.GlobalObject, aMethod, @lRes.Run, 0);
+end;
+
+class method Utilities.MyFormat(s: String; params args: array of Object): String;
+begin
+  if (length(args) = 1) and (args[0] <> nil) and (args[0] is Array) then
+    args := Array(args).OfType<Object>.ToArray;
+  for i: Integer := 0 to length(args) -1 do
+    if args[i] is EcmaScriptObject then
+      args[i] := EcmaScriptObject(args[i]).Root.JSONStringify(EcmaScriptObject(args[i]).Root.ExecutionContext, nil, EcmaScriptObject(args[i]));
+  exit String.Format(s, args);
 end;
 
 

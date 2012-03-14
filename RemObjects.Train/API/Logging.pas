@@ -75,6 +75,7 @@ type
   end;
 
 extension method ILogger.LogError(s: String; params args: array of Object);
+extension method ILogger.LogInfo(s: String; params args: array of Object);
 extension method ILogger.LogMessage(s: String; params args: array of Object);
 extension method ILogger.LogWarning(s: String; params args: array of Object);
 extension method ILogger.LogHint(s: String; params args: array of Object);
@@ -243,27 +244,32 @@ end;
 
 extension method ILogger.LogError(s: String; params args: array of Object);
 begin
-  self.LogError(String.Format(s, args));
+  self.LogError(Utilities.MyFormat(s, args));
 end;
 
 extension method ILogger.LogMessage(s: String; params args: array of Object);
 begin
-  self.LogMessage(String.Format(s,  args));
+  self.LogMessage(Utilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogWarning(s: String; params args: array of Object);
 begin
-  self.LogWarning(String.Format(s,  args));
+  self.LogWarning(Utilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogHint(s: String; params args: array of Object);
 begin
-  self.LogHint(String.Format(s,  args));
+  self.LogHint(Utilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogDebug(s: String; params args: array of Object);
 begin
-  self.LogDebug(String.Format(s,  args));
+  self.LogDebug(Utilities.MyFormat(s,  args));
+end;
+
+extension method ILogger.LogInfo(s: String; params args: array of Object);
+begin
+  self.LogInfo(Utilities.MyFormat(s,  args));
 end;
 
 end.

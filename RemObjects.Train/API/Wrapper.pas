@@ -137,9 +137,10 @@ begin
         el.SetValue(result, Convert(lEl, el.PropertyType, nil), []);
       end;
     end;
-  end else if (aDestType = typeOf(String)) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptObject) then
+  end else if aVal = RemObjects.Script.EcmaScript.Undefined.Instance then exit nil 
+  else if (aDestType = typeOf(String)) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptObject) then begin
     exit aVal.ToString
-  else
+  end else
     exit System.Convert.ChangeType(aVal, aDestType);
 end;
 

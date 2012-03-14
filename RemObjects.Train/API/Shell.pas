@@ -59,7 +59,7 @@ begin
     end;
   end;
 
-  fEngine.Engine.Logger.Enter(String.Format('exec({0}, {1})', lCMD, lArg));
+  fEngine.Engine.Logger.Enter(true,String.Format('exec({0}, {1})', lCMD, lArg));
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
@@ -85,7 +85,7 @@ begin
         end;
       end;
     end, lEnv.ToArray, lTimeout);
-    fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);
@@ -97,7 +97,7 @@ begin
       exit Undefined.Instance;
     lFail := false;
   finally
-    fEngine.Engine.Logger.Exit(String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
@@ -127,7 +127,7 @@ begin
   end;
   var lLogger := new RemObjects.Train.DelayedLogger;
   var lTask := new System.Threading.Tasks.Task(method begin
-    lLogger.Enter(String.Format('exec({0}, {1})', lCMD, lArg));
+    lLogger.Enter(true,String.Format('exec({0}, {1})', lCMD, lArg));
     try
       if fEngine.Engine.DryRun then begin
         lLogger.LogMessage('Dry run.');
@@ -141,7 +141,7 @@ begin
       end, a-> begin
         locking(sb) do sb.AppendLine(a);
       end, lEnv.ToArray, lTimeout);
-      lLogger.LogMessage('Output: '#13#10+sb.ToString);
+      lLogger.LogInfo('Output: '#13#10+sb.ToString);
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
         lLogger.LogError(lErr);
@@ -149,7 +149,7 @@ begin
       end;
       lFail := false;
     finally
-      lLogger.Exit(String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+      lLogger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
@@ -159,9 +159,9 @@ end;
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
-  var lWD := Utilities.GetArgAsString(args, 1, ec);
+  var lWD := if length(args) < 2 then nil else  Utilities.GetArgAsString(args, 1, ec);
   var lFail := true;
-  fEngine.Engine.Logger.Enter(String.Format('system({0})', lArg));
+  fEngine.Engine.Logger.Enter(true,String .Format('system({0})', lArg));
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
@@ -173,7 +173,7 @@ begin
     end, a-> begin
       locking(sb) do sb.AppendLine(a)
     end, nil, nil);
-    fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);
@@ -182,7 +182,7 @@ begin
     lFail := false;
     exit sb.ToString();
   finally
-    fEngine.Engine.Logger.Exit(String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
@@ -198,11 +198,11 @@ begin
   if aComSpec then begin
     lProcess.StartInfo.FileName := if RemObjects.Train.Utilities.Windows then coalesce(System.Environment.GetEnvironmentVariable('COMSPEC'), 'CMD.EXE') else coalesce(System.Environment.GetEnvironmentVariable('SHELL'), '/bin/sh');
     if String.IsNullOrEmpty(aCommand) then begin
-      lProcess.StartInfo.Arguments := (if RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aArgs;
+      lProcess.StartInfo.Arguments := (if not RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aArgs;
     end else begin
       if not aCommand.StartsWith('"') then 
         aCommand := '"'+aCommand.Replace('"', '""')+'"';
-      lProcess.StartInfo.Arguments := (if RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
+      lProcess.StartInfo.Arguments := (if not RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
     end;
   end else begin
     lProcess.StartInfo.FileName := aCommand;

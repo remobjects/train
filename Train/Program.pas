@@ -17,6 +17,9 @@ type
 
   Logger = public class(ILogger)
   private
+    fWriteEnter: Boolean;
+    fIndent: Integer;
+    method CheckEnter;
   public
     method LogDebug(s: System.String);
     method LogWarning(s: System.String);
@@ -33,6 +36,7 @@ implementation
 method Logger.LogDebug(s: System.String);
 begin
   if not LoggerSettings. ShowDebug then exit;
+  CheckEnter;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.DarkBlue;
   Console.WriteLine(s);
@@ -41,6 +45,7 @@ end;
 
 method Logger.LogError(s: System.String);
 begin
+  CheckEnter;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Red;
   Console.WriteLine(s);
@@ -50,6 +55,7 @@ end;
 method Logger.LogHint(s: System.String);
 begin
   if not LoggerSettings. ShowHint then exit;
+  CheckEnter;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Magenta;
   Console.WriteLine(s);
@@ -59,6 +65,7 @@ end;
 method Logger.LogMessage(s: System.String);
 begin
   if not LoggerSettings. ShowMessage then exit;
+  CheckEnter;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Gray;
   Console.WriteLine(s);
@@ -68,6 +75,7 @@ end;
 method Logger.LogWarning(s: System.String);
 begin
   if not LoggerSettings. ShowWarning then exit;
+  CheckEnter;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.Yellow;
   Console.WriteLine(s);
@@ -77,16 +85,19 @@ end;
 method Logger.Enter(aImportant: Boolean := false; aScript: String; params args:  array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
+  CheckEnter;
   if (length(args) = 1) and (args[0] is array of Object) then begin
     args := Array of Object(args[0]);
   end;
 
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;
-  var lArgs := String.Join(', ', args);
-  if length(lArgs) > 0 then lArgs := ' '+lArgs;
-  Console.WriteLine('Enter: '+aScript+ lArgs);
+  var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
+  Console.Write(aScript+'('+lArgs+')');
+                 
   Console.ForegroundColor := lCol;
+  fWriteEnter := true;
+  inc(fIndent);
 end;
 
 method Logger.&Exit(aImportant: Boolean := false;aScript: String; aFailMode: FailMode; params  args:array of  Object);
@@ -94,15 +105,31 @@ begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;
-  var lArgs := String.Join(', ', args);
-  if length(lArgs) > 0 then lArgs := ' '+lArgs;
-  Console.WriteLine('Exit: '+aScript+ lArgs);
+  dec(fIndent);
+  if fWriteEnter then begin
+    fWriteEnter := false;
+    Console.WriteLine(', Done.');
+  end else begin
+    CheckEnter;
+    Console.WriteLine('Done '+aScript);
+  end;
   Console.ForegroundColor := lCol;
 end;
 
 method Logger.LogInfo(s: String);
 begin
   LogDebug(s);
+end;
+
+method Logger.CheckEnter;
+begin
+  if fWriteEnter then begin
+     Console.WriteLine;
+     fWriteEnter := false;
+  end;
+  if fIndent = 0 then exit;
+  var s := new String(' ', fIndent * 2);
+  Console.Write(s);
 end;
 
 class method ConsoleApp.Main(): Integer;
