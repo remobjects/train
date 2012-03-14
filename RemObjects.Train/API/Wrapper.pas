@@ -106,8 +106,10 @@ begin
     result := ConvertBack(fMethod.Invoke(nil, lList.ToArray));
     lFail := false;
   except
-    on e: System.Reflection.TargetInvocationException do
+    on e: System.Reflection.TargetInvocationException do begin
+      fServices.Logger.LogError(e.Message);
       raise e.InnerException;
+    end;
   finally
     fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
   end;
