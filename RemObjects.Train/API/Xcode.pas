@@ -100,7 +100,7 @@ begin
     for each el in lErrors do
       aServices.Logger.LogError(el);
   end else
-    aServices.Logger.LogInfo(lOutput.ToString);
+    aServices.Logger.LogDebug(lOutput.ToString);
 
 
   if n <> 0 then raise new Exception('XCode failed');
