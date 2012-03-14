@@ -206,7 +206,7 @@ begin
   try
     var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope));
     
-    new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();
+    new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := fEngine.Logger).Run();
     lFail := false;
   finally
     fEngine.Logger.Exit('run', if lFail then FailMode.Yes else FailMode.No, lFail);

@@ -141,13 +141,13 @@ end;
 class method FilePlugin.File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
-  System.IO.File.WriteAllText(lVal, aData);
+  System.IO.File.WriteAllText(lVal, aServices.Expand(ec,aData));
 end;
 
 class method FilePlugin.File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData:String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
-  System.IO.File.AppendAllText(lVal, aData);
+  System.IO.File.AppendAllText(lVal, aServices.Expand(ec,aData ));
 end;
 
 class method FilePlugin.File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
