@@ -148,7 +148,7 @@ end;
 method AsyncWorker.WaitFor(ec: ExecutionContext; args: EcmaScriptObject; aTimeout: Integer);
 begin
   var lFail := true;
-  fEngine.Logger.Enter('waitFor', ''+args+' '+aTimeout);
+  fEngine.Logger.Enter(true,'waitFor', ''+args+' '+aTimeout);
     var lTasks := new List<System.Threading.Tasks.Task>;
   try
     for i: Integer := 0 to RemObjects.Script.EcmaScript.Utilities.GetObjAsInteger(args.Get(ec, 0, 'length'), ec) -1 do begin
@@ -168,7 +168,7 @@ begin
   finally
     for each el in lTasks.Where(a->a.IsCompleted) do
       fEngine.UnregisterTask(el);
-    fEngine.Logger.Exit('waitFor', if lFail then FailMode.Yes else FailMode.No);
+    fEngine.Logger.Exit(true,'waitFor', if lFail then FailMode.Yes else FailMode.No);
   end;
 end;
 
@@ -202,14 +202,14 @@ method AsyncWorker.run(aScope: ExecutionContext; aSelf: Object; params args: arr
 begin
   result := Undefined.Instance;
   var lFail := true;
-  fEngine.Logger.Enter('run', args);
+  fEngine.Logger.Enter(true,'run', args);
   try
     var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope));
     
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := fEngine.Logger).Run();
     lFail := false;
   finally
-    fEngine.Logger.Exit('run', if lFail then FailMode.Yes else FailMode.No, lFail);
+    fEngine.Logger.Exit(true,'run', if lFail then FailMode.Yes else FailMode.No, lFail);
   end;
   
 end;
@@ -218,7 +218,7 @@ method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args
 begin
   result := Undefined.Instance;
   var lFail := true;
-  fEngine.Logger.Enter('runAsync', args);
+  fEngine.Logger.Enter(true,'runAsync', args);
   var lLogger := new DelayedLogger;
   var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope));
   try
@@ -232,7 +232,7 @@ begin
     result := new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
     lFail := false;
   finally
-    fEngine.Logger.Exit('runAsync', if lFail then FailMode.Yes else FailMode.No, args);
+    fEngine.Logger.Exit(true,'runAsync', if lFail then FailMode.Yes else FailMode.No, args);
   end;
 end;
 

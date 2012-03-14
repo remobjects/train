@@ -136,7 +136,7 @@ begin
   if ev <> nil then begin
     for i: Integer := 0 to RemObjects.Script.ecmascript.Utilities.GetObjAsInteger(ev.Get('length'), fEngine.GlobalObject.ExecutionContext) -1 do begin
       if i <> 0 then lArgs := lArgs + ', ';
-      lArgs := lArgs + RemObjects.Script.ecmascript.Utilities.GetObjAsString(ev.Get(i.ToString), fEngine.GlobalObject.ExecutionContext);
+      lArgs := lArgs + Utilities.MyFormat('{0}', ev.Get(i.ToString));
     end;
   end;
 
