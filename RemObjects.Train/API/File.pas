@@ -105,15 +105,18 @@ begin
     lMask := System.IO.Path.GetFileName(lVal);
     if lMask = '' then lMask := '8';
 
-
+    var lZero: Boolean := true;
     for each el in System.IO.Directory.GetFiles(lDir, lMask, 
       if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
+      lZero := false;
       var lTargetFN := el.Substring(lDir.Length+1);
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
       System.IO.File.Copy(el, lTargetFN, true);
+      aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', el,  lTargetFN));
     end;
+    if lZero then raise new Exception('Zero files copied!');
     exit;
   end;
 
@@ -121,6 +124,7 @@ begin
     System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), true)
   else
     System.IO.File.Copy(lVal, lVal2, true);
+  aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
 
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String);
