@@ -16,6 +16,9 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
 
+
+    class method Find(aPath: String): sequence of String;
+
     [WrapAs('file.copy', SkipDryRun := true)]
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
     [WrapAs('file.list', SkipDryRun := true)]
@@ -124,7 +127,8 @@ class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: Exe
 begin
   var lVal := aServices.ResolveWithBase(ec, AFN);
   if lVal = nil then exit;
-  System.IO.File.Delete(lVal);
+  for each el in Find(lVal) do 
+    System.IO.File.Delete(el);
 end;
 
 class method FilePlugin.File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String): String;
@@ -236,6 +240,13 @@ begin
     if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do
     res.Add(el);
   exit res.ToArray;
+end;
+
+class method FilePlugin.Find(aPath: String): sequence of  String;
+begin
+  if aPath.IndexOfAny(['*', '?']) >= 0 then begin
+    exit System.IO.Directory.EnumerateFiles(System.IO.Path.GetDirectoryName(aPath), System.IO.Path.GetFileName(aPath), System.IO.SearchOption.TopDirectoryOnly);
+  end else exit  [aPath];
 end;
 
 end.

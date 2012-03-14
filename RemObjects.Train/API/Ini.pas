@@ -17,7 +17,7 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
 
-    [WrapAs('ini.fromFile')]
+    [WrapAs('ini.fromFile', SkipDryRun := false)]
     class method FromFile(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext; aFN: String): IniFile;
     [WrapAs('ini.fromString', SkipDryRun := false)]
     class method FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
@@ -95,8 +95,7 @@ end;
 class method IniPlugin.FromFile(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;aFN: String): IniFile;
 begin
   result := new IniFile();
-  if not aServices.Engine.DryRun then
-    result.LoadFromFile(aServices.ResolveWithBase(ec,aFN));
+  result.LoadFromFile(aServices.ResolveWithBase(ec,aFN));
 end;
 
 class method IniPlugin.FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
