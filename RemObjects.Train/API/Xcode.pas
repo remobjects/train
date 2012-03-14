@@ -56,7 +56,7 @@ end;
 class method XcodePlugin.XcodeRun(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: XcodeOptions; aActions: String);
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
-  aServices.Logger.LogMessage('Building: '+aProject);
+  //aServices.Logger.LogMessage('Building: '+aProject);
 
   CheckSettings(aServices);
   if aServices.Engine.DryRun then exit;

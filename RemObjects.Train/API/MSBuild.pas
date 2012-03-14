@@ -56,7 +56,7 @@ end;
 class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
-  aServices.Logger.LogMessage('Building: '+aProject);
+  //aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
 
   if aServices.Engine.DryRun then exit;
@@ -103,7 +103,7 @@ end;
 class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
-  aServices.Logger.LogMessage('Building: '+aProject);
+  //aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
@@ -148,7 +148,7 @@ end;
 class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
-  aServices.Logger.LogMessage('Building: '+aProject);
+  //aServices.Logger.LogMessage('Building: '+aProject);
   CheckSettings(aServices);
 
   if aServices.Engine.DryRun then exit;
