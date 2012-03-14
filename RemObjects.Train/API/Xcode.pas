@@ -70,7 +70,7 @@ begin
     if not String.IsNullOrEmpty(aOptions.sdk) then
       sb.Append(' -sdk "'+aOptions.sdk+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
-      sb.Append(' SYMROOT="'+aOptions.destinationFolder+'"');
+      sb.Append(' SYMROOT="'+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
   end;
   sb.Append(' '+aActions);
