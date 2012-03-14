@@ -34,7 +34,7 @@ type
 implementation
 
 method Logger.LogDebug(s: System.String);
-begin
+ begin
   if not LoggerSettings. ShowDebug then exit;
   CheckEnter;
   var lCol := Console.ForegroundColor;

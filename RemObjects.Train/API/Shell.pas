@@ -26,7 +26,7 @@ implementation
 
 method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := Utilities.GetArgAsString(args, 0, ec);
+  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec));
   var lFail := true;
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
@@ -96,6 +96,9 @@ begin
     else
       exit Undefined.Instance;
     lFail := false;
+  except
+    on e: Exception do
+      fEngine.Engine.Logger.LogError('Error in execute: '+e.Message);
   finally
     fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
@@ -103,7 +106,7 @@ end;
 
 method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := Utilities.GetArgAsString(args, 0, ec);
+  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec));
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
