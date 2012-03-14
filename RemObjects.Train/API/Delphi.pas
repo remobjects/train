@@ -92,10 +92,10 @@ begin
       sb.AppendFormat(' "-D{0}"', el);
 
     if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
-      sb.AppendFormat(' "-NO{0}" "-N0{0}"', aOptions.destinationFolder);
+      sb.AppendFormat(' "-NO{0}" "-N0{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then 
-      sb.AppendFormat(' "-LE{0}" "-LN{0}" "-E{0}"', aOptions.destinationFolder);
+      sb.AppendFormat(' "-LE{0}" "-LN{0}" "-E{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
     if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
       sb.AppendFormat(' "-I{0}"', aOptions.includeSearchPath);
@@ -109,6 +109,7 @@ begin
   
   end;
  var lOutput:= new StringBuilder;
+  aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
   if 0 <> Shell.ExecuteProcess(lRootPath, sb.ToString, nil, false,
   a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil) then begin
     aServices.Logger.LogMessage(lOutput.ToString);

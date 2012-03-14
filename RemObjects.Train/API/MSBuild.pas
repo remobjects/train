@@ -69,11 +69,12 @@ begin
     if not String.IsNullOrEmpty(aOptions.platform) then
       sb.Append(' "/property:Platform='+aOptions.platform+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
+      sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
   end;
 
   var lTmp := new DelayedLogger();
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then
@@ -106,10 +107,11 @@ begin
     if not String.IsNullOrEmpty(aOptions.platform) then
       sb.Append(' "/property:Platform='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
-    sb.Append(aOptions.extraArgs);
+      sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
+    sb.Append(' '+aOptions.extraArgs);
   end;
   var lTmp := new DelayedLogger();
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then
@@ -143,10 +145,12 @@ begin
     if not String.IsNullOrEmpty(aOptions.platform) then
       sb.Append(' "/property:Platform='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
-      sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
-    sb.Append(aOptions.extraArgs);
+      sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
+    sb.Append(' '+aOptions.extraArgs);
   end;
   var lTmp := new DelayedLogger();
+
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then
