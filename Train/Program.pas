@@ -126,7 +126,6 @@ begin
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
   var lArgs: List<String>;
   try
-  
     lArgs := lOptions.Parse(OptionCommandLine.Parse(Environment.CommandLine).Skip(1));
   except
     on  Exception  do
@@ -151,6 +150,7 @@ begin
     lRoot.LoadSystem;
     if File.Exists(lGlobalSettings) then 
       lRoot.LoadIni(lGlobalSettings);
+     lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
     for each el in lGlobalVars do lRoot[el.Key] := el.Value;
     if LoggerSettings.ShowDebug then
       lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
