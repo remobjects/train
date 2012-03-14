@@ -69,11 +69,11 @@ begin
       sb.Append(' -target "'+aOptions.target+'"');
     if not String.IsNullOrEmpty(aOptions.sdk) then
       sb.Append(' -sdk "'+aOptions.sdk+'"');
+    sb.Append(' '+aActions);
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
       sb.Append(' SYMROOT="'+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
   end;
-  sb.Append(' '+aActions);
   //aServices.Logger.LogMessage(sb.ToString);
 
   var lOutput:= new StringBuilder;
