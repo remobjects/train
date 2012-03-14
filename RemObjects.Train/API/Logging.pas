@@ -47,6 +47,7 @@ type
 
   XmlLogger = public class(ILogger, IDisposable)
   private
+    method FindFailNodes(var aWork: XElement; aInput: sequence of XElement);
     fTarget: System.IO.Stream;
     fXmlData: System.Xml.Linq.XElement;
   public
@@ -88,6 +89,9 @@ end;
 
 method XmlLogger.Dispose;
 begin
+  var lFailElement: XElement := nil;
+  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
+  
   fXmlData.Document.Save(fTarget);
   fTarget:Dispose;
 end;
@@ -139,6 +143,29 @@ begin
   else '0';
   end));
   fXmlData := fXmlData.Parent;
+end;
+
+method XmlLogger.FindFailNodes(var aWork: XElement; aInput: sequence of  XElement);
+begin
+  for each el in aInput do begin
+    if (el.Name = 'action') then begin
+      var lRes := String(el.Attribute('result'));
+      if (lRes = nil) or (lRes = "2") then continue;
+      if lRes = '0' then begin
+        if aWork = nil then begin
+          aWork := new XElement('errors');
+          el.Document.Root.AddFirst(aWork);
+        end;
+        var lNewEL := new XElement(el.Name, el.Attributes().Where(a->not a.IsNamespaceDeclaration));
+        
+        for each error in el.Elements('error') do begin
+          lNewEL.Add(new XElement('error', error.Value));
+        end;
+        aWork.Add(lNewEL);
+      end;
+      FindFailNodes(var aWork, el.Elements);
+    end;
+  end;
 end;
 
 constructor MultiLogger;
