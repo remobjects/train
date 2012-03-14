@@ -73,11 +73,21 @@ begin
     sb.Append(aOptions.extraArgs);
   end;
 
-  var lOutput:= new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
+  var lTmp := new DelayedLogger();
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  a-> begin
+    if not String.IsNullOrEmpty(a) then
+    lTmp.LogError(a)
+   end ,a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      if a.StartsWith('MSBUILD : error') then
+        lTmp.LogError(a)
+      else
+       lTmp.LogMessage(a)
+    end;
+   end, nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToString);
+  lTmp.Replay(aServices.Logger);
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
@@ -99,11 +109,21 @@ begin
       sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
     sb.Append(aOptions.extraArgs);
   end;
-  var lOutput:= new StringBuilder;
+  var lTmp := new DelayedLogger();
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
+  a-> begin
+    if not String.IsNullOrEmpty(a) then
+    lTmp.LogError(a)
+   end ,a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      if a.StartsWith('MSBUILD : error') then
+        lTmp.LogError(a)
+      else
+       lTmp.LogMessage(a)
+    end;
+   end, nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToString);
+  lTmp.Replay(aServices.Logger);
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
@@ -126,11 +146,21 @@ begin
       sb.Append(' "/property:OutputPath='+aOptions.destinationFolder+'"');
     sb.Append(aOptions.extraArgs);
   end;
- var lOutput:= new StringBuilder;
+  var lTmp := new DelayedLogger();
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil);
+  a-> begin
+    if not String.IsNullOrEmpty(a) then
+    lTmp.LogError(a)
+   end ,a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      if a.StartsWith('MSBUILD : error') then
+        lTmp.LogError(a)
+      else
+       lTmp.LogMessage(a)
+    end;
+   end, nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToString);
+  lTmp.Replay(aServices.Logger);
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
