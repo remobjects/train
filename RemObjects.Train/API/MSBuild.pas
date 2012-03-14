@@ -75,20 +75,28 @@ begin
 
   var lTmp := new DelayedLogger();
   aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  var lOutput := new StringBuilder;
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
-    if not String.IsNullOrEmpty(a) then
-    lTmp.LogError(a)
+    if not String.IsNullOrEmpty(a) then begin
+      lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.StartsWith('MSBUILD : error') then
-        lTmp.LogError(a)
-      else
-       lTmp.LogMessage(a)
+        lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
     end;
    end, nil, nil);
 
+  if n <> 0 then
+    lTmp.LogMessage(lOutput.ToString)
+  else
+    lTmp.LogInfo(lOutput.ToString);
+
   lTmp.Replay(aServices.Logger);
+
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
@@ -112,20 +120,28 @@ begin
   end;
   var lTmp := new DelayedLogger();
   aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  var lOutput := new StringBuilder;
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
-    if not String.IsNullOrEmpty(a) then
-    lTmp.LogError(a)
+    if not String.IsNullOrEmpty(a) then begin
+      lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.StartsWith('MSBUILD : error') then
-        lTmp.LogError(a)
-      else
-       lTmp.LogMessage(a)
+        lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
     end;
    end, nil, nil);
 
+  if n <> 0 then
+    lTmp.LogMessage(lOutput.ToString)
+  else
+    lTmp.LogInfo(lOutput.ToString);
+
   lTmp.Replay(aServices.Logger);
+
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
@@ -148,23 +164,31 @@ begin
       sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
   end;
-  var lTmp := new DelayedLogger();
 
+  var lTmp := new DelayedLogger();
   aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  var lOutput := new StringBuilder;
   var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
   a-> begin
-    if not String.IsNullOrEmpty(a) then
-    lTmp.LogError(a)
+    if not String.IsNullOrEmpty(a) then begin
+      lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.StartsWith('MSBUILD : error') then
-        lTmp.LogError(a)
-      else
-       lTmp.LogMessage(a)
+        lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
     end;
    end, nil, nil);
 
+  if n <> 0 then
+    lTmp.LogMessage(lOutput.ToString)
+  else
+    lTmp.LogInfo(lOutput.ToString);
+
   lTmp.Replay(aServices.Logger);
+
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 

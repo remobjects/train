@@ -17,6 +17,8 @@ type
     method LogWarning(s: String);
     method LogHint(s: String);
     method LogDebug(s: String);
+    method LogInfo(s: String);
+
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
 
@@ -81,9 +83,15 @@ begin
       4: aTarget.LogDebug(lItem.Value.Item2);
       6: aTarget.Enter(true,lItem.Value.Item2, lItem.Value.Item4);
       7: aTarget.Exit(true,lItem.Value.Item2, FailMode(lItem.Value.Item3), lItem.Value.Item4);
+      8: aTarget.LogInfo(lItem.Value.Item2);
     end;
     lItem := lItem.Next;
   end;
+end;
+
+method DelayedLogger.LogInfo(s: String);
+begin
+  fDelayStore.AddLast(Tuple.Create(8, s, 0,array of Object(nil)));
 end;
 
 end.

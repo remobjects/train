@@ -26,6 +26,7 @@ type
     method LogWarning(s: String);
     method LogHint(s: String);
     method LogDebug(s: String);
+    method LogInfo(s: String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
   end;  
@@ -41,6 +42,7 @@ type
     method LogWarning(s: String);locked;
     method LogHint(s: String);locked;
     method LogDebug(s: String);locked;
+    method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
   end;
@@ -58,6 +60,7 @@ type
     method LogWarning(s: String);locked;
     method LogHint(s: String);locked;
     method LogDebug(s: String);locked;
+    method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
   end;
@@ -169,6 +172,11 @@ begin
   end;
 end;
 
+method XmlLogger.LogInfo(s: String);
+begin
+  LogMessage(s);
+end;
+
 constructor MultiLogger;
 begin
 
@@ -212,6 +220,11 @@ end;
 method MultiLogger.Dispose;
 begin
   Loggers.ForEach(a->IDisposable(a):Dispose);
+end;
+
+method MultiLogger.LogInfo(s: String);
+begin
+  Loggers.ForEach(a->a.LogInfo(s));
 end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);

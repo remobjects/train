@@ -108,14 +108,30 @@ begin
 
   
   end;
- var lOutput:= new StringBuilder;
+  var lTmp := new DelayedLogger();
+  var lOutput := new StringBuilder;
   aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
-  if 0 <> Shell.ExecuteProcess(lRootPath, sb.ToString, nil, false,
-  a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.AppendLine(a), nil, nil) then begin
-    aServices.Logger.LogMessage(lOutput.ToString);
-    raise new Exception('Delphi build failed');
-  end;
+  var n := Shell.ExecuteProcess(lRootPath, sb.ToString, nil,false ,
+  a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
+   end ,a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      if a.StartsWith('[DCC Error]') or a.StartsWith('[DCC Fatal Error]') or a.Contains(' Error:') or a.Contains(' Fatal: ') then
+        lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
+   end, nil, nil);
 
-  aServices.Logger.LogMessage(lOutput.ToString);
+  if n <> 0 then
+    lTmp.LogMessage(lOutput.ToString)
+  else
+    lTmp.LogInfo(lOutput.ToString);
+
+  lTmp.Replay(aServices.Logger);
+
+  if n <> 0 then raise new Exception('Delphi failed');
 end;
 end.

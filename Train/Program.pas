@@ -22,6 +22,7 @@ type
     method LogWarning(s: System.String);
     method LogMessage(s: System.String);
     method LogHint(s: System.String);
+    method LogInfo(s: String);
     method LogError(s: System.String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
@@ -97,6 +98,11 @@ begin
   if length(lArgs) > 0 then lArgs := ' '+lArgs;
   Console.WriteLine('Exit: '+aScript+ lArgs);
   Console.ForegroundColor := lCol;
+end;
+
+method Logger.LogInfo(s: String);
+begin
+  LogDebug(s);
 end;
 
 class method ConsoleApp.Main(): Integer;
