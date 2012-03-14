@@ -5,6 +5,7 @@ interface
 uses
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
+  RemObjects.Train,
   System.Linq,
   System.Text;
 
@@ -23,6 +24,8 @@ type
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
     [WrapAs('file.move', SkipDryRun := true)]
     class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
+    [WrapAs('folder.move', SkipDryRun := true)]
+    class method Folder_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
     [WrapAs('file.list', SkipDryRun := true)]
     class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean := false): array of String;
     [WrapAs('file.remove', SkipDryRun := true)]
@@ -78,6 +81,7 @@ begin
     new EcmaScriptObject(aServices.Globals)
     .AddValue('list', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
     .AddValue('exists', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Exists'))
+    .AddValue('move', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Move'))
     .AddValue('create', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Create'))
     .AddValue('remove', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Delete'))
   );
@@ -290,6 +294,14 @@ begin
   if aPath.IndexOfAny(['*', '?']) >= 0 then begin
     exit System.IO.Directory.EnumerateFiles(System.IO.Path.GetDirectoryName(aPath), System.IO.Path.GetFileName(aPath), System.IO.SearchOption.TopDirectoryOnly);
   end else exit  [aPath];
+end;
+
+class method FilePlugin.Folder_Move(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft: String; aRight: String);
+begin
+  var lVal := aServices.ResolveWithBase(ec, aLeft);
+  var lVal2 := aServices.ResolveWithBase(ec, aRight);
+  System.IO.Directory.Move(lVal, lVal2);
+  aServices.Logger.LogMessage('Moved {0} to {1}', lVal, lVal2);
 end;
 
 end.

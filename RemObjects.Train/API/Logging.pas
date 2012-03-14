@@ -132,7 +132,7 @@ end;
 method XmlLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
-  var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a->a.ToString()).ToArray);
+  var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a-> if a is EcmaScriptObject then  EcmaScriptObject(a).Root.JSONStringify(EcmaScriptObject(a).Root.ExecutionContext, nil, a):ToString else  a.ToString()).ToArray);
   var lNode := new XElement('action', new XAttribute('name', aScript), new XAttribute('args', lArgsString));
   self.fXmlData.Add(lNode);
   fXmlData := lNode;
