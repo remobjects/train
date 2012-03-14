@@ -59,14 +59,14 @@ begin
     end;
   end;
 
-  fEngine.Engine.Logger.Enter(true,String.Format('exec({0}, {1})', lCMD, lArg));
+  fEngine.Engine.Logger.Enter(true,String.Format('exec({0})', lCMD), lArg);
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
       exit '';
     end;
     var sb := new System.Text.StringBuilder;
-    var lExit := ExecuteProcess(lCMD, lArg, LWD,false , a-> begin
+    var lExit := ExecuteProcess(lCMD, lArg, coalesce(LWD, fEngine.Engine.WorkDir),false , a-> begin
       locking(sb) do begin
         sb.AppendLine(a);
       end;
@@ -98,11 +98,11 @@ begin
     lFail := false;
   except
     on e: Exception do begin
-      fEngine.Engine.Logger.LogError('Error in execute: '+e.ToString);
+      fEngine.Engine.Logger.LogError('Error when calling Process.Execute: '+e.Message);
       raise;
     end;
   finally
-    fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
@@ -132,14 +132,14 @@ begin
   end;
   var lLogger := new RemObjects.Train.DelayedLogger;
   var lTask := new System.Threading.Tasks.Task(method begin
-    lLogger.Enter(true,String.Format('exec({0}, {1})', lCMD, lArg));
+    lLogger.Enter(true,String.Format('exec({0})', lCMD), lArg);
     try
       if fEngine.Engine.DryRun then begin
         lLogger.LogMessage('Dry run.');
         exit '';
       end;
       var sb := new System.Text.StringBuilder;
-      var lExit := ExecuteProcess(lCMD, lArg, lWD, false, a-> begin
+      var lExit := ExecuteProcess(lCMD, lArg, coalesce(lWD, fEngine.Engine.WorkDir), false, a-> begin
         locking(sb) do begin
           sb.AppendLine(a);
         end;
@@ -154,7 +154,7 @@ begin
       end;
       lFail := false;
     finally
-      lLogger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+      lLogger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
@@ -166,14 +166,14 @@ begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
   var lWD := if length(args) < 2 then nil else  Utilities.GetArgAsString(args, 1, ec);
   var lFail := true;
-  fEngine.Engine.Logger.Enter(true,String .Format('system({0})', lArg));
+  fEngine.Engine.Logger.Enter(true,'system()', lArg);
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
       exit '';
     end;
     var sb := new System.Text.StringBuilder;
-    var lExit := ExecuteProcess(nil, lArg, lWD,true , a-> begin
+    var lExit := ExecuteProcess(nil, lArg, coalesce(lWD, fEngine.Engine.WorkDir),true , a-> begin
       locking(sb) do sb.AppendLine(a);
     end, a-> begin
       locking(sb) do sb.AppendLine(a)
@@ -187,7 +187,7 @@ begin
     lFail := false;
     exit sb.ToString();
   finally
-    fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,'system()', if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
