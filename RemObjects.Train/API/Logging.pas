@@ -19,7 +19,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
   end;
 
-  FailMode = public (No, Yes, Recovered);
+  FailMode = public (No, Yes, Recovered, Unknown);
   ILogger = public interface
     method LogError(s: String);
     method LogMessage(s: String);
@@ -137,6 +137,7 @@ end;
 method XmlLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
+  if aFailMode <> FailMode.Unknown then
   fXmlData.Add(new XAttribute('result', case aFailMode of
     FailMode.No: '1';
     FailMode.Recovered: '2';
@@ -150,7 +151,7 @@ begin
   for each el in aInput do begin
     if (el.Name = 'action') then begin
       var lRes := String(el.Attribute('result'));
-      if (lRes = nil) or (lRes = "2") then continue;
+      if (lRes = "2") then continue;
       if lRes = '0' then begin
         if aWork = nil then begin
           aWork := new XElement('errors');

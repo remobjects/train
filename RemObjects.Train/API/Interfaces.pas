@@ -20,6 +20,7 @@ type
     property Logger: ILogger read;
     property AsyncWorker: AsyncWorker read write;
     method ResolveWithBase(ec: ExecutionContext;s: String): String;
+    method Expand(ec: ExecutionContext; s: String): String;
   end;
 
   IPluginRegistration = public interface

@@ -204,7 +204,6 @@ begin
   var lFail := true;
   fEngine.Logger.Enter('run', args);
   try
-    if fEngine.DryRun then exit;
     var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope));
     
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath)).Run();

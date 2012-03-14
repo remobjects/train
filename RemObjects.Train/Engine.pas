@@ -102,7 +102,7 @@ begin
     on e: Exception do begin
       lFail := true;
       if fErrorPos <> nil then
-        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fEngine.SourceFileName, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
+        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fErrorPos.File, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
       else
         Logger:LogError('Error while running script {0}: {1}', fEngine.SourceFileName, e.Message);
       raise;
@@ -128,12 +128,25 @@ end;
 
 method Engine.fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
 begin
-  Logger:LogDebug('Frame enter {0}', e.Name);
+  if e.Name.Contains('.') then exit;
+  var lEnv := fEngine.CallStack.LastOrDefault():Frame;
+  var n := if (lEnv = nil) or (not lEnv.HasBinding('arguments')) then nil else lEnv.GetBindingValue('arguments', false);
+  var ev :=  EcmaScriptObject(n);
+  var lArgs: String := '';
+  if ev <> nil then begin
+    for i: Integer := 0 to RemObjects.Script.ecmascript.Utilities.GetObjAsInteger(ev.Get('length'), fEngine.GlobalObject.ExecutionContext) -1 do begin
+      if i <> 0 then lArgs := lArgs + ', ';
+      lArgs := lArgs + RemObjects.Script.ecmascript.Utilities.GetObjAsString(ev.Get(i.ToString), fEngine.GlobalObject.ExecutionContext);
+    end;
+  end;
+
+  Logger:Enter(true, 'function '+e.Name, lArgs);
 end;
 
 method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
 begin
-  Logger:LogDebug('Frame exit {0}', e.Name);
+  if e.Name.Contains('.') then exit;
+  Logger:&Exit(true, 'function '+e.Name, FailMode.Unknown);
 end;
 
 method Engine.CreateChildEngine: Engine;
@@ -253,7 +266,7 @@ begin
    if lValue.StartsWith('(') and lValue.EndsWith(')') then 
      lValue := lValue.Substring(1, lValue.Length -2);
     
-    var u := ec:LexicalScope:GetBindingValue(lValue, false);
+    var u := if ec:LexicalScope:HasBinding(lValue) then ec.LexicalScope.GetBindingValue(lValue, false) else nil;
     var n := if (u = nil) or (u = Undefined.Instance) then nil else RemObjects.Script.EcmaScript.Utilities.GetObjAsString(u, ec);
     if (n = nil) then n := Environment[lValue]:ToString;
     
