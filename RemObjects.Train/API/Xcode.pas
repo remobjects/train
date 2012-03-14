@@ -77,12 +77,12 @@ begin
   //aServices.Logger.LogMessage(sb.ToString);
 
 
-  var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
+  var lErrors := new System.Collections.Generic.List<String>;
   var n := Shell.ExecuteProcess('/usr/bin/xcodebuild', sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
-      lTmp.LogError(a);
+      locking lErrors do lErrors.Add(a);
       locking lOutput do lOutput.AppendLine(a);
     end;
    end ,a-> begin
@@ -90,17 +90,18 @@ begin
 
       var atrim := a.TrimStart;
       if atrim.StartsWith('ld: ') or atrim.StartsWith('clang: ') then
-        lTmp.LogError(a);
+        locking lErrors do lErrors.Add(a);
       locking lOutput do lOutput.AppendLine(a);
     end;
    end, nil, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  if n <> 0 then begin
+    aServices.Logger.LogMessage(lOutput.ToString);
+    for each el in lErrors do
+      aServices.Logger.LogError(el);
+  end else
+    aServices.Logger.LogInfo(lOutput.ToString);
 
-  lTmp.Replay(aServices.Logger);
 
   if n <> 0 then raise new Exception('XCode failed');
 

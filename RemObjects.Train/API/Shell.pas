@@ -28,7 +28,7 @@ method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Obje
 begin
   var lCMD := Utilities.GetArgAsString(args, 0, ec);
   var lFail := true;
-  var lArg := Utilities.GetArgAsString(args, 1, ec);
+  var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<String, String>>;
   var lTimeout: nullable TimeSpan := nil;
@@ -104,7 +104,7 @@ end;
 method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lCMD := Utilities.GetArgAsString(args, 0, ec);
-  var lArg := Utilities.GetArgAsString(args, 1, ec);
+  var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<String, String>>;
@@ -158,7 +158,7 @@ end;
 
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lArg := Utilities.GetArgAsString(args, 0, ec);
+  var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
   var lWD := Utilities.GetArgAsString(args, 1, ec);
   var lFail := true;
   fEngine.Engine.Logger.Enter(String.Format('system({0})', lArg));
