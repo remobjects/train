@@ -266,11 +266,21 @@ begin
    if lValue.StartsWith('(') and lValue.EndsWith(')') then 
      lValue := lValue.Substring(1, lValue.Length -2);
     
-    var u := if ec:LexicalScope:HasBinding(lValue) then ec.LexicalScope.GetBindingValue(lValue, false) else nil;
-    var n := if (u = nil) or (u = Undefined.Instance) then nil else RemObjects.Script.EcmaScript.Utilities.GetObjAsString(u, ec);
-    if (n = nil) then n := Environment[lValue]:ToString;
+    var lScope := ec:LexicalScope;
+    var lRes: String := nil;
+    while assigned(lScope) do begin
+      if lScope.HasBinding(lValue) then begin
+        var n := ec.LexicalScope.GetBindingValue(lValue, false);
+        if (n <> nil) and (n <> Undefined.Instance) then begin
+          lRes := RemObjects.Script.EcmaScript.Utilities.GetObjAsString(n, ec);
+          break;
+        end;
+      end;
+      lScope := lScope.Previous;
+    end;
+    if (lRes = nil) then lRes := Environment[lValue]:ToString;
     
-    exit n;
+    exit lRes;
   end);
 end;
     

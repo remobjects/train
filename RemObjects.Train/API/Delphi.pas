@@ -25,7 +25,7 @@ type
   private
   public
     property dcc: String; // overrides any version
-    property version: String;
+    property delphi: String;
     property platform: String;
     property aliases: String;
     property conditionalDefines: array of String;
@@ -53,7 +53,7 @@ begin
   var lRootPath: String;
   aProject := aServices.ResolveWithBase(ec, aProject);
   aServices.Logger.LogMessage('Building: '+aProject);
-  var lVer := aOptions.version.Trim();
+  var lVer := aOptions.delphi:Trim();
   if lVer.StartsWith('d') or lVer.StartsWith('D') then lVer := lVer.Substring(1);
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
