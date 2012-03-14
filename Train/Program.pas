@@ -93,7 +93,7 @@ begin
   var lCol := Console.ForegroundColor;
   Console.ForegroundColor := ConsoleColor.White;
   var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
-  Console.Write(aScript+'('+lArgs+')');
+  Console.Write(aScript+'('+lArgs+') { ... ');
                  
   Console.ForegroundColor := lCol;
   fWriteEnter := true;
@@ -108,10 +108,10 @@ begin
   dec(fIndent);
   if fWriteEnter then begin
     fWriteEnter := false;
-    Console.WriteLine(', Done.');
+    Console.WriteLine(#8#8#8#8'}  ');
   end else begin
     CheckEnter;
-    Console.WriteLine('Done '+aScript);
+    Console.WriteLine('} '+aScript);
   end;
   Console.ForegroundColor := lCol;
 end;
@@ -124,6 +124,7 @@ end;
 method Logger.CheckEnter;
 begin
   if fWriteEnter then begin
+     Console.Write(#8#8#8#8'    ');
      Console.WriteLine;
      fWriteEnter := false;
   end;

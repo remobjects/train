@@ -97,8 +97,10 @@ begin
       exit Undefined.Instance;
     lFail := false;
   except
-    on e: Exception do
-      fEngine.Engine.Logger.LogError('Error in execute: '+e.Message);
+    on e: Exception do begin
+      fEngine.Engine.Logger.LogError('Error in execute: '+e.ToString);
+      raise;
+    end;
   finally
     fEngine.Engine.Logger.Exit(true,String.Format('system({0})', lArg), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
