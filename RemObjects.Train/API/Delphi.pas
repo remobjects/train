@@ -20,6 +20,7 @@ type
 
     [WrapAs('delphi.build', SkipDryRun := false)]
     class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
+    class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aInput: String): String;
   end;
   DelphiOptions = public class
   private
@@ -103,10 +104,10 @@ begin
     sb.AppendFormat(' -LE "{0}" -LN "{0}" -E "{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
-    sb.AppendFormat(' -I "{0}"', aOptions.includeSearchPath);
+    sb.AppendFormat(' -I "{0}"', RebuildMultiPath(aServices,ec,aOptions.includeSearchPath));
 
   if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
-    sb.AppendFormat(' -U "{0}"', aOptions.unitSearchPath);
+    sb.AppendFormat(' -U "{0}"', RebuildMultiPath(aServices,ec,aOptions.unitSearchPath));
 
 
   sb.Append(aOptions.otherParameters);
@@ -137,5 +138,14 @@ begin
   lTmp.Replay(aServices.Logger);
 
   if n <> 0 then raise new Exception('Delphi failed');
+end;
+
+class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aInput: String): String;
+begin
+  var lItems := aInput.Split([';'], StringSplitOptions.RemoveEmptyEntries);
+  for i: Integer := 0 to lItems.Length -1 do begin
+    lItems[i] := aServices.ResolveWithBase(ec, lItems[i]);
+  end;
+  exit String.Join(';', lItems);
 end;
 end.
