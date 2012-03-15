@@ -91,22 +91,22 @@ begin
 
   if aOptions = nil then aOptions := new DelphiOptions;
   if not String.IsNullOrEmpty(aOptions.aliases) then
-    sb.AppendFormat(' "-A{0}"', aOptions.aliases);
+    sb.AppendFormat(' -A "{0}"', aOptions.aliases);
 
   for each el in aOptions.conditionalDefines do
-    sb.AppendFormat(' "-D{0}"', el);
+    sb.AppendFormat(' -D "{0}"', el);
 
   if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
-    sb.AppendFormat(' "-NO{0}" "-N0{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+    sb.AppendFormat(' -NO "{0}" -N0 "{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.destinationFolder) then 
-    sb.AppendFormat(' "-LE{0}" "-LN{0}" "-E{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+    sb.AppendFormat(' -LE "{0}" -LN "{0}" -E "{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
-    sb.AppendFormat(' "-I{0}"', aOptions.includeSearchPath);
+    sb.AppendFormat(' -I "{0}"', aOptions.includeSearchPath);
 
   if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
-    sb.AppendFormat(' "-U{0}"', aOptions.unitSearchPath);
+    sb.AppendFormat(' -U "{0}"', aOptions.unitSearchPath);
 
 
   sb.Append(aOptions.otherParameters);
