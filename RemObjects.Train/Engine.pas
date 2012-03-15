@@ -220,7 +220,7 @@ begin
     s := Path.Combine(system.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), s.Substring(2));
   if System.IO.Path .DirectorySeparatorChar = '\' then
     s:= s.Replace('/', '\');
-  if System.IO.Path.IsPathRooted(s) then
+  if System.IO.Path.IsPathRooted(s) or (s.StartsWith('$')) then
     exit s;
   exit System.IO.Path.Combine(WorkDir, s)
 end;
