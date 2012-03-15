@@ -113,6 +113,7 @@ begin
     if lMask = '' then lMask := '*';
 
     var lZero: Boolean := true;
+    var lFiles:= new StringBuilder;
     for each el in System.IO.Directory.GetFiles(lDir, lMask, System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
       var lTargetFN := el.Substring(lDir.Length+1);
@@ -120,8 +121,9 @@ begin
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
       System.IO.File.Move(el, lTargetFN);
-      aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', el,  lTargetFN));
+      lFiles .AppendLine(String.Format('Moved {0} to {1}', el,  lTargetFN));
     end;
+    aServices.Logger.LogInfo(lFiles.ToString);
     if lZero then raise new Exception('Zero files moved!');
     exit;
   end;
@@ -149,6 +151,7 @@ begin
     if lMask = '' then lMask := '*';
 
     var lZero: Boolean := true;
+    var lFiles := new System.Text.StringBuilder;
     for each el in System.IO.Directory.GetFiles(lDir, lMask, 
       if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
@@ -157,8 +160,10 @@ begin
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
       System.IO.File.Copy(el, lTargetFN, true);
-      aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', el,  lTargetFN));
+      lFiles .AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
     end;
+    
+    aServices.Logger.LogInfo(lFiles.ToString);
     if lZero then raise new Exception('Zero files copied!');
     exit;
   end;
