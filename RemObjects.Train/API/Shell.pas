@@ -26,7 +26,7 @@ implementation
 
 method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec));
+  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec), true);
   var lFail := true;
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
@@ -45,7 +45,7 @@ begin
     end;
     lVal := lOpt.Get('workdir');
     if lVal is String then
-      LWD := fEngine.ResolveWithBase(ec,String (lVal));
+      LWD := fEngine.ResolveWithBase(ec,String (lVal), true);
 
     lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
@@ -108,7 +108,7 @@ end;
 
 method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec));
+  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec), true);
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
@@ -121,7 +121,7 @@ begin
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
     lVal := lOpt.Get('workdir');
     if lVal is String then
-      lWD := fEngine.ResolveWithBase(ec,String (lVal));
+      lWD := fEngine.ResolveWithBase(ec,String (lVal), true);
     lVal := lOpt.Get('environment');
     var lObj := EcmaScriptObject(lVal);
     if lObj  <> nil then begin

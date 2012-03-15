@@ -19,7 +19,7 @@ type
     property Engine: Engine read;
     property Logger: ILogger read;
     property AsyncWorker: AsyncWorker read write;
-    method ResolveWithBase(ec: ExecutionContext;s: String): String;
+    method ResolveWithBase(ec: ExecutionContext;s: String; aExpand: Boolean := false): String;
     method Expand(ec: ExecutionContext; s: String): String;
   end;
 

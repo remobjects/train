@@ -20,7 +20,7 @@ type
 
     method Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 
-    method Convert(aVal: Object; aDestType: &Type; aDefault: Object): Object;
+    method Convert(ec: RemObjects.Script.EcmaScript.ExecutionContext; aVal: Object; aDestType: &Type; aDefault: Object): Object;
     method ConvertBack(aVal: Object): Object;
   end;
   WrapAsAttribute = public class(Attribute)
@@ -58,7 +58,8 @@ end;
 method Wrapper.Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 begin
   result := RemObjects.Script.EcmaScript.Undefined.Instance;
-  fServices.Logger.Enter(fWrapInfo.Important, fWrapInfo.LogName, aArgs);
+  if not String.IsNullOrEmpty(fWrapInfo.LogName) then
+    fServices.Logger.Enter(fWrapInfo.Important, fWrapInfo.LogName, aArgs);
   var lFail := true;
   try
     if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then begin lFail := false; exit; end;
@@ -74,7 +75,7 @@ begin
       lArgs.RemoveAt(0);
     end;
     if fWrapInfo.WantSelf then begin
-      lList.Add(Convert(aSelf, lArgs[0].ParameterType, nil));
+      lList.Add(Convert(ec, aSelf, lArgs[0].ParameterType, nil));
       lArgs.RemoveAt(0);
     end;
 
@@ -83,10 +84,10 @@ begin
     while (lInArgs.Count>0) and (lArgs.Count > 0) do begin
       if (lArgs.First.ParameterType.IsArray) and (length(lArgs.First.GetCustomAttributes(typeOf(ParamArrayAttribute), true)) > 0) then begin
         if lPargs = nil then lPargs := new System.Collections.ArrayList;
-        lPargs.Add(Convert(lInArgs[0], lArgs[0].ParameterType.GetElementType, nil));
+        lPargs.Add(Convert(ec, lInArgs[0], lArgs[0].ParameterType.GetElementType, nil));
         lInArgs.RemoveAt(0);
       end else begin
-        lList.Add(Convert(lInArgs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
+        lList.Add(Convert(ec, lInArgs[0], lArgs[0].ParameterType, lArgs[0].RawDefaultValue));
         lArgs.RemoveAt(0);
         lInArgs.RemoveAt(0);
       end;
@@ -111,21 +112,24 @@ begin
       raise e.InnerException;
     end;
   finally
-    fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
+    if not String.IsNullOrEmpty(fWrapInfo.LogName) then
+      fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
   end;
 end;
 
-method Wrapper.Convert(aVal: Object; aDestType: &Type; aDefault: Object): Object;
+method Wrapper.Convert(ec: RemObjects.Script.EcmaScript.ExecutionContext; aVal: Object; aDestType: &Type; aDefault: Object): Object;
 begin
   if (aVal = nil) or (aVal = RemObjects.Script.EcmaScript.Undefined.Instance) then aVal := aDefault;
   if aVal = DBNull.Value then aVal := nil;
+  if aVal is String then
+    aVal := fServices.Expand(ec, String(aVal));
   if aVal is WrapperObject then 
     exit WrapperObject(aVal).Val else 
   if (aDestType.IsArray) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptArrayObject) then begin
     var lArr := RemObjects.Script.EcmaScript.EcmaScriptArrayObject(aVal);
     Result := Array.CreateInstance(aDestType.GetElementType(), lArr.Length);
     for i: Integer := 0 to lArr.Length -1 do begin
-      Array(Result).SetValue(Convert(lArr.Get(self.fServices.Globals.ExecutionContext, 0, i.ToString()), aDestType.GetElementType(), nil), i);
+      Array(Result).SetValue(Convert(ec,lArr.Get(self.fServices.Globals.ExecutionContext, 0, i.ToString()), aDestType.GetElementType(), nil), i);
     end;
   end else if (&Type.GetTypeCode(aDestType) = TypeCode.Object) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptObject) then begin
     var lVal := RemObjects.Script.EcmaScript.EcmaScriptObject(aVal);
@@ -134,7 +138,7 @@ begin
       if not el.CanRead or not el.CanWrite then continue;
       var lEl := lVal.Get(fServices.Globals.ExecutionContext, 0, el.Name);
       if (lEl <> nil) and (lEl <> RemObjects.Script.EcmaScript.Undefined.Instance) then begin
-        el.SetValue(result, Convert(lEl, el.PropertyType, nil), []);
+        el.SetValue(result, Convert(ec, lEl, el.PropertyType, nil), []);
       end;
     end;
   end else if aVal = RemObjects.Script.EcmaScript.Undefined.Instance then exit nil 

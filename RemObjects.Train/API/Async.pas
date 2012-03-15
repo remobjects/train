@@ -204,7 +204,7 @@ begin
   var lFail := true;
   fEngine.Logger.Enter(true,'run', args);
   try
-    var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope));
+    var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope), true);
     
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := fEngine.Logger).Run();
     lFail := false;
@@ -220,7 +220,7 @@ begin
   var lFail := true;
   fEngine.Logger.Enter(true,'runAsync', args);
   var lLogger := new DelayedLogger;
-  var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope));
+  var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope), true);
   try
     var lTask := new Task(method begin
       if fEngine.DryRun then exit;
@@ -228,7 +228,7 @@ begin
       new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := lLogger).Run();
     end);
     lTask.Start;
-    fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope))), lLogger);
+    fEngine.RegisterTask(lTask, String.Format('[{0}] runAsync {1}', lTask.Id, fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope), true)), lLogger);
     result := new TaskWrapper(fEngine.Engine.GlobalObject, Task := lTask);
     lFail := false;
   finally

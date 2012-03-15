@@ -17,6 +17,23 @@ type
   protected
   public
     method &Register(aServices: IApiRegistrationServices);
+
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Log(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method LogError(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Message(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Warning(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Hint(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Debug(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Info(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Error(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
   end;
 
   FailMode = public (No, Yes, Recovered, Unknown);
@@ -230,16 +247,87 @@ end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);
 begin
-  var lLogger := aServices.Engine;
-  aServices.RegisterValue('log', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogMessage(a:FirstOrDefault:ToString, a:&Skip(1):ToArray))
-    .AddValue('error', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogError(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
-    .AddValue('message', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogMessage(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
-    .AddValue('warning', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogWarning(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
-    .AddValue('hint', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogHint(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
-    .AddValue('debug', Utilities.SimpleFunction(aServices.Engine, a-> lLogger.Logger.LogDebug(a:FirstOrDefault:ToString, a:&Skip(1):ToArray)))
-  );
-  aServices.RegisterValue('error', Utilities.SimpleFunction(aServices.Engine, a-> begin 
-    raise new Exception(a:FirstOrDefault:ToString)end ));
+  var lLog := Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Log');
+  aServices.RegisterValue('log', lLog);
+  lLog.AddValue('error', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'LogError'));
+  lLog.AddValue('message', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Message'));
+  lLog.AddValue('warning', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Warning'));
+  lLog.AddValue('hint', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Hint'));
+  lLog.AddValue('debug', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Debug'));
+  lLog.AddValue('info', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Info'));
+  aServices.RegisterValue('error', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Error'));
+end;
+
+class method LoggingRegistration.Log(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogMessage(aArgs[0])
+  else
+    aServices.Logger.LogMessage(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.LogError(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogError(aArgs[0])
+  else
+    aServices.Logger.LogError(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Message(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogMessage(aArgs[0])
+  else
+    aServices.Logger.LogMessage(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Warning(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogWarning(aArgs[0])
+  else
+    aServices.Logger.LogWarning(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Hint(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogHint(aArgs[0])
+  else
+    aServices.Logger.LogHint(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Debug(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogDebug(aArgs[0])
+  else
+    aServices.Logger.LogDebug(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Info(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    aServices.Logger.LogInfo(aArgs[0])
+  else
+    aServices.Logger.LogInfo(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Error(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+begin
+  if length(aArgs) = 0 then exit;
+  if length(aArgs) = 1 then
+    raise new Exception(aArgs[0])
+  else
+    raise new Exception(String.Format(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray));
 end;
 
 extension method ILogger.LogError(s: String; params args: array of Object);
