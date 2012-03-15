@@ -84,30 +84,34 @@ begin
   var sb := new StringBuilder;
   sb.AppendFormat('"{0}"', aProject);
 
-  if aOptions <> nil then begin
-    if not String.IsNullOrEmpty(aOptions.aliases) then
-      sb.AppendFormat(' "-A{0}"', aOptions.aliases);
+  if String.IsNullOrWhiteSpace(aOptions.unitSearchPath) then
+    aOptions.unitSearchPath := Path.GetDirectoryName(aProject)
+  else
+    aOptions.unitSearchPath := aOptions.unitSearchPath +';'+Path.GetDirectoryName(aProject);
 
-    for each el in aOptions.conditionalDefines do
-      sb.AppendFormat(' "-D{0}"', el);
+  if aOptions = nil then aOptions := new DelphiOptions;
+  if not String.IsNullOrEmpty(aOptions.aliases) then
+    sb.AppendFormat(' "-A{0}"', aOptions.aliases);
 
-    if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
-      sb.AppendFormat(' "-NO{0}" "-N0{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+  for each el in aOptions.conditionalDefines do
+    sb.AppendFormat(' "-D{0}"', el);
 
-    if not String.IsNullOrEmpty(aOptions.destinationFolder) then 
-      sb.AppendFormat(' "-LE{0}" "-LN{0}" "-E{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+  if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
+    sb.AppendFormat(' "-NO{0}" "-N0{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
-    if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
-      sb.AppendFormat(' "-I{0}"', aOptions.includeSearchPath);
+  if not String.IsNullOrEmpty(aOptions.destinationFolder) then 
+    sb.AppendFormat(' "-LE{0}" "-LN{0}" "-E{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
-    if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
-      sb.AppendFormat(' "-U{0}"', aOptions.unitSearchPath);
+  if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
+    sb.AppendFormat(' "-I{0}"', aOptions.includeSearchPath);
+
+  if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
+    sb.AppendFormat(' "-U{0}"', aOptions.unitSearchPath);
 
 
-    sb.Append(aOptions.otherParameters);
+  sb.Append(aOptions.otherParameters);
 
   
-  end;
   var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
   aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
