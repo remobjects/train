@@ -6,6 +6,7 @@ uses
   RemObjects.Train,
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
+  System.Collections.Generic,
   System.Text,
   System.Text.RegularExpressions,
   System.Xml.Linq,
@@ -16,6 +17,8 @@ type
   [PluginRegistration]
   DelphiPlugin = public class(IPluginRegistration)
   private
+    class method UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo);
+    class method ParseVersion(aVal: String): array of Integer;
   public
     method &Register(aServices: IApiRegistrationServices);
 
@@ -37,8 +40,24 @@ type
     property unitSearchPath:String;
     property namespaces: String;
     property otherParameters: String;
+
+    property updateIcon: String;
+    property updateVersionInfo: VersionInfo;
   end;  // Delphi_Path
 
+  VersionInfo = public class
+  private
+  public
+    property isDll: Boolean;
+    property version: String;
+    property fileVersion: String;
+    property company: String;
+    property description: String;
+    property legalCopyright: String;
+    property legalTrademarks: String;
+    property productName: String;
+    property title: String;
+  end;
 
 implementation
 
@@ -121,6 +140,11 @@ begin
 
   sb.Append(aOptions.otherParameters);
 
+  if not String.IsNullOrEmpty(aOptions.updateIcon) or (aOptions.updateVersionInfo <> nil) then begin
+    var lRes := Path.ChangeExtension(aProject, '.res');
+    UpdateResource(lRes, aServices.ResolveWithBase(ec, aOptions.updateIcon), aOptions.updateVersionInfo);
+  end;
+
   
   var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
@@ -157,5 +181,51 @@ begin
     lItems[i] := Regex.Replace(lItems[i], '\$\(DELPHI\)', aDelphi, RegexOptions.IgnoreCase);
   end;
   exit String.Join(';', lItems);
+end;
+
+class method DelphiPlugin.UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo);
+begin
+  var lRes := UnmanagedResourceFile.FromFile(aRes);
+
+  if not String.IsNullOrEmpty(aIcon) then
+    lRes.ReplaceIcons(File.ReadAllBytes(aIcon));
+
+  if aVersion <> nil then begin
+    var pev := new Win32VersionInfoResource();
+    pev.ResLang := 0;
+    pev.IsDll := aVersion.isDll;
+    var lVer := ParseVersion(coalesce(aVersion.version, ''));
+    var lFileVer := ParseVersion(coalesce(aVersion.fileVersion,aVersion.version, ''));
+    pev.FileVerMaj := lFileVer[0];
+    pev.FileVerMin := lFileVer[1];
+    pev.FileVerRelease := lFileVer[2];
+    pev.FileVerBuild := lFileVer[3];
+    pev.ProductVerMaj := lVer[0];
+    pev.ProductVerMin := lVer[1];
+    pev.ProductVerRelease := lVer[1];
+    pev.ProductVerBuild := lVer[2];
+    pev.Values.Add(new KeyValuePair<String,String>('ProductVersion', String.Format(System.Globalization.CultureInfo.InvariantCulture, '{0}.{1}.{2}.{3}', pev.ProductVerMaj, pev.ProductVerMin, pev.ProductVerBuild, pev.ProductVerRelease)));
+    pev.Values.Add(new KeyValuePair<String,String>('FileVersion', String.Format(System.Globalization.CultureInfo.InvariantCulture, '{0}.{1}.{2}.{3}', pev.FileVerMaj, pev.FileVerMin, pev.FileVerBuild, pev.FileVerRelease)));
+
+    if not String.IsNullOrEmpty(aVersion.company) then    pev.Values.Add(new KeyValuePair<String,String>('CompanyName', aVersion.company));
+    if not String.IsNullOrEmpty(aVersion.description) then    pev.Values.Add(new KeyValuePair<String,String>('FileDescription', aVersion.description));
+    if not String.IsNullOrEmpty(aVersion.legalCopyright) then    pev.Values.Add(new KeyValuePair<String,String>('LegalCopyright', aVersion.legalCopyright));
+    if not String.IsNullOrEmpty(aVersion.legalTrademarks) then    pev.Values.Add(new KeyValuePair<String,String>('LegalTrademarks', aVersion.legalTrademarks));
+    if not String.IsNullOrEmpty(aVersion.productName) then    pev.Values.Add(new KeyValuePair<String,String>('ProductName', aVersion.productName));
+    if not String.IsNullOrEmpty(aVersion.title) then    pev.Values.Add(new KeyValuePair<String,String>('Title', aVersion.title));
+    lRes.AddVersionInfo(true, 0, pev);
+  end;
+
+  lRes.Save(aRes);
+end;
+
+class method DelphiPlugin.ParseVersion(aVal: String): array of Integer;
+begin
+  try
+    var lVer := Version.Parse(aVal);
+    exit [lVer.Major, lVer.Minor, lVer.Build, lVer.Revision];
+  except
+      exit [0,0,0,0];
+  end;
 end;
 end.
