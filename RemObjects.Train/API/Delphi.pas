@@ -35,6 +35,7 @@ type
     property dcuDestinationFolder: String;
     property includeSearchPath: String;
     property unitSearchPath:String;
+    property namespaces: String;
     property otherParameters: String;
   end;  // Delphi_Path
 
@@ -101,6 +102,9 @@ begin
 
   for each el in aOptions.conditionalDefines do
     sb.AppendFormat(' -D"{0}"', el);
+
+  if not String.IsNullOrEmpty(aOptions.namespaces) then
+    sb.AppendFormat(' -NS"{0}"', aOptions.namespaces);
 
   if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
     sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));

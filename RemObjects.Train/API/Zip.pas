@@ -50,14 +50,15 @@ end;
 class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean);
 begin
   zip := aServices.ResolveWithBase(ec,zip);
-  if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
+  //if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
   if String.IsNullOrEmpty(aFileMasks) then aFileMasks := '*';
   aFileMasks := aFileMasks.Replace(',', ';');
   aInputFolder := aServices.ResolveWithBase(ec,aInputFolder);
   if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;
   var lZip := new Ionic.Zip.ZipFile();
-  for each el in System.IO.Directory.EnumerateFiles(aInputFolder, aFileMasks, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
+  for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
+  for each el in System.IO.Directory.EnumerateFiles(aInputFolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
     var lFal := el;
     if lFal.StartsWith(aInputFolder) then
       lFal := lFal.Substring(aInputFolder.Length).Replace('\', '/');

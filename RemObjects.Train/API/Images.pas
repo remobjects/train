@@ -38,7 +38,8 @@ begin
   var lDisk := new DiscUtils.Iso9660.CDBuilder();
   lDisk.VolumeIdentifier := aDiskName;
   lDisk.UseJoliet := true;
-  for each el in System.IO.Directory.EnumerateFiles(basefolder, filemasklist, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
+  for each mask in filemasklist.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
+  for each el in System.IO.Directory.EnumerateFiles(basefolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
     var lFal := el;
     if lFal.StartsWith(basefolder) then
       lFal := lFal.Substring(basefolder.Length);
