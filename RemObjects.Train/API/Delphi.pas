@@ -7,6 +7,7 @@ uses
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
   System.Text,
+  System.Text.RegularExpressions,
   System.Xml.Linq,
   System.IO,
   System.Runtime.InteropServices;
@@ -20,7 +21,7 @@ type
 
     [WrapAs('delphi.build', SkipDryRun := false)]
     class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
-    class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aInput: String): String;
+    class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext;aDelphi, aInput: String): String;
   end;
   DelphiOptions = public class
   private
@@ -60,19 +61,20 @@ begin
     lRootPath:= aOptions.dcc
   else begin
     case lVer of
-      '6': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String;
-      '7': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String;
-      '8': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String;
-      '2005', '9': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String;
-      '2006, 10': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String;
-      '2007, 11': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String;
-      '2009, 13': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\6.0', 'RootDir', '') as String;
-      '2010, 14': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\7.0', 'RootDir', '') as String;
-      'XE', '2011', '15': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\8.0', 'RootDir', '') as String;
-      'XE2', '2012', '16': lRootPath := Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\9.0', 'RootDir', '') as String;
+      '6': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\6.0', 'RootDir', '') as String);
+      '7': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\7.0', 'RootDir', '') as String);
+      '8': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\2.0', 'RootDir', '') as String);
+      '2005', '9': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\3.0', 'RootDir', '') as String);
+      '2006', '10': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\4.0', 'RootDir', '') as String);
+      '2007', '11': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\5.0', 'RootDir', '') as String);
+      '2009', '12': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\6.0', 'RootDir', '') as String);
+      '2010', '14': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\7.0', 'RootDir', '') as String);
+      'XE', '2011', '15': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
+      'XE2', '2012', '16': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
     else
       raise new Exception('Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
     end;
+    if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     if aOptions:platform = 'osx' then
     lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') else
     if aOptions:platform = '64' then
@@ -82,8 +84,11 @@ begin
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc32 not found: '+lRootPath);
   if aServices.Engine.DryRun then exit;
+  var lDelphi := Path.GetDirectoryName(Path.GetDirectoryName(lRootPath));
   var sb := new StringBuilder;
-  sb.AppendFormat('"{0}" -B', aProject);
+  sb.AppendFormat('"{0}" -Q -B', aProject);
+
+  var lPath := Path.GetDirectoryName(aProject);
 
   if String.IsNullOrWhiteSpace(aOptions.unitSearchPath) then
     aOptions.unitSearchPath := Path.GetDirectoryName(aProject)
@@ -104,10 +109,10 @@ begin
     sb.AppendFormat(' -LE"{0}" -LN"{0}" -E"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
-    sb.AppendFormat(' -I"{0}"', RebuildMultiPath(aServices,ec,aOptions.includeSearchPath));
+    sb.AppendFormat(' -I"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.includeSearchPath));
 
   if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
-    sb.AppendFormat(' -U"{0}"', RebuildMultiPath(aServices,ec,aOptions.unitSearchPath));
+    sb.AppendFormat(' -U"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.unitSearchPath));
 
 
   sb.Append(aOptions.otherParameters);
@@ -116,7 +121,7 @@ begin
   var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
   aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
-  var n := Shell.ExecuteProcess(lRootPath, sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(lRootPath, sb.ToString, lPath,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -140,11 +145,12 @@ begin
   if n <> 0 then raise new Exception('Delphi failed');
 end;
 
-class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aInput: String): String;
+class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aDelphi, aInput: String): String;
 begin
   var lItems := aInput.Split([';'], StringSplitOptions.RemoveEmptyEntries);
   for i: Integer := 0 to lItems.Length -1 do begin
     lItems[i] := aServices.ResolveWithBase(ec, lItems[i]);
+    lItems[i] := Regex.Replace(lItems[i], '\$\(DELPHI\)', aDelphi, RegexOptions.IgnoreCase);
   end;
   exit String.Join(';', lItems);
 end;
