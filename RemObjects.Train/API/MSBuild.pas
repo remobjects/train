@@ -7,7 +7,9 @@ uses
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
   System.Text,
+  System.Text.RegularExpressions,
   System.Xml.Linq,
+  System.Linq,
   System.IO,
   System.Runtime.InteropServices;
 
@@ -15,6 +17,8 @@ type
   [PluginRegistration]
   MSBuildPlugin = public class(IPluginRegistration)
   private
+    class var fVersionRegex,
+    fFileVersionRegex: Regex;
   public
     method &Register(aServices: IApiRegistrationServices);
 
@@ -26,6 +30,8 @@ type
     class method MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext;aProject: String; aOptions: MSBuildOptions);
     [WrapAs('msbuild.rebuild', SkipDryRun := false)]
     class method MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext;aProject: String; aOptions: MSBuildOptions);
+    [WrapAs('msbuild.updateAssemblyVersion', SkipDryRun := true)]
+    class method MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String; aNewVersion: String; aFileVersion: String := '');
   end;
   MSBuildOptions = public class
   private
@@ -44,7 +50,9 @@ begin
     .AddValue('clean', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildClean'))
     .AddValue('build', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildBuild'))
     .AddValue('rebuild', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildRebuild'))
+    .AddValue('updateAssemblyVersion', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildUpdateAssemblyVersion'))
 ;
+
 end;
 
 class method MSBuildPlugin.CheckSettings(aServices: IApiRegistrationServices);
@@ -190,6 +198,41 @@ begin
   lTmp.Replay(aServices.Logger);
 
   if n <> 0 then raise new Exception('MSBuild failed');
+end;
+
+class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; 
+  aFile: String; aNewVersion: String; aFileVersion: String);
+begin
+  for each el in aFile.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(a->aServices.ResolveWithBase(ec, a)) do begin
+    var lFile := File.ReadAllText(el);
+    var lFoundAsmVer := false;
+    var lFoundAsmFileVer := false;
+    if fVersionRegex = nil then begin
+      fVersionRegex := new Regex('(?<=[. ]AssemblyVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
+      fFileVersionRegex := new Regex('(?<=[. ]AssemblyFileVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
+    end;
+    lFile := fVersionRegex.Replace(lFile, method (aMatch: Match): String begin
+        lFoundAsmVer := true;
+        exit aNewVersion;
+      end);
+    lFile := fFileVersionRegex.Replace(lFile, method (aMatch: Match): String begin
+        lFoundAsmFileVer := true;
+        if String.IsNullOrEmpty(aFileVersion) then exit aNewVersion;
+        exit aFileVersion;
+      end);
+    if not lFoundAsmVer then begin
+      lFile := lFile+ 
+      #13#10'[assembly: AssemblyVersion("'+aNewVersion+'")]'#13#10;
+
+    end;
+    if not lFoundAsmFileVer and not String.IsNullOrEmpty(aFileVersion) then begin
+      lFile := lFile+ 
+      #13#10'[assembly: AssemblyVersion("'+aFileVersion+'")]'#13#10;
+
+    end;
+
+    File.WriteAllText(el, lFile);
+  end;
 end;
 
 end.
