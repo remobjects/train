@@ -184,8 +184,8 @@ begin
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);
 
-    lLogger.LogMessage('Invoked as: '+String.Join(' ',lCmdArgs.Select(a->'"'+a+'"').ToArray));
-    lLogger.LogMessage('Invoked as: '+String.Join(' ',args.Select(a->'"'+a+'"').ToArray));
+    //lLogger.LogMessage('Invoked as: '+String.Join(' ',lCmdArgs.Select(a->'"'+a+'"').ToArray));
+    //lLogger.LogMessage('Invoked as: '+String.Join(' ',args.Select(a->'"'+a+'"').ToArray));
     lArgs := lOptions.Parse(lCmdArgs.Skip(1));
   except
     on  Exception  do
@@ -230,11 +230,10 @@ begin
     end;
   except
     on e: Exception do begin
-      //if LoggerSettings.ShowDebug then
-      //  lLogger.LogError('Exception: {0}', e.ToString)
+      lLogger.LogDebug('Exception: {0}', e.Message);
       //else
 //        lLogger.LogError('Exception: {0}', e.Message);
-
+      
       exit 1;
     end;
   finally
