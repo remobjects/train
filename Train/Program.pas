@@ -12,7 +12,7 @@ uses
 type
   ConsoleApp = class
   public
-    class method Main(): Integer;
+    class method Main(args: array of String): Integer;
     class property ShowColors: Boolean := true;
   end;
 
@@ -154,7 +154,7 @@ begin
   Console.Write(s);
 end;
 
-class method ConsoleApp.Main(): Integer;
+class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
   Console.WriteLine('Copyright (c) RemObjects Software, 2012. All rights reserved.');
@@ -184,8 +184,8 @@ begin
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);
 
-    var lDebug :=('Invoked as: '+String.Join(' ',lCmdArgs.Select(a->'"'+a+'"').ToArray));
-    lLogger.LogMessage(lDebug);
+    lLogger.LogMessage('Invoked as: '+String.Join(' ',lCmdArgs.Select(a->'"'+a+'"').ToArray));
+    lLogger.LogMessage('Invoked as: '+String.Join(' ',args.Select(a->'"'+a+'"').ToArray));
     lArgs := lOptions.Parse(lCmdArgs.Skip(1));
   except
     on  Exception  do
