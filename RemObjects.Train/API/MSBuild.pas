@@ -203,7 +203,7 @@ end;
 class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; 
   aFile: String; aNewVersion: String; aFileVersion: String);
 begin
-  for each el in aFile.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(a->aServices.ResolveWithBase(ec, a)) do begin
+  for each el in aFile.Split([';', ','], StringSplitOptions.RemoveEmptyEntries).Select(a->aServices.ResolveWithBase(ec, a)) do begin
     var lFile := File.ReadAllText(el);
     var lFoundAsmVer := false;
     var lFoundAsmFileVer := false;

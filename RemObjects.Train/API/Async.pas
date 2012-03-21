@@ -205,7 +205,11 @@ begin
   fEngine.Logger.Enter(true,'run', args);
   try
     var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope), true);
-    
+    if not File.Exists(lPath) then begin
+      fengine.Logger.LogError('File not found: '+lPath);
+      raise new Exception('File not found: '+lPath);
+    end;
+
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := fEngine.Logger).Run();
     lFail := false;
   finally
@@ -221,6 +225,10 @@ begin
   fEngine.Logger.Enter(true,'runAsync', args);
   var lLogger := new DelayedLogger;
   var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope), true);
+  if not File.Exists(lPath) then begin
+    fengine.Logger.LogError('File not found: '+lPath);
+    raise new Exception('File not found: '+lPath);
+  end;
   try
     var lTask := new Task(method begin
       if fEngine.DryRun then exit;

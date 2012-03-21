@@ -190,6 +190,10 @@ begin
       lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
 
     for each el in lArgs do begin
+      if not File.Exists(el) then begin
+        lLogger.LogError('File not found {0}', el);
+        exit 1;
+      end;
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
       lEngine.DryRun := lDryRun;

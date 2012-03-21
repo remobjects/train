@@ -50,13 +50,13 @@ type
     class method Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext;params args: array of String): String;
     [WrapAs('path.resolve', SkipDryRun := true, Important := false)]
     class method Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext;aPath: String; aBase: String := nil): String;
-    [WrapAs('path.getFilename', SkipDryRun := true, Important := false)]
+    [WrapAs('path.getFileName', SkipDryRun := true, Important := false)]
     class method Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
-    [WrapAs('path.getFilenameWithoutExtension', SkipDryRun := true, Important := false)]
+    [WrapAs('path.getFileNameWithoutExtension', SkipDryRun := true, Important := false)]
     class method Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
-    [WrapAs('path.getFilenameExtension', SkipDryRun := true, Important := false)]
+    [WrapAs('path.getFileNameExtension', SkipDryRun := true, Important := false)]
     class method Path_GetFilenameExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
-    [WrapAs('path.getFoldername', SkipDryRun := true, Important := false)]
+    [WrapAs('path.getFolderName', SkipDryRun := true, Important := false)]
     class method Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
   end;
 
@@ -91,10 +91,10 @@ begin
     .AddValue('directorySeperator', System.IO.Path.DirectorySeparatorChar.ToString())
     .AddValue('combine', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Combine'))
     .AddValue('resolve', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Resolve'))
-    .AddValue('getFilename', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilename'))
-    .AddValue('getFilenameWithoutExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFileWithoutExtension'))
-    .AddValue('getFilenameExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilenameExtension'))
-    .AddValue('getFoldername', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFoldername'))
+    .AddValue('getFileName', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilename'))
+    .AddValue('getFileNameWithoutExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFileWithoutExtension'))
+    .AddValue('getFileNameExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilenameExtension'))
+    .AddValue('getFolderName', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFoldername'))
   );
 end;
 
