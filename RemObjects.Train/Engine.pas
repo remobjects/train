@@ -87,7 +87,7 @@ method Engine.Run;
 begin
   Initialize;
   var lFail := false;
-  Logger.Enter('script', fEngine.SourceFileName);
+  Logger.Enter(true,'script', fEngine.SourceFileName);
   try
     fEngine.Run();
     for each el in fTasks do begin
@@ -110,7 +110,7 @@ begin
   finally
     for each el in fTasks.ToArray do 
       UnregisterTask(el.Item1);
-    Logger.Exit('script', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
+    Logger.Exit(true, 'script', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
   end;
 end;
 

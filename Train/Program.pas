@@ -13,6 +13,7 @@ type
   ConsoleApp = class
   public
     class method Main(): Integer;
+    class property ShowColors: Boolean;
   end;
 
   Logger = public class(ILogger)
@@ -37,49 +38,59 @@ method Logger.LogDebug(s: System.String);
  begin
   if not LoggerSettings. ShowDebug then exit;
   CheckEnter;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.DarkBlue;
-  Console.WriteLine(s);
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.DarkBlue;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else Console.WriteLine(s);
 end;
 
 method Logger.LogError(s: System.String);
 begin
   CheckEnter;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.Red;
-  Console.WriteLine(s);
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.Red;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else Console.WriteLine(s);
 end;
 
 method Logger.LogHint(s: System.String);
 begin
   if not LoggerSettings. ShowHint then exit;
   CheckEnter;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.Magenta;
-  Console.WriteLine(s);
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.Magenta;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else Console.WriteLine(s);
 end;
 
 method Logger.LogMessage(s: System.String);
 begin
   if not LoggerSettings. ShowMessage then exit;
   CheckEnter;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.Gray;
-  Console.WriteLine(s);
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.Gray;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else Console.WriteLine(s);
 end;
 
 method Logger.LogWarning(s: System.String);
 begin
   if not LoggerSettings. ShowWarning then exit;
-  CheckEnter;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.Yellow;
-  Console.WriteLine(s);
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    CheckEnter;
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.Yellow;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else Console.WriteLine(s);
 end;
 
 method Logger.Enter(aImportant: Boolean := false; aScript: String; params args:  array of Object);
@@ -90,12 +101,17 @@ begin
     args := Array of Object(args[0]);
   end;
 
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.White;
+  var lCol: ConsoleColor;
+  if ConsoleApp.ShowColors then begin
+    lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.White;
+  end;
   var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
   Console.Write(aScript+'('+lArgs+') { ... ');
-                 
-  Console.ForegroundColor := lCol;
+        
+  if ConsoleApp.ShowColors then begin       
+    Console.ForegroundColor := lCol;
+  end;
   fWriteEnter := true;
   inc(fIndent);
 end;
@@ -103,8 +119,11 @@ end;
 method Logger.&Exit(aImportant: Boolean := false;aScript: String; aFailMode: FailMode; params  args:array of  Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
-  var lCol := Console.ForegroundColor;
-  Console.ForegroundColor := ConsoleColor.White;
+  var lCol: ConsoleColor;
+  if ConsoleApp.ShowColors then begin
+    lCol := Console.ForegroundColor;
+    Console.ForegroundColor := ConsoleColor.White;
+  end;
   dec(fIndent);
   if fWriteEnter then begin
     fWriteEnter := false;
@@ -113,7 +132,9 @@ begin
     CheckEnter;
     Console.WriteLine('} '+aScript);
   end;
-  Console.ForegroundColor := lCol;
+  if ConsoleApp.ShowColors then begin
+    Console.ForegroundColor := lCol;
+  end;
 end;
 
 method Logger.LogInfo(s: String);
@@ -147,6 +168,7 @@ begin
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
+  lOptions.Add('c|colors', 'Use colors', v-> begin ShowColors := assigned(v); end);
   lOptions.Add('d|debug', 'Show debugging messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
   lOptions.Add('w|warning', 'Show warning messages', v-> begin LoggerSettings.ShowWarning := assigned(v); end);
   lOptions.Add('i|hint', 'Show hint messages', v-> begin LoggerSettings.ShowDebug := assigned(v); end);
