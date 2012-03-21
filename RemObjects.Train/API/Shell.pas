@@ -60,7 +60,7 @@ begin
     end;
   end;
 
-  fEngine.Engine.Logger.Enter(true,String.Format('exec({0})', lCMD), lArg);
+  fEngine.Engine.Logger.Enter(true,'exec', lCMD+if not String.IsNullOrEmpty(lArg) then ' '+ lArg else '');
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
