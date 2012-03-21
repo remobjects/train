@@ -47,23 +47,23 @@ implementation
 method IniPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   var lProto := new EcmaScriptObject(aServices.Globals);
-  lProto.AddValue('toFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), 'ToFile'));
-  lProto.AddValue('toString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), '_ToString'));
+  lProto.AddValue('toFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), 'ToFile'));
+  lProto.AddValue('toString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine,typeOf(IniPlugin), '_ToString'));
 
-  var lCtor := RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'Ctor', lProto);
+  var lCtor := RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'Ctor', lProto);
   aServices.RegisterValue('ini', lCtor);
   lCtor.Class := 'ini';
-  lCtor.AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromFile', lProto));
-  lCtor.AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromString', lProto));
+  lCtor.AddValue('fromFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromFile', lProto));
+  lCtor.AddValue('fromString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'FromString', lProto));
 
 
-  lProto.AddValue('getValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'GetString'));
-  lProto.AddValue('setValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'SetString'));
-  lProto.AddValue('deleteSection', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteSection'));
-  lProto.AddValue('deleteValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteValue'));
-  lProto.AddValue('keysInSection', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'KeysInSection'));
+  lProto.AddValue('getValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'GetString'));
+  lProto.AddValue('setValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'SetString'));
+  lProto.AddValue('deleteSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteSection'));
+  lProto.AddValue('deleteValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteValue'));
+  lProto.AddValue('keysInSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'KeysInSection'));
   (*  
-  lProto.AddValue('keysInSection', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
+  lProto.AddValue('keysInSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('keysInSection', args);
     try 
       var lSelf := aSelf as IniFileWrapper;
@@ -78,7 +78,7 @@ begin
     end;
   end)); 
   end)); 
-  lProto.AddValue('deleteValue', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
+  lProto.AddValue('deleteValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('deleteValue', args);
     try 
       var lSelf := aSelf as IniFileWrapper;

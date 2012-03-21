@@ -143,7 +143,7 @@ begin
   if ev <> nil then begin
     for i: Integer := 0 to RemObjects.Script.ecmascript.Utilities.GetObjAsInteger(ev.Get('length'), fEngine.GlobalObject.ExecutionContext) -1 do begin
       if i <> 0 then lArgs := lArgs + ', ';
-      lArgs := lArgs + Utilities.MyFormat('{0}', ev.Get(i.ToString));
+      lArgs := lArgs + MUtilities.MyFormat('{0}', ev.Get(i.ToString));
     end;
   end;
 
@@ -169,9 +169,9 @@ end;
 
 method Engine.RegisterProperty(aName: String; aGet: Func<Object>; aSet: Action<Object>);
 begin
-  fEngine.GlobalObject.DefineOwnProperty(aName, new PropertyValue(PropertyAttributes.Enumerable, Utilities.SimpleFunction(self, a -> begin
+  fEngine.GlobalObject.DefineOwnProperty(aName, new PropertyValue(PropertyAttributes.Enumerable, MUtilities.SimpleFunction(self, a -> begin
     exit aGet();
-  end), Utilities.SimpleFunction(self, a-> begin
+  end), MUtilities.SimpleFunction(self, a-> begin
     aSet(EcmaScriptScope.DoTryWrap(fEngine.GlobalObject, coalesce(a:FirstOrDefault, Undefined.Instance)));
     exit Undefined.Instance;
   end)));

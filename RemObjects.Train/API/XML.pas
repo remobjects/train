@@ -38,16 +38,16 @@ implementation
 method XmlPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   var lProto := new EcmaScriptObject(aServices.Globals);
-  lProto.AddValue('toFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToFile')); 
-  lProto.AddValue('toString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToString')); 
-  lProto.AddValue('xpath', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath'));
-  lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlValue'), nil)); 
+  lProto.AddValue('toFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToFile')); 
+  lProto.AddValue('toString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToString')); 
+  lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath'));
+  lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlValue'), nil)); 
   
   
 
   aServices.RegisterObjectValue('xml')
-    .AddValue('fromFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromFile', lProto))
-    .AddValue('fromString', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromString', lProto));
+    .AddValue('fromFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromFile', lProto))
+    .AddValue('fromString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromString', lProto));
 end;
 
 class method XmlPlugin.xmlFromFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): XElement;

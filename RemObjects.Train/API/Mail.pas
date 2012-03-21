@@ -46,7 +46,7 @@ implementation
 method MailReg.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('mail', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-  .AddValue('send', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MailReg), 'MailSend'))
+  .AddValue('send', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MailReg), 'MailSend'))
   );
 end;
 

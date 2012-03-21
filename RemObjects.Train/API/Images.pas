@@ -25,8 +25,8 @@ implementation
 method ImagesPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('images')
-    .AddValue('createISO', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(ImagesPlugin), 'ImagesCreateISO'))
-    .AddValue('createDMG', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(ImagesPlugin), 'ImagesCreateDMG'));
+    .AddValue('createISO', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(ImagesPlugin), 'ImagesCreateISO'))
+    .AddValue('createDMG', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(ImagesPlugin), 'ImagesCreateDMG'));
 end;
 
 class method ImagesPlugin.ImagesCreateISO(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; isoFile: String; basefolder: String; filemasklist: String; aDiskName: String; aRecurse: Boolean := true);

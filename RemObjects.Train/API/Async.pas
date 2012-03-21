@@ -84,8 +84,8 @@ method AsyncRegistration.&Register(aServices: IApiRegistrationServices);
 begin
   var lAsync := new AsyncWorker(aServices.Engine);
   aServices.AsyncWorker := lAsync;
-  aServices.RegisterValue('include', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
-  aServices.RegisterValue('sleep', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Sleep'));
+  aServices.RegisterValue('include', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
+  aServices.RegisterValue('sleep', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Sleep'));
   aServices.RegisterValue('async', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'async', @lAsync.CallAsync, 1, false, true));  
@@ -98,7 +98,7 @@ begin
   aServices.RegisterValue('expand', 
     new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
     'expand', @lAsync.expand, 1, false, true));
-  aServices.RegisterValue('waitFor', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, (a,b,c) -> 
+  aServices.RegisterValue('waitFor', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a,b,c) -> 
     begin 
       lAsync.WaitFor(a, Utilities.GetArgAsEcmaScriptObject(c, 0, a), 
       Utilities.GetArgAsInteger(c, 1, a));  

@@ -30,7 +30,7 @@ implementation
 method InnoSetupPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('inno')
-    .AddValue('build', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(InnoSetupPlugin), 'InnoBuild'));
+    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(InnoSetupPlugin), 'InnoBuild'));
 end;
 
 class method InnoSetupPlugin.InnoBuild(aServices: IApiRegistrationServices; aFilename: String; aOptions: InnoSetupOptions);

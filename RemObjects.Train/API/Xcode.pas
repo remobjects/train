@@ -44,9 +44,9 @@ implementation
 method XcodePlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('xcode')
-    .AddValue('clean', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeClean'))
-    .AddValue('build', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeBuild'))
-    .AddValue('rebuild', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeRebuild'));
+    .AddValue('clean', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeClean'))
+    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeBuild'))
+    .AddValue('rebuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(XcodePlugin), 'XcodeRebuild'));
 end;
 
 class method XcodePlugin.CheckSettings(aServices: IApiRegistrationServices);

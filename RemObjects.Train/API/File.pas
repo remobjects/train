@@ -67,34 +67,34 @@ method FilePlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('file', 
     new EcmaScriptObject(aServices.Globals)
-    .AddValue('copy', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
-    .AddValue('move', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Move'))
-    .AddValue('list', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_List'))
-    .AddValue('remove', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Delete'))
-    .AddValue('read', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Read'))
-    .AddValue('write', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Write'))
-    .AddValue('append', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Append'))
-    .AddValue('exists', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Exists'))
+    .AddValue('copy', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
+    .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Move'))
+    .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_List'))
+    .AddValue('remove', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Delete'))
+    .AddValue('read', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Read'))
+    .AddValue('write', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Write'))
+    .AddValue('append', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Append'))
+    .AddValue('exists', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Exists'))
   );
 
   aServices.RegisterValue('folder', 
     new EcmaScriptObject(aServices.Globals)
-    .AddValue('list', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
-    .AddValue('exists', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Exists'))
-    .AddValue('move', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Move'))
-    .AddValue('create', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Create'))
-    .AddValue('remove', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Delete'))
+    .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
+    .AddValue('exists', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Exists'))
+    .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Move'))
+    .AddValue('create', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Create'))
+    .AddValue('remove', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Delete'))
   );
 
   aServices.RegisterValue('path', 
     new EcmaScriptObject(aServices.Globals)
     .AddValue('directorySeperator', System.IO.Path.DirectorySeparatorChar.ToString())
-    .AddValue('combine', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Combine'))
-    .AddValue('resolve', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Resolve'))
-    .AddValue('getFileName', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilename'))
-    .AddValue('getFileNameWithoutExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFileWithoutExtension'))
-    .AddValue('getFileNameExtension', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilenameExtension'))
-    .AddValue('getFolderName', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFoldername'))
+    .AddValue('combine', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Combine'))
+    .AddValue('resolve', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Resolve'))
+    .AddValue('getFileName', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilename'))
+    .AddValue('getFileNameWithoutExtension', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFileWithoutExtension'))
+    .AddValue('getFileNameExtension', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilenameExtension'))
+    .AddValue('getFolderName', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFoldername'))
   );
 end;
 

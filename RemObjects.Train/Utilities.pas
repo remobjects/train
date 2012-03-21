@@ -10,7 +10,7 @@ uses
   System.Text;
 
 type
-  Utilities = public class
+  MUtilities = public class
   private
   protected
   public
@@ -56,34 +56,34 @@ begin
   end;
 end;
 
-class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
+class method MUtilities.SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
 begin
   exit new EcmaScriptFunctionObject(aOwner.Engine.GlobalObject, '', aDelegate, 0, false, false);
 end;
 
-class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: Func<Object, array of Object, Object>): EcmaScriptFunctionObject;
+class method MUtilities.SimpleFunction(aOwner: Engine; aDelegate: Func<Object, array of Object, Object>): EcmaScriptFunctionObject;
 begin
   exit SimpleFunction(aOwner, (a,b,c) -> aDelegate(b,c));
 end;
 
-class method Utilities.SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
+class method MUtilities.SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
 begin
   exit SimpleFunction(aOwner, (a,b,c) -> aDelegate(c));
 end;
 
-class method Utilities.Windows: Boolean;
+class method MUtilities.Windows: Boolean;
 begin
   exit Environment.OSVersion.Platform in [PlatformID.Win32NT, PlatformID.Win32S, PlatformID.Win32Windows, PlatformID.WinCE];
 end;
 
-class method Utilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
+class method MUtilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
 begin
   var lRes := new RemObjects.Train.API.Wrapper(aOwner, aType.GetMethod(aMethod), aProto);
 
   exit new EcmaScriptFunctionObject(aOwner.Engine.GlobalObject, aMethod, @lRes.Run, 0);
 end;
 
-class method Utilities.MyFormat(s: String; params args: array of Object): String;
+class method MUtilities.MyFormat(s: String; params args: array of Object): String;
 begin
   if (length(args) = 1) and (args[0] <> nil) and (args[0] is Array) then
     args := Array(args).OfType<Object>.ToArray;

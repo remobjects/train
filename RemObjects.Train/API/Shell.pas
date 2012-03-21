@@ -202,13 +202,13 @@ begin
   var lProcess := new Process();
   if lProcess.StartInfo = nil then lProcess.StartInfo := new ProcessStartInfo();
   if aComSpec then begin
-    lProcess.StartInfo.FileName := if RemObjects.Train.Utilities.Windows then coalesce(System.Environment.GetEnvironmentVariable('COMSPEC'), 'CMD.EXE') else coalesce(System.Environment.GetEnvironmentVariable('SHELL'), '/bin/sh');
+    lProcess.StartInfo.FileName := if MUtilities.Windows then coalesce(System.Environment.GetEnvironmentVariable('COMSPEC'), 'CMD.EXE') else coalesce(System.Environment.GetEnvironmentVariable('SHELL'), '/bin/sh');
     if String.IsNullOrEmpty(aCommand) then begin
-      lProcess.StartInfo.Arguments := (if not RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aArgs;
+      lProcess.StartInfo.Arguments := (if not MUtilities.Windows then '-c ' else '/C ')+ aArgs;
     end else begin
       if not aCommand.StartsWith('"') then 
         aCommand := '"'+aCommand.Replace('"', '""')+'"';
-      lProcess.StartInfo.Arguments := (if not RemObjects.Train.Utilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
+      lProcess.StartInfo.Arguments := (if not MUtilities.Windows then '-c ' else '/C ')+ aCommand+' '+aArgs;
     end;
   end else begin
     lProcess.StartInfo.FileName := aCommand;
@@ -257,7 +257,7 @@ begin
   var lInstance := new Shell(aServices);
   aServices.RegisterValue('shell', 
     new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-  .AddValue('cd', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+  .AddValue('cd', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
       var lCurrPath := aServices.Engine.WorkDir;
       var lPath := RemObjects.Script.EcmaScript.Utilities.GetArgAsString(c, 0, a);
@@ -273,9 +273,9 @@ begin
         aServices.Engine.WorkDir := lCurrPath;
       end;
     end))
-  .AddValue('exec', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, @lInstance.Exec))
-  .AddValue('execAsync', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, @lInstance.ExecAsync))
-  .AddValue('system', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, @lInstance.INTSystem)));
+  .AddValue('exec', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.Exec))
+  .AddValue('execAsync', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.ExecAsync))
+  .AddValue('system', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.INTSystem)));
 end;
 
 end.

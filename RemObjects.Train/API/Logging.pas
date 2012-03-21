@@ -250,15 +250,15 @@ end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);
 begin
-  var lLog := Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Log');
+  var lLog := MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Log');
   aServices.RegisterValue('log', lLog);
-  lLog.AddValue('error', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'LogError'));
-  lLog.AddValue('message', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Message'));
-  lLog.AddValue('warning', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Warning'));
-  lLog.AddValue('hint', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Hint'));
-  lLog.AddValue('debug', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Debug'));
-  lLog.AddValue('info', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Info'));
-  aServices.RegisterValue('error', Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'Error'));
+  lLog.AddValue('error', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'LogError'));
+  lLog.AddValue('message', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Message'));
+  lLog.AddValue('warning', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Warning'));
+  lLog.AddValue('hint', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Hint'));
+  lLog.AddValue('debug', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Debug'));
+  lLog.AddValue('info', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Info'));
+  aServices.RegisterValue('error', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Error'));
 end;
 
 class method LoggingRegistration.Log(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
@@ -335,7 +335,7 @@ end;
 
 extension method ILogger.LogError(s: String; params args: array of Object);
 begin
-  self.LogError(Utilities.MyFormat(s, args));
+  self.LogError(MUtilities.MyFormat(s, args));
 end;
 
 
@@ -355,27 +355,27 @@ end;
 
 extension method ILogger.LogMessage(s: String; params args: array of Object);
 begin
-  self.LogMessage(Utilities.MyFormat(s,  args));
+  self.LogMessage(MUtilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogWarning(s: String; params args: array of Object);
 begin
-  self.LogWarning(Utilities.MyFormat(s,  args));
+  self.LogWarning(MUtilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogHint(s: String; params args: array of Object);
 begin
-  self.LogHint(Utilities.MyFormat(s,  args));
+  self.LogHint(MUtilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogDebug(s: String; params args: array of Object);
 begin
-  self.LogDebug(Utilities.MyFormat(s,  args));
+  self.LogDebug(MUtilities.MyFormat(s,  args));
 end;
 
 extension method ILogger.LogInfo(s: String; params args: array of Object);
 begin
-  self.LogInfo(Utilities.MyFormat(s,  args));
+  self.LogInfo(MUtilities.MyFormat(s,  args));
 end;
 
 end.

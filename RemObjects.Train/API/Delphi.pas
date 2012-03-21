@@ -64,7 +64,7 @@ implementation
 method DelphiPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('delphi')
-    .AddValue('build', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiBuild'))
+    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiBuild'))
 ;
 end;
 

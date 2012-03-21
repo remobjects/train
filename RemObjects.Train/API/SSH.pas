@@ -40,17 +40,17 @@ implementation
 method SSHReg.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('ssh', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-  .AddValue('execute', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SshExecute'))
-  .AddValue('loadKey', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SshLoadKey')));
+  .AddValue('execute', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SshExecute'))
+  .AddValue('loadKey', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SshLoadKey')));
 
   var lProto := new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals);
-  lProto.AddValue('listFiles', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFiles'));
-  lProto.AddValue('listFolders', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFolders'));
-  lProto.AddValue('download', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpUpload'));
-  lProto.AddValue('upload', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpDownload'));
-  lProto.AddValue('close', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpClose'));
+  lProto.AddValue('listFiles', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFiles'));
+  lProto.AddValue('listFolders', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFolders'));
+  lProto.AddValue('download', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpUpload'));
+  lProto.AddValue('upload', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpDownload'));
+  lProto.AddValue('close', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpClose'));
   aServices.RegisterValue('sftp', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-  .AddValue('connect', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpConnect', lProto)));
+  .AddValue('connect', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpConnect', lProto)));
 end;
 
 class method SSHReg.SshExecute(aServices: IApiRegistrationServices; aConnectionString: String; aCMD: String; aUSername: String; aPassword: String): String;

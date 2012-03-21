@@ -24,8 +24,8 @@ implementation
 method WebRegister.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('http', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
-    .AddValue('getUrl', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(WebRegister), 'HttpGetUrl'))
-    .AddValue('downloadUrl', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(WebRegister), 'HttpDownloadUrl')));
+    .AddValue('getUrl', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(WebRegister), 'HttpGetUrl'))
+    .AddValue('downloadUrl', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(WebRegister), 'HttpDownloadUrl')));
 end;
 
 class method WebRegister.HttpGetUrl(aServices: IApiRegistrationServices; aUrl: String): String;

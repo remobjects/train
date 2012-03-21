@@ -45,7 +45,7 @@ begin
   var lEnv := new RemObjects.Train.API.JVariables(aServices.Engine);
   aServices.RegisterValue('env', lEnv);
   aServices.RegisterProperty('wd', -> aServices.Engine.WorkDir, a-> begin aServices.Engine.WorkDir := Utilities.GetObjAsString(a, aServices.Globals.ExecutionContext) end);
-  aServices.RegisterValue('export', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, a-> begin
+  aServices.RegisterValue('export', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, a-> begin
     aServices.Logger.Enter('export', a);
     try
       var lValue := a.Skip(1):FirstOrDefault();
@@ -57,7 +57,7 @@ begin
       aServices.Logger.Exit('export', FailMode.No);
     end;
   end));
-  aServices.RegisterValue('ignoreErrors', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+  aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
     aServices.Logger.Enter('ignoreErrors', c);
     var lFail := false;
@@ -75,7 +75,7 @@ begin
       aServices.Logger.Exit('ignoreErrors', if lFail then FailMode.Recovered else FailMode.No);
     end;
     end));
-  aServices.RegisterValue('retry', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+  aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
       aServices.Logger.Enter('retry', c);
       var lFailMode := FailMode.No;

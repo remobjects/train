@@ -40,10 +40,10 @@ implementation
 method ZipRegistration.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('zip')
-    .AddValue('compress', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipCompress'))
-    .AddValue('list', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipList'))
-    .AddValue('extractFile', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipExtractFile'))
-    .AddValue('extractFiles', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipExtractFiles'))
+    .AddValue('compress', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipCompress'))
+    .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipList'))
+    .AddValue('extractFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipExtractFile'))
+    .AddValue('extractFiles', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'ZipExtractFiles'))
     ;
 end;
 

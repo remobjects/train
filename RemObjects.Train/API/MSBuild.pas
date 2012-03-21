@@ -4,6 +4,7 @@ interface
 
 uses 
   RemObjects.Train,
+  System.Threading,
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
   System.Text,
@@ -33,6 +34,19 @@ type
     [WrapAs('msbuild.updateAssemblyVersion', SkipDryRun := true)]
     class method MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String; aNewVersion: String; aFileVersion: String := '');
   end;
+  [PluginRegistration]
+  GacPlugin = public class(IPluginRegistration)
+  public
+    method &Register(aServices: IApiRegistrationServices);
+    [WrapAs('gac.install', SkipDryRun := true)]
+    class method GacInstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
+    [WrapAs('gac.uninstall', SkipDryRun := true)]
+    class method GacUninstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
+    [WrapAs('gac.list', SkipDryRun := true)]
+    class method GacList(aServices: IApiRegistrationServices; ec: ExecutionContext; aFilter: String): array of String;
+  end;
+
+
   MSBuildOptions = public class
   private
   public
@@ -44,13 +58,48 @@ type
 
 implementation
 
+method GacPlugin.&Register(aServices: IApiRegistrationServices);
+begin
+  aServices.RegisterObjectValue('gac')
+    .AddValue('install', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(GacPlugin), 'GacInstall'))
+    .AddValue('uninstall', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(GacPlugin), 'GacUninstall'))
+    .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(GacPlugin), 'GacList'))
+;
+end;
+
+class method GacPlugin.GacInstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
+begin
+  if MUtilities.Windows then begin
+    MSWinGacUtil.Register(aServices.ResolveWithBase(ec, aFile, false));
+  end else
+    raise new Exception('GacUtil only implemented for Windows');
+end;
+
+class method GacPlugin.GacUninstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
+begin
+  if MUtilities.Windows then begin
+    MSWinGacUtil.Unregister(aServices.ResolveWithBase(ec, aFile));
+  end else
+    raise new Exception('GacUtil only implemented for Windows');
+end;
+
+class method GacPlugin.GacList(aServices: IApiRegistrationServices; ec: ExecutionContext; aFilter: String): array of String;
+begin
+  var lFilter := if aFilter = nil then '' else aFilter.ToLowerInvariant;
+  if MUtilities.Windows then begin
+    var lList := MSWinGacUtil.List('');
+    result := lList.Where(a->a.ToLowerInvariant.Contains(lFilter)).ToArray;
+  end else
+    raise new Exception('GacUtil only implemented for Windows');
+end;
+
 method MSBuildPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('msbuild')
-    .AddValue('clean', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildClean'))
-    .AddValue('build', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildBuild'))
-    .AddValue('rebuild', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildRebuild'))
-    .AddValue('updateAssemblyVersion', RemObjects.Train.Utilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildUpdateAssemblyVersion'))
+    .AddValue('clean', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildClean'))
+    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildBuild'))
+    .AddValue('rebuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildRebuild'))
+    .AddValue('updateAssemblyVersion', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildUpdateAssemblyVersion'))
 ;
 
 end;
