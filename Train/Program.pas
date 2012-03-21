@@ -13,7 +13,7 @@ type
   ConsoleApp = class
   public
     class method Main(): Integer;
-    class property ShowColors: Boolean;
+    class property ShowColors: Boolean := true;
   end;
 
   Logger = public class(ILogger)
