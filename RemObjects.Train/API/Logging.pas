@@ -71,6 +71,7 @@ type
     method FindFailNodes(var aWork: XElement; aInput: sequence of XElement);
     fTarget: System.IO.Stream;
     fXmlData: System.Xml.Linq.XElement;
+    class method Filter(s: String): String;
   public
     constructor(aTarget: System.IO.Stream);
     method Dispose;
@@ -122,38 +123,38 @@ end;
 
 method XmlLogger.LogError(s: String);
 begin
-  fXmlData.Add(new XElement('error', s));
+  fXmlData.Add(new XElement('error', Filter(s)));
 end;
 
 method XmlLogger.LogMessage(s: String);
 begin
   if LoggerSettings. ShowMessage then
-    fXmlData.Add(new XElement('message', s));
+    fXmlData.Add(new XElement('message', Filter(s)));
 end;
 
 method XmlLogger.LogWarning(s: String);
 begin
   if LoggerSettings. ShowWarning then
-    fXmlData.Add(new XElement('warning', s));
+    fXmlData.Add(new XElement('warning', Filter(s)));
 end;
 
 method XmlLogger.LogHint(s: String);
 begin
   if LoggerSettings. ShowHint then
-    fXmlData.Add(new XElement('hint', s));
+    fXmlData.Add(new XElement('hint', Filter(s)));
 end;
 
 method XmlLogger.LogDebug(s: String);
 begin
   if LoggerSettings. ShowDebug then
-    fXmlData.Add(new XElement('debug', s));
+    fXmlData.Add(new XElement('debug', Filter(s)));
 end;
 
 method XmlLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a-> if a is EcmaScriptObject then  EcmaScriptObject(a).Root.JSONStringify(EcmaScriptObject(a).Root.ExecutionContext, nil, a):ToString else  a.ToString()).ToArray);
-  var lNode := new XElement('action', new XAttribute('name', aScript), new XAttribute('args', lArgsString));
+  var lNode := new XElement('action', new XAttribute('name', Filter(aScript)), new XAttribute('args', Filter(lArgsString)));
   self.fXmlData.Add(lNode);
   fXmlData := lNode;
 end;
@@ -196,6 +197,18 @@ end;
 method XmlLogger.LogInfo(s: String);
 begin
   LogMessage(s);
+end;
+
+class method XmlLogger.Filter(s: String): String;
+begin
+  if s.IndexOfAny([#0,#1, #2,#3,#4,#5,#6,#7,#8,#11,#12,#14,#15,#16,#17,#18,#19,#20,#21,#22,#23,#34,#25,#26,#27,#28,#29,#30,#31]) < 0 then exit s;
+  var sb := new StringBuilder;
+  for i: Integer := 0 to length(s) -1 do begin
+    if s[i] not in [#0 .. #8, #11, #12, #14..#31] then
+      sb.Append(s[i]);
+  end;
+
+  exit sb.ToString;
 end;
 
 constructor MultiLogger;
