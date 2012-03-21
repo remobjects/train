@@ -105,13 +105,13 @@ begin
         Logger.LogMessage('Unfinished tasks timed out');
     end;
   except
-    on e: AbortException do ;
     on e: Exception do begin
       lFail := true;
-      if fErrorPos <> nil then
-        Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fErrorPos.File, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
-      else
-        Logger:LogError('Error while running script {0}: {1}', fEngine.SourceFileName, e.Message);
+      if e is not AbortException then
+        if fErrorPos <> nil then
+          Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fErrorPos.File, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
+        else
+          Logger:LogError('Error while running script {0}: {1}', fEngine.SourceFileName, e.Message);
       raise new AbortException;
     end;
   finally
@@ -211,7 +211,7 @@ end;
 
 method Engine.set_WorkDir(value: String);
 begin
-  if String.IsNullOrEmpty(value) then Value := System.Environment.CurrentDirectory;
+  if String.IsNullOrEmpty(value) then value := System.Environment.CurrentDirectory;
   value := Path.GetFullPath(value); // resolve it
   if value <> fWorkDir then begin
     fWorkDir := value;

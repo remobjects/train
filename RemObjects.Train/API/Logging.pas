@@ -4,11 +4,13 @@ interface
 
 uses
   RemObjects.Train.API,
+  System.Reflection,
   System.Xml.Linq,
   System.Linq,
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
-  System.Text;
+  System.Text, 
+  DiscUtils.Iscsi;
 
 type
   [PluginRegistration]
@@ -92,6 +94,7 @@ type
   end;
 
 extension method ILogger.LogError(s: String; params args: array of Object);
+extension method ILogger.LogError(e: Exception);
 extension method ILogger.LogInfo(s: String; params args: array of Object);
 extension method ILogger.LogMessage(s: String; params args: array of Object);
 extension method ILogger.LogWarning(s: String; params args: array of Object);
@@ -333,6 +336,21 @@ end;
 extension method ILogger.LogError(s: String; params args: array of Object);
 begin
   self.LogError(Utilities.MyFormat(s, args));
+end;
+
+
+extension method ILogger.LogError(e: Exception);
+begin
+  if e = nil then exit;
+  if e is TargetInvocationException then
+    e := TargetInvocationException(e).InnerException;
+  if e is AbortException then exit; // ignore, already logged
+  var lAgg := AggregateException(e);
+  if lAgg <> nil then begin
+    for each el in lAgg.InnerExceptions do
+    self.LogError(el);
+  end else
+    LogError(e.Message);
 end;
 
 extension method ILogger.LogMessage(s: String; params args: array of Object);

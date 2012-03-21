@@ -166,6 +166,12 @@ begin
     else
       if not System.Threading.Tasks.Task.WaitAll(lTasks.ToArray, aTimeout) then raise new Exception('Timeout waiting for tasks: ');
     lFail := false;
+  except
+    on e: Exception do begin
+      fEngine.Logger.LogError(e);
+      lFail := true;
+      raise new AbortException;
+    end;
   finally
     for each el in lTasks.Where(a->a.IsCompleted) do
       fEngine.UnregisterTask(el);
@@ -213,6 +219,13 @@ begin
 
     new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := fEngine.Logger).Run();
     lFail := false;
+  except
+    on e: Exception do begin
+      lFail := true;
+      if e is not AbortException then
+        fEngine.Logger.LogError(e);
+      raise new AbortException;
+    end;
   finally
     fEngine.Logger.Exit(true,'run', if lFail then FailMode.Yes else FailMode.No, lFail);
   end;

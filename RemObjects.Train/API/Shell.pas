@@ -1,7 +1,8 @@
 ﻿namespace RemObjects.Train.API;
 
 interface
-uses System.Collections.Generic, System.Diagnostics, RemObjects.Script.EcmaScript;
+uses RemObjects.Train,
+  System.Collections.Generic, System.Diagnostics, RemObjects.Script.EcmaScript;
 type
   [PluginRegistration]
   ShellRegistration = public class(IPluginRegistration)
@@ -99,7 +100,7 @@ begin
   except
     on e: Exception do begin
       fEngine.Engine.Logger.LogError('Error when calling Process.Execute: '+e.Message);
-      raise;
+      raise new AbortException;
     end;
   finally
     fEngine.Engine.Logger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
@@ -150,7 +151,7 @@ begin
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
         lLogger.LogError(lErr);
-        raise new Exception(lErr);
+        raise new AbortException();
       end;
       lFail := false;
     finally
@@ -182,7 +183,7 @@ begin
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);
-      raise new Exception(lErr);
+      raise new AbortException;
     end;
     lFail := false;
     exit sb.ToString();

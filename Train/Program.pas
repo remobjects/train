@@ -229,14 +229,9 @@ begin
       lEngine.Logger := nil;
     end;
   except
-    on e: AbortException do begin
-      exit 1;
-    end;
-
     on e: Exception do begin
-      lLogger.LogDebug('Exception: {0}', e.ToString);
-      //else
-//        lLogger.LogError('Exception: {0}', e.Message);
+      if e is not AbortException then
+        lLogger.LogDebug('Exception: {0}', e.ToString);
       
       exit 1;
     end;
