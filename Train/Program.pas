@@ -108,6 +108,7 @@ begin
   end;
   var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
   Console.Write(aScript+'('+lArgs+') { ... ');
+  Console.Out.Flush();
         
   if ConsoleApp.ShowColors then begin       
     Console.ForegroundColor := lCol;
