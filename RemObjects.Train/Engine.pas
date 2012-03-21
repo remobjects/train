@@ -54,7 +54,10 @@ type
     method CreateChildEngine: Engine;
   end;
 
-
+  AbortException = public class(Exception)
+  private
+  public
+  end;
 
 implementation
 
@@ -63,8 +66,11 @@ constructor Engine(aParent: Environment; aScriptPath: String; aScript: String :=
 begin
   fEnvironment := new Environment(aParent);
   fEngine := new EcmaScriptComponent;
-  if not String.IsNullOrEmpty(aScriptPath) then
-  WorkDir := Path.GetDirectoryName(aScriptPath);
+  if not String.IsNullOrEmpty(aScriptPath) then begin
+    WorkDir := Path.GetDirectoryName(aScriptPath);
+  end else
+    WorkDir := System.Environment.CurrentDirectory;
+
   fEngine.DebugTracePoint += fEngineDebugTracePoint;
   fEngine.DebugException += fEngineDebugException;
   fEngine.DebugFrameEnter += fEngineDebugFrameEnter;
@@ -99,13 +105,14 @@ begin
         Logger.LogMessage('Unfinished tasks timed out');
     end;
   except
+    on e: AbortException do ;
     on e: Exception do begin
       lFail := true;
       if fErrorPos <> nil then
         Logger:LogError('Error while running script {0} ({2}:{3}): {1}', fErrorPos.File, e.Message, fErrorPos.StartRow, fErrorPos.StartCol)
       else
         Logger:LogError('Error while running script {0}: {1}', fEngine.SourceFileName, e.Message);
-      raise;
+      raise new AbortException;
     end;
   finally
     for each el in fTasks.ToArray do 
@@ -204,6 +211,7 @@ end;
 
 method Engine.set_WorkDir(value: String);
 begin
+  if String.IsNullOrEmpty(value) then Value := System.Environment.CurrentDirectory;
   value := Path.GetFullPath(value); // resolve it
   if value <> fWorkDir then begin
     fWorkDir := value;
