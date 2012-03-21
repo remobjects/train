@@ -7,6 +7,7 @@ uses
   RemObjects.Script,
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
+  System.IO,
   System.Linq,
   System.Text, 
   System.Threading.Tasks;
@@ -206,7 +207,7 @@ begin
   try
     var lPath := fEngine.ResolveWithBase(aScope,Utilities.GetArgAsString(args, 0, aScope), true);
     if not File.Exists(lPath) then begin
-      fengine.Logger.LogError('File not found: '+lPath);
+      fEngine.Logger.LogError('File not found: '+lPath);
       raise new Exception('File not found: '+lPath);
     end;
 
@@ -226,7 +227,7 @@ begin
   var lLogger := new DelayedLogger;
   var lPath := fEngine.ResolveWithBase(aScope,Utilities .GetArgAsString(args, 0, aScope), true);
   if not File.Exists(lPath) then begin
-    fengine.Logger.LogError('File not found: '+lPath);
+    fEngine.Logger.LogError('File not found: '+lPath);
     raise new Exception('File not found: '+lPath);
   end;
   try
