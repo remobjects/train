@@ -230,7 +230,7 @@ begin
     end;
   except
     on e: Exception do begin
-      lLogger.LogDebug('Exception: {0}', e.Message);
+      lLogger.LogDebug('Exception: {0}', e.ToString);
       //else
 //        lLogger.LogError('Exception: {0}', e.Message);
       
