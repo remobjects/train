@@ -165,7 +165,7 @@ end;
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
-  var lWD := if length(args) < 2 then nil else fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 1, ec));
+  var lWD := if length(args) < 2 then nil else fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 1, ec), true);
   var lFail := true;
   fEngine.Engine.Logger.Enter(true,'system()', lArg+' WD: '+lWD);
   try
