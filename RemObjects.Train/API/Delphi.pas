@@ -75,7 +75,7 @@ begin
   var lRootPath: String;
   aProject := aServices.ResolveWithBase(ec, aProject);
   aServices.Logger.LogMessage('Building: '+aProject);
-  var lVer := aOptions.delphi:Trim();
+  var lVer := coalesce(aOptions.delphi:Trim(), '');
   if lVer.StartsWith('d') or lVer.StartsWith('D') then lVer := lVer.Substring(1);
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
@@ -92,7 +92,7 @@ begin
       'XE', '2011', '15': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
       'XE2', '2012', '16': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
     else
-      raise new Exception('Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
+     raise new Exception('Invalid "delphi" flag; Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
     end;
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     if aOptions:platform = 'osx' then
