@@ -167,7 +167,7 @@ begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
   var lWD := if length(args) < 2 then nil else fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
-  fEngine.Engine.Logger.Enter(true,'system()', lArg);
+  fEngine.Engine.Logger.Enter(true,'system()', lArg+' WD: '+lWD);
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
