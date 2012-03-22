@@ -214,6 +214,8 @@ begin
   if String.IsNullOrEmpty(value) then value := System.Environment.CurrentDirectory;
   value := Path.GetFullPath(value); // resolve it
   if value <> fWorkDir then begin
+    if not Directory.Exists(value) then 
+      raise new Exception('Directory not valid: '+value);
     fWorkDir := value;
     Logger:LogMessage('Changing directory to '+value);
   end;

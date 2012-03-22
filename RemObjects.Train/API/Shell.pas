@@ -165,7 +165,7 @@ end;
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
-  var lWD := if length(args) < 2 then nil else  Utilities.GetArgAsString(args, 1, ec);
+  var lWD := if length(args) < 2 then nil else fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
   fEngine.Engine.Logger.Enter(true,'system()', lArg);
   try
@@ -260,11 +260,19 @@ begin
   .AddValue('cd', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
       var lCurrPath := aServices.Engine.WorkDir;
-      var lPath := RemObjects.Script.EcmaScript.Utilities.GetArgAsString(c, 0, a);
-      if System.IO.Path.IsPathRooted(lPath) then 
-        aServices.Engine.WorkDir := lPath
-      else
-        aServices.Engine.WorkDir  := System.IO.Path.Combine(aServices.Engine.WorkDir, lPath);
+      var lPath := aServices.ResolveWithBase(a, RemObjects.Script.EcmaScript.Utilities.GetArgAsString(c, 0, a), true);
+      try
+        if System.IO.Path.IsPathRooted(lPath) then 
+          aServices.Engine.WorkDir := lPath
+        else
+          aServices.Engine.WorkDir  := System.IO.Path.Combine(aServices.Engine.WorkDir, lPath);
+      except
+        on e: Exception do begin
+          aServices.Logger.LogError(e);
+          raise new AbortException;
+        end;
+      end;
+
       var lFunc := RemObjects.Script.EcmaScript.Utilities.GetArgAsEcmaScriptObject(c, 1, a);
       if lFunc <> nil then
       try 
