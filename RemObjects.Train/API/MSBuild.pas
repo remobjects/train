@@ -54,7 +54,7 @@ type
     property platform: String;
     property destinationFolder: String;
     property extraArgs: String;
-  end;  // MSBuild_Path
+  end;  // MSBuild
 
 implementation
 
@@ -106,8 +106,8 @@ end;
 
 class method MSBuildPlugin.CheckSettings(aServices: IApiRegistrationServices);
 begin
-  if not File.Exists(coalesce(aServices.Environment['MSBuild_Path']:ToString, '')) then
-    raise new Exception('MSBuild_Path is not set in the environment path!');
+  if not File.Exists(coalesce(aServices.Environment['MSBuild']:ToString, '')) then
+    raise new Exception('MSBuild is not set in the environment path!');
 end;
 
 class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -131,9 +131,9 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -176,9 +176,9 @@ begin
     sb.Append(' '+aOptions.extraArgs);
   end;
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -223,9 +223,9 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild_Path']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild_Path']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);

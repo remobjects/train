@@ -35,10 +35,10 @@ end;
 
 class method InnoSetupPlugin.InnoBuild(aServices: IApiRegistrationServices; aFilename: String; aOptions: InnoSetupOptions);
 begin
-  var lPath := String(aServices.Environment['InnoSetup_Path']);
+  var lPath := String(aServices.Environment['InnoSetup']);
   if String.IsNullOrEmpty(lPath) then
     lPath := String(Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 5_is1', 'InstallLocation', ''));
-  if String.IsNullOrEmpty(lPath) then raise new Exception('"InnoSetup_Path" env var is set');
+  if String.IsNullOrEmpty(lPath) then raise new Exception('"InnoSetup" env var is set');
   lPath := System.IO.Path.Combine(lPath, 'ISCC.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath+' could not be found');
   if aServices.Engine.DryRun then exit;

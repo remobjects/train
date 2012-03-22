@@ -362,8 +362,12 @@ begin
   if lAgg <> nil then begin
     for each el in lAgg.InnerExceptions do
     self.LogError(el);
-  end else
-    LogError(e.Message);
+  end else begin
+    if (e is NullReferenceException) or (e is ArgumentException) then
+      LogError(e.ToString)
+    else
+      LogError(e.Message);
+  end;
 end;
 
 extension method ILogger.LogMessage(s: String; params args: array of Object);

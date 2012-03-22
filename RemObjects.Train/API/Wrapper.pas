@@ -109,7 +109,7 @@ begin
     lFail := false;
   except
     on e: System.Reflection.TargetInvocationException do begin
-        fServices.Logger.LogError(e.InnerException);
+      fServices.Logger.LogError(e.InnerException);
       raise new AbortException;
     end;
   finally
