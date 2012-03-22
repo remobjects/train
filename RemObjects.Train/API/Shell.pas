@@ -55,7 +55,7 @@ begin
     var lObj := EcmaScriptObject(lVal);
     if lObj  <> nil then begin
       for each el in lObj.Values do begin
-        lEnv.Add(new KeyValuePair<String,String>(el.Key, Utilities.GetObjAsString(el.Value, ec)));
+        lEnv.Add(new KeyValuePair<String,String>(el.Key, Utilities.GetObjAsString(el.Value.Value, ec)));
       end;
     end;
   end;
@@ -127,7 +127,7 @@ begin
     var lObj := EcmaScriptObject(lVal);
     if lObj  <> nil then begin
       for each el in lObj.Values do begin
-        lEnv.Add(new KeyValuePair<String,String>(el.Key, Utilities.GetObjAsString(el.Value, ec)));
+        lEnv.Add(new KeyValuePair<String,String>(el.Key, Utilities.GetObjAsString(el.Value.Value, ec)));
       end;
     end;
   end;
