@@ -138,6 +138,7 @@ begin
   if System.IO.Directory.Exists(lVal2) then begin
     var lTargetFN := System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal));
     if aDelete and System.IO.File.Exists(lTargetFN) then
+      System.IO.File.Delete(lTargetFN);
     System.IO.File.Move(lVal, lTargetFN)
   end else begin
       if aDelete and System.IO.File.Exists(lVal2)  then
