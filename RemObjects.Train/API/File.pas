@@ -23,7 +23,7 @@ type
     [WrapAs('file.copy', SkipDryRun := true)]
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
     [WrapAs('file.move', SkipDryRun := true)]
-    class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
+    class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aDelete: Boolean := true);
     [WrapAs('folder.move', SkipDryRun := true)]
     class method Folder_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
     [WrapAs('file.list', SkipDryRun := true)]
@@ -98,7 +98,7 @@ begin
   );
 end;
 
-class method FilePlugin.File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
+class method FilePlugin.File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aDelete: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
@@ -121,6 +121,9 @@ begin
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
+      
+      if aDelete and System.IO.File.Exists(lTargetFN)  then
+        System.IO.File.Delete(lTargetFN);
       System.IO.File.Move(el, lTargetFN);
       lFiles .AppendLine(String.Format('Moved {0} to {1}', el,  lTargetFN));
     end;
@@ -132,10 +135,16 @@ begin
   if System.IO.Directory.Exists(lVal) then
     System.IO.Directory.Move(lVal, lVal2)
   else
-  if System.IO.Directory.Exists(lVal2) then
-    System.IO.File.Move(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)))
-  else
+  if System.IO.Directory.Exists(lVal2) then begin
+    var lTargetFN := System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal));
+    if aDelete and System.IO.File.Exists(lTargetFN) then
+    System.IO.File.Move(lVal, lTargetFN)
+  end else begin
+      if aDelete and System.IO.File.Exists(lVal2)  then
+        System.IO.File.Delete(lVal2);
+
     System.IO.File.Move(lVal, lVal2);
+  end;
   aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', lVal,  lVal2));
 end;
 
