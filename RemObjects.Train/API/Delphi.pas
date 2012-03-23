@@ -95,12 +95,15 @@ begin
      raise new Exception('Invalid "delphi" flag; Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
     end;
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
-    if aOptions:platform = 'osx' then
-    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') else
-    if aOptions:platform = '64' then
-    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') else
-    if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform = '32') or (aOptions:platform = 'Win32') then 
-    lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe');
+    
+    if aOptions:platform:ToLower in ['macosx', 'osx'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') 
+    else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') 
+    else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then 
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
+    else
+      raise new Exception('Unsupported platform ("win32", "win64", "osx")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
