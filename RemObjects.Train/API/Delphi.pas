@@ -99,10 +99,10 @@ begin
     lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') else
     if aOptions:platform = '64' then
     lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') else
-    if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform = '32') then 
+    if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform = '32') or (aOptions:platform = 'Win32') then 
     lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe');
   end;
-  if not File.Exists(lRootPath) then raise new Exception('Delphi dcc32 not found: '+lRootPath);
+  if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
   var lDelphi := Path.GetDirectoryName(Path.GetDirectoryName(lRootPath));
   var sb := new StringBuilder;
