@@ -27,7 +27,9 @@ type
     [WrapAs('xml.toString', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlToString(aServices: IApiRegistrationServices; aSelf: XElement): String;
     [WrapAs('xml.xpath', SkipDryRun := true, wantSelf := true, Important := false)]
-    class method xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
+    class method xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): Object;
+    [WrapAs('xml.xpathElement', SkipDryRun := true, wantSelf := true, Important := false)]
+    class method xmlXpathElement(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
     [WrapAs('xml.value', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;
   end;
@@ -41,6 +43,7 @@ begin
   lProto.AddValue('toFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToFile')); 
   lProto.AddValue('toString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToString')); 
   lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath'));
+  lProto.AddValue('xpathElement', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpathElement'));
   lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlValue'), nil)); 
   
   
@@ -52,7 +55,7 @@ end;
 
 class method XmlPlugin.xmlFromFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): XElement;
 begin
-  XElement.Load(aServices.ResolveWithBase(ec,aFN ));
+  exit XElement.Load(aServices.ResolveWithBase(ec,aFN ));
 end;
 
 class method XmlPlugin.xmlFromString(aServices: IApiRegistrationServices; aString: String): XElement;
@@ -70,14 +73,19 @@ begin
   exit aSelf.ToString;
 end;
 
-class method XmlPlugin.xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
+class method XmlPlugin.xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): Object;
 begin
-  exit System.Xml.XPath.Extensions.XPathSelectElement(aSelf, aPath);
+  exit System.Xml.XPath.Extensions.XPathEvaluate(aSelf, aPath);
 end;
 
 class method XmlPlugin.xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;
 begin
   exit aSelf.Value;
+end;
+
+class method XmlPlugin.xmlXpathElement(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
+begin
+  exit System.Xml.XPath.Extensions.XPathSelectElement(aSelf, aPath);
 end;
 
 end.
