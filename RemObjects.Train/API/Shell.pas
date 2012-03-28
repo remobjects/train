@@ -232,7 +232,7 @@ begin
   end;
 
   for each el in environment do begin
-    lProcess.StartInfo.EnvironmentVariables.Add(el.Key, el.Value);
+    lProcess.StartInfo.EnvironmentVariables[el.Key] := el.Value;
   end;
 
   try 
