@@ -7,6 +7,7 @@ uses
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
   System.Collections,
+  System.Collections.Generic,
   System.Linq,
   System.Xml.Linq,
   System.IO,
@@ -44,8 +45,8 @@ begin
   var lProto := new EcmaScriptObject(aServices.Globals);
   lProto.AddValue('toFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToFile')); 
   lProto.AddValue('toString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToString')); 
-  lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath'));
-  lProto.AddValue('xpathElement', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpathElement'));
+  lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath', lProto));
+  lProto.AddValue('xpathElement', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpathElement', lProto));
   lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlValue'), nil)); 
   
   
@@ -77,13 +78,15 @@ end;
 
 class method XmlPlugin.xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): Object;
 begin
-  var res := System.Xml.XPath.Extensions.XPathEvaluate(aSelf, aPath);
-  if res is sequence of Boolean then
-    res := sequence of Boolean(res).ToArray
-  else if res is sequence of Double then
-    res := sequence of Double(res).ToArray
-  else if res is sequence of String then
-    res := sequence of String(res).ToArray;
+  var lDoc := new XDocument(aSelf);
+  var res := System.Xml.XPath.Extensions.XPathEvaluate(lDoc, aPath);
+  if res is IEnumerable then begin
+    var lRes := new List<Object>;
+    for each x: Object in IEnumerable(res) do begin
+      lRes.Add(x);
+    end;
+    res := lRes.ToArray;
+  end;
 
   exit res;
 end;

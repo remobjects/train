@@ -160,7 +160,7 @@ begin
   end;
 
   if &Type.GetTypeCode(aVal.GetType()) = TypeCode.Object then
-    exit new WrapperObject(fServices.Globals, fProto, &Class := aVal.GetType().Name, Val := aVal);
+    exit new WrapperObject(fServices.Globals, if fProto = nil then fServices.Globals.ObjectPrototype else fProto, &Class := aVal.GetType().Name, Val := aVal);
   exit aVal;
 end;
 
