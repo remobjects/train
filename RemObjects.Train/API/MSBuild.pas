@@ -25,6 +25,8 @@ type
 
     class method CheckSettings(aServices: IApiRegistrationServices);
 
+    [WrapAs('msbuild.custom', SkipDryRun := false)]
+    class method MSBuildCustom(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
     [WrapAs('msbuild.clean', SkipDryRun := false)]
     class method MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
     [WrapAs('msbuild.build', SkipDryRun := false)]
@@ -96,6 +98,7 @@ end;
 method MSBuildPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('msbuild')
+    .AddValue('custom', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildCustom'))
     .AddValue('clean', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildClean'))
     .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildBuild'))
     .AddValue('rebuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildRebuild'))
@@ -282,6 +285,53 @@ begin
 
     File.WriteAllText(el, lFile);
   end;
+end;
+
+class method MSBuildPlugin.MSBuildCustom(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
+begin
+  aProject := aServices.ResolveWithBase(ec, aProject);
+  //aServices.Logger.LogMessage('Building: '+aProject);
+  CheckSettings(aServices);
+
+  if aServices.Engine.DryRun then exit;
+  var sb := new StringBuilder;
+  sb.Append('/nologo "'+aProject+'"');
+  if aOptions <> nil then begin
+    if not String.IsNullOrEmpty(aOptions.configuration) then
+      sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
+    if not String.IsNullOrEmpty(aOptions.platform) then
+      sb.Append(' "/property:Platform='+aOptions.platform+'"');
+    if not String.IsNullOrEmpty(aOptions.destinationFolder) then
+      sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
+    sb.Append(' '+aOptions.extraArgs);
+  end;
+
+  var lTmp := new DelayedLogger();
+  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
+  var lOutput := new StringBuilder;
+  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
+  a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
+   end ,a-> begin
+    if not String.IsNullOrEmpty(a) then begin
+      if a.StartsWith('MSBUILD : error') then
+        lTmp.LogError(a);
+      locking lOutput do lOutput.AppendLine(a);
+    end;
+   end, nil, nil);
+
+  if n <> 0 then
+    lTmp.LogMessage(lOutput.ToString)
+  else
+    lTmp.LogInfo(lOutput.ToString);
+
+  lTmp.Replay(aServices.Logger);
+
+  if n <> 0 then raise new Exception('MSBuild failed');
+
 end;
 
 end.
