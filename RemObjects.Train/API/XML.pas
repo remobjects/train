@@ -6,6 +6,8 @@ uses
   RemObjects.Train,
   RemObjects.Script.EcmaScript, 
   RemObjects.Script.EcmaScript.Internal, 
+  System.Collections,
+  System.Linq,
   System.Xml.Linq,
   System.IO,
   System.Runtime.InteropServices;
@@ -75,7 +77,15 @@ end;
 
 class method XmlPlugin.xmlXpath(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): Object;
 begin
-  exit System.Xml.XPath.Extensions.XPathEvaluate(aSelf, aPath);
+  var res := System.Xml.XPath.Extensions.XPathEvaluate(aSelf, aPath);
+  if res is sequence of Boolean then
+    res := sequence of Boolean(res).ToArray
+  else if res is sequence of Double then
+    res := sequence of Double(res).ToArray
+  else if res is sequence of String then
+    res := sequence of String(res).ToArray;
+
+  exit res;
 end;
 
 class method XmlPlugin.xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;

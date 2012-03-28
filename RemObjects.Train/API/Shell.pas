@@ -86,12 +86,13 @@ begin
         end;
       end;
     end, lEnv.ToArray, lTimeout);
-    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);
+      fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
       raise new Exception(lErr);
     end;
+    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     lFail := false;
     if lCaptureMode then 
       exit sb.ToString()
