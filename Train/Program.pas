@@ -165,6 +165,8 @@ begin
   var lShowHelp: Boolean := false;
   var lDryRun: Boolean := false;
   var lXMLOut: String := nil;
+  var lHtmlOut: String := nil;
+  var lXSLT: String := nil;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
@@ -177,6 +179,8 @@ begin
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
   lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then begin
     lGlobalVars.Add(k, v); end; end);
+  lOptions.Add('xslt=', 'Override XSLT for html output', (v) -> begin lXSLT := v; end);
+  lOptions.Add('t|html=', 'Write HTML log to file ', (v) -> begin lHtmlOut := v; end);
   lOptions.Add('x|xml=', 'Write XML log to file', (v) -> begin lXMLOut := v; end);
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
@@ -204,8 +208,8 @@ begin
   try
     lMulti.Loggers.Add(lLogger);
     lLogger := lMulti;
-    if not String.IsNullOrEmpty(lXMLOut) then begin
-      lMulti.Loggers.Add(new XmlLogger(new FileStream(lXMLOut, FileMode.Create, FileAccess.Write)));
+    if not String.IsNullOrEmpty(lXMLOut) or not String.IsNullOrEmpty(lHtmlOut) then begin
+      lMulti.Loggers.Add(new XmlLogger(lXMLOut, lHtmlOut, lXSLT));
     end;
     var lRoot := new RemObjects.Train.API.Environment();
     lRoot.LoadSystem;

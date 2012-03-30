@@ -4,12 +4,15 @@ interface
 
 uses
   RemObjects.Train.API,
+  System.IO,
   System.Reflection,
+  System.Xml,
   System.Xml.Linq,
   System.Linq,
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
   System.Text, 
+  System.Xml.Xsl,
   DiscUtils.Iscsi;
 
 type
@@ -66,15 +69,14 @@ type
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
   end;
 
-  XmlLogger = public class(ILogger, IDisposable)
-  private
+  BaseXmlLogger = public abstract class(ILogger, IDisposable)
+  assembly
     method FindFailNodes(var aWork: XElement; aInput: sequence of XElement);
-    fTarget: System.IO.Stream;
     fXmlData: System.Xml.Linq.XElement;
     class method Filter(s: String): String;
   public
-    constructor(aTarget: System.IO.Stream);
-    method Dispose;
+    constructor;
+    method Dispose; virtual; 
     method LogError(s: String); locked;
     method LogMessage(s: String);locked;
     method LogWarning(s: String);locked;
@@ -84,6 +86,16 @@ type
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
   end;
+
+
+  XmlLogger = public class(BaseXmlLogger, IDisposable)
+  private
+    fXSLT, fTargetXML, fTargetHTML: String;
+  public
+    constructor(aTargetXML, aTargetHTML, aXSLT: String);
+    method Dispose; override;
+  end;
+
 
   LoggerSettings = public static class
   private
@@ -104,53 +116,70 @@ extension method ILogger.LogDebug(s: String; params args: array of Object);
 
 implementation
 
-constructor XmlLogger(aTarget: System.IO.Stream);
+constructor XmlLogger(aTargetXML, aTargetHTML, aXSLT: String);
 begin
-  fTarget := aTarget;
-  var lDoc := new XDocument();
-  fXmlData := new XElement('log');
-  lDoc.Add(fXmlData);
+  fTargetXML := aTargetXML;
+  fTargetHTML := aTargetHTML;
+  fXSLT := aXSLT;
+  if not String.IsNullOrEmpty(aXSLT) then begin
+    if not File.Exists(aXSLT) then
+      raise new Exception('File not found:' +aXSLT);
+  end;
 end;
 
 method XmlLogger.Dispose;
 begin
-  var lFailElement: XElement := nil;
-  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
+  inherited;
   
-  fXmlData.Document.Save(fTarget);
-  fTarget:Dispose;
+  if not String.IsNullOrEmpty(fTargetXML) then 
+    fXmlData.Document.Save(fTargetXML);
+  if not String.IsNullOrEmpty(fTargetHTML) then begin
+     //var myXPathDoc := new XPathDocument(lLogFile);
+     var myXslTrans := new XslCompiledTransform();
+     if not String.IsNullOrEmpty(fXSLT) then
+       myXslTrans.Load(fXSLT)
+     else begin
+       using sr := new XmlTextReader(typeOf(XmlLogger).Assembly.GetManifestResourceStream('RemObjects.Train.Resources.Train2HTML.xslt')) do begin
+         myXslTrans.Load(sr);
+       end;
+     end;
+     var lOutput := new XDocument;
+     using sw := lOutput.CreateWriter do
+       myXslTrans.Transform(fXmlData.Document.CreateReader, sw);
+     lOutput.Save(fTargetHTML);
+  end;
 end;
 
-method XmlLogger.LogError(s: String);
+method BaseXmlLogger.LogError(s: String);
 begin
   fXmlData.Add(new XElement('error', Filter(s)));
 end;
 
-method XmlLogger.LogMessage(s: String);
+method BaseXmlLogger.LogMessage(s: String);
 begin
   if LoggerSettings. ShowMessage then
     fXmlData.Add(new XElement('message', Filter(s)));
 end;
 
-method XmlLogger.LogWarning(s: String);
+method BaseXmlLogger.LogWarning(s: String);
 begin
   if LoggerSettings. ShowWarning then
     fXmlData.Add(new XElement('warning', Filter(s)));
 end;
 
-method XmlLogger.LogHint(s: String);
+method BaseXmlLogger.LogHint(s: String);
 begin
   if LoggerSettings. ShowHint then
     fXmlData.Add(new XElement('hint', Filter(s)));
 end;
 
-method XmlLogger.LogDebug(s: String);
+method BaseXmlLogger.LogDebug(s: String);
 begin
   if LoggerSettings. ShowDebug then
     fXmlData.Add(new XElement('debug', Filter(s)));
 end;
 
-method XmlLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
+method BaseXmlLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a-> if a is EcmaScriptObject then  EcmaScriptObject(a).Root.JSONStringify(EcmaScriptObject(a).Root.ExecutionContext, nil, a):ToString else  a.ToString()).ToArray);
@@ -159,7 +188,7 @@ begin
   fXmlData := lNode;
 end;
 
-method XmlLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
+method BaseXmlLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   if aFailMode <> FailMode.Unknown then
@@ -171,7 +200,7 @@ begin
   fXmlData := fXmlData.Parent;
 end;
 
-method XmlLogger.FindFailNodes(var aWork: XElement; aInput: sequence of  XElement);
+method BaseXmlLogger.FindFailNodes(var aWork: XElement; aInput: sequence of  XElement);
 begin
   for each el in aInput do begin
     if (el.Name = 'action') then begin
@@ -194,12 +223,12 @@ begin
   end;
 end;
 
-method XmlLogger.LogInfo(s: String);
+method BaseXmlLogger.LogInfo(s: String);
 begin
   LogMessage(s);
 end;
 
-class method XmlLogger.Filter(s: String): String;
+class method BaseXmlLogger.Filter(s: String): String;
 begin
   if s.IndexOfAny([#0,#1, #2,#3,#4,#5,#6,#7,#8,#11,#12,#14,#15,#16,#17,#18,#19,#20,#21,#22,#23,#34,#25,#26,#27,#28,#29,#30,#31]) < 0 then exit s;
   var sb := new StringBuilder;
@@ -209,6 +238,19 @@ begin
   end;
 
   exit sb.ToString;
+end;
+
+constructor BaseXmlLogger;
+begin
+  var lDoc := new XDocument();
+  fXmlData := new XElement('log');
+  lDoc.Add(fXmlData);
+end;
+
+method BaseXmlLogger.Dispose;
+begin
+  var lFailElement: XElement := nil;
+  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
 end;
 
 constructor MultiLogger;
