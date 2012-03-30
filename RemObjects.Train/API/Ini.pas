@@ -22,7 +22,7 @@ type
     [WrapAs('ini.fromString', SkipDryRun := false)]
     class method FromString(aServices: IApiRegistrationServices; aString: String): IniFile;
 
-    [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
+    [WrapAs('ini.toFile', SkipDryRun := true, wantSelf := true, Important := true)]
     class method ToFile(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext;aSelf: IniFile; aFN: String);
     [WrapAs('ini.toString', SkipDryRun := false, wantSelf := true, Important := false)]
     class method _ToString(aServices: IApiRegistrationServices; aSelf: IniFile): String;

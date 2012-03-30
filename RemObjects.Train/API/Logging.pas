@@ -50,7 +50,7 @@ type
     method LogDebug(s: String);
     method LogInfo(s: String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
-    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
+    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object := nil);
   end;  
 
   MultiLogger = public class(ILogger, IDisposable)
@@ -66,7 +66,7 @@ type
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
-    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
+    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
   end;
 
   BaseXmlLogger = public abstract class(ILogger, IDisposable)
@@ -84,7 +84,7 @@ type
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
-    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);locked;
+    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
   end;
 
 
@@ -188,7 +188,7 @@ begin
   fXmlData := lNode;
 end;
 
-method BaseXmlLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
+method BaseXmlLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   if aFailMode <> FailMode.Unknown then
@@ -197,6 +197,8 @@ begin
     FailMode.Recovered: '2';
   else '0';
   end));
+  if (aResult <> nil) and (aResult <> Undefined.Instance) then
+    fXmlData.Add(new XElement('return', aResult:ToString));
   fXmlData := fXmlData.Parent;
 end;
 
@@ -288,9 +290,9 @@ begin
   Loggers.ForEach(a->a.Enter(aImportant, aScript, args));
 end;
 
-method MultiLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
+method MultiLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);
 begin
-  Loggers.ForEach(a->a.Exit(aImportant,aScript , aFailMode,args ));
+  Loggers.ForEach(a->a.Exit(aImportant,aScript , aFailMode, aResult));
 end;
 
 method MultiLogger.Dispose;

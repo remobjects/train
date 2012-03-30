@@ -3,6 +3,7 @@
 interface
 
 uses
+  RemObjects.Script.EcmaScript,
   System.Collections.Generic,
   System.IO,
   System.Linq, 
@@ -29,7 +30,7 @@ type
     method LogInfo(s: String);
     method LogError(s: System.String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
-    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; params args: array of Object);
+    method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
   end;
 
 implementation
@@ -117,7 +118,7 @@ begin
   inc(fIndent);
 end;
 
-method Logger.&Exit(aImportant: Boolean := false;aScript: String; aFailMode: FailMode; params  args:array of  Object);
+method Logger.&Exit(aImportant: Boolean := false;aScript: String; aFailMode: FailMode; aReturn: Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
   var lCol: ConsoleColor;
@@ -126,12 +127,17 @@ begin
     Console.ForegroundColor := ConsoleColor.White;
   end;
   dec(fIndent);
+  var lRet:= '';
+  if (aReturn <> nil) and (aReturn <> Undefined.Instance) then
+    lRet:= ': '+aReturn
+  else
+    lRet := ' ';
   if fWriteEnter then begin
     fWriteEnter := false;
-    Console.WriteLine(#8#8#8#8'}  ');
+    Console.WriteLine(#8#8#8#8'} '+lRet);
   end else begin
     CheckEnter;
-    Console.WriteLine('} '+aScript);
+    Console.WriteLine('} '+aScript+lRet);
   end;
   if ConsoleApp.ShowColors then begin
     Console.ForegroundColor := lCol;

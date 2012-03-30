@@ -25,7 +25,7 @@ type
     [WrapAs('xml.fromString', SkipDryRun := true)]
     class method xmlFromString(aServices: IApiRegistrationServices; aString: String): XElement;
 
-    [WrapAs('xml.toFile', SkipDryRun := true, wantSelf := true, Important := false)]
+    [WrapAs('xml.toFile', SkipDryRun := true, wantSelf := true, Important := true)]
     class method xmlToFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: XElement; aFN: String);
     [WrapAs('xml.toString', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlToString(aServices: IApiRegistrationServices; aSelf: XElement): String;

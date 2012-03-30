@@ -19,7 +19,7 @@ type
     fErrorPos: nullable PositionPair;
     method fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
     method set_WorkDir(value: String);
-    method fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
+    method fEngineDebugFrameExit(sender: Object; e: ScriptDebugExitScopeEventArgs);
     method fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
     method fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
     method RegisterValue(aName: String; aValue: Object); 
@@ -150,10 +150,14 @@ begin
   Logger:Enter(true, 'function '+e.Name, lArgs);
 end;
 
-method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugEventArgs);
+method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugExitScopeEventArgs);
 begin
   if e.Name.Contains('.') then exit;
-  Logger:&Exit(true, 'function '+e.Name, FailMode.Unknown);
+  if e.WasException then begin
+    Logger:LogError(ScriptRuntimeException.Unwrap(e.Result):ToString);
+    Logger:&Exit(true, 'function '+e.Name, FailMode.Yes, nil);
+  end else
+    Logger:&Exit(true, 'function '+e.Name, FailMode.No, ScriptRuntimeException.Unwrap(e.Result));
 end;
 
 method Engine.CreateChildEngine: Engine;

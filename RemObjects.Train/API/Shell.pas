@@ -156,7 +156,7 @@ begin
       end;
       lFail := false;
     finally
-      lLogger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+      lLogger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, nil);
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
