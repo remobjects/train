@@ -146,6 +146,9 @@ begin
      var lOutput := new XDocument;
      using sw := lOutput.CreateWriter do
        myXslTrans.Transform(fXmlData.Document.CreateReader, sw);
+     if lOutput.Declaration = nil then begin
+       lOutput.Declaration := new XDeclaration('1.0', 'utf-8', 'yes');
+     end;
      lOutput.Save(fTargetHTML);
   end;
 end;
