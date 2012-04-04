@@ -52,6 +52,7 @@ begin
       if lValue is EcmaScriptObject then 
       lValue := Utilities.GetObjectAsPrimitive(aServices.Globals.ExecutionContext, EcmaScriptObject(lValue), PrimitiveType.None);
       lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
+      System.Environment.SetEnvironmentVariable(a:FirstOrDefault():ToString, lValue:ToString);
       exit Undefined.Instance;
     finally
       aServices.Logger.Exit('export', FailMode.No);
