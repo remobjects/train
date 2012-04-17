@@ -155,8 +155,10 @@ begin
   if e.Name.Contains('.') then exit;
   if e.WasException then begin
     var lVal := ScriptRuntimeException.Unwrap(e.Result);
-    if lVal is Exception then lVal := Exception(lVal).Message; // don't want the callstack.
-    Logger:LogError(lVal:ToString);
+    if lVal is not AbortException then begin
+      if lVal is Exception then lVal := Exception(lVal).Message; // don't want the callstack.
+      Logger:LogError(lVal:ToString);
+    end;
     Logger:&Exit(true, 'function '+e.Name, FailMode.Yes, nil);
   end else
     Logger:&Exit(true, 'function '+e.Name, FailMode.No, ScriptRuntimeException.Unwrap(e.Result));

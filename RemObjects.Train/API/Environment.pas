@@ -68,6 +68,8 @@ begin
       except
         on e: Exception do begin
           lFail := true;
+          if e is AbortException then 
+          aServices.Engine.Logger.LogWarning('Ignoring error') else
           aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
           result := Undefined.Instance; 
         end;
@@ -92,7 +94,10 @@ begin
               
               if lCount > 0 then begin
                 lFailMode := FailMode.Recovered;
-                aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
+                if e is AbortException then 
+                  aServices.Engine.Logger.LogWarning('Ignoring error') 
+                else
+                  aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
                 continue;
               end;
               aServices.Engine.Logger.LogError(e);

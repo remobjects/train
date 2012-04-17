@@ -222,7 +222,6 @@ begin
   except
     on e: Exception do begin
       lFail := true;
-      if e is not AbortException then
         fEngine.Logger.LogError(e);
       raise new AbortException;
     end;
