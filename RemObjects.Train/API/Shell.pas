@@ -60,7 +60,7 @@ begin
     end;
   end;
 
-  fEngine.Engine.Logger.Enter(true,'exec', lCMD+if not String.IsNullOrEmpty(lArg) then ' '+ lArg else '');
+  fEngine.Engine.Logger.Enter(true,'shell.exec', lCMD+if not String.IsNullOrEmpty(lArg) then ' '+ lArg else '');
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
@@ -104,7 +104,7 @@ begin
       raise new AbortException;
     end;
   finally
-    fEngine.Engine.Logger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,String.Format('shell.exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
@@ -134,7 +134,7 @@ begin
   end;
   var lLogger := new RemObjects.Train.DelayedLogger;
   var lTask := new System.Threading.Tasks.Task(method begin
-    lLogger.Enter(true,String.Format('exec({0})', lCMD), lArg);
+    lLogger.Enter(true,String.Format('shell.execAsync({0})', lCMD), lArg);
     try
       if fEngine.Engine.DryRun then begin
         lLogger.LogMessage('Dry run.');
@@ -156,7 +156,7 @@ begin
       end;
       lFail := false;
     finally
-      lLogger.Exit(true,String.Format('exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, nil);
+      lLogger.Exit(true,String.Format('shell.execAsync({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, nil);
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
@@ -168,7 +168,7 @@ begin
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 0, ec));
   var lWD := if length(args) < 2 then nil else fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 1, ec), true);
   var lFail := true;
-  fEngine.Engine.Logger.Enter(true,'system()', lArg+' WD: '+lWD);
+  fEngine.Engine.Logger.Enter(true,'shell.system()', lArg+' WD: '+lWD);
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
@@ -189,7 +189,7 @@ begin
     lFail := false;
     exit sb.ToString();
   finally
-    fEngine.Engine.Logger.Exit(true,'system()', if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(true,'shell.system()', if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
