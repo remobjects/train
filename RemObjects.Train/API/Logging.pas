@@ -85,6 +85,7 @@ type
     method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
+    class method MyToString(s: Object): String;
   end;
 
 
@@ -201,7 +202,7 @@ begin
   else '0';
   end));
   if (aResult <> nil) and (aResult <> Undefined.Instance) then
-    fXmlData.Add(new XElement('return', aResult:ToString));
+    fXmlData.Add(new XElement('return', Filter(MyToString(aResult))));
   fXmlData := fXmlData.Parent;
 end;
 
@@ -256,6 +257,16 @@ method BaseXmlLogger.Dispose;
 begin
   var lFailElement: XElement := nil;
   FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
+end;
+
+class method BaseXmlLogger.MyToString(s: Object): String;
+begin
+  if s = nil then exit '';
+  if s is array of Object then 
+    exit String.Join(', ', array of Object(s).Select(a->MyToString(a)).ToArray);
+  if s is EcmaScriptObject then  
+    exit coalesce(EcmaScriptObject(s).Root.JSONStringify(EcmaScriptObject(s).Root.ExecutionContext, nil, s):ToString, '');
+  exit s.ToString;
 end;
 
 constructor MultiLogger;

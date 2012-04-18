@@ -144,7 +144,7 @@ begin
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
-      if a.StartsWith('MSBUILD : error') then
+      if a.Contains(': error ') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
     end;
@@ -236,7 +236,7 @@ begin
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
-      if a.StartsWith('MSBUILD : error') then
+      if a.Contains(': error ') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
     end;

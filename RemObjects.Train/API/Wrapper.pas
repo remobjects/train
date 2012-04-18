@@ -114,7 +114,7 @@ begin
     end;
   finally
     if not String.IsNullOrEmpty(fWrapInfo.LogName) then
-      fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, aArgs );
+      fServices.Logger.Exit(fWrapInfo.Important, fWrapInfo.LogName, if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No, result);
   end;
 end;
 
