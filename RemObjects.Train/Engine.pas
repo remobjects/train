@@ -117,7 +117,7 @@ begin
   finally
     for each el in fTasks.ToArray do 
       UnregisterTask(el.Item1);
-    Logger.Exit(true, 'script', if lFail then FailMode.Yes else FailMode.No, fEngine.SourceFileName);
+    Logger.Exit(true, 'script', if lFail then FailMode.Yes else FailMode.No);
   end;
 end;
 
