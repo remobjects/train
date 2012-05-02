@@ -15,7 +15,7 @@ uses
 [assembly: AssemblyCopyright('')]
 [assembly: AssemblyTrademark('')]
 [assembly: AssemblyCulture('')]
-[assembly: AssemblyVersion('1.0.0.1')]
+[assembly: AssemblyVersion('0.5.0.0')]
 [assembly: NeutralResourcesLanguage('')]
 [assembly: ComVisible(false)]
 
