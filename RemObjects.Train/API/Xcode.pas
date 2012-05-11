@@ -103,7 +103,7 @@ begin
     aServices.Logger.LogDebug(lOutput.ToString);
 
 
-  if n <> 0 then raise new Exception('XCode failed');
+  if n <> 0 then raise new Exception('Xcode failed');
 
 end;
 
