@@ -22,6 +22,8 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
 
+    [WrapAs('delphi.getBasePath', skipDryRun := false)]
+    class method DelphiGetBaseBath(aVer: String): String;
     [WrapAs('delphi.build', SkipDryRun := false)]
     class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
     class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext;aDelphi, aInput: String): String;
@@ -65,6 +67,7 @@ method DelphiPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('delphi')
     .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiBuild'))
+    .AddValue('getBasePath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiGetBaseBath'))
 ;
 end;
 
@@ -76,24 +79,10 @@ begin
   aProject := aServices.ResolveWithBase(ec, aProject);
   aServices.Logger.LogMessage('Building: '+aProject);
   var lVer := coalesce(aOptions.delphi:Trim(), '');
-  if lVer.StartsWith('d') or lVer.StartsWith('D') then lVer := lVer.Substring(1);
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
   else begin
-    case lVer of
-      '6': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\6.0', 'RootDir', '') as String);
-      '7': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\7.0', 'RootDir', '') as String);
-      '8': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\2.0', 'RootDir', '') as String);
-      '2005', '9': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\3.0', 'RootDir', '') as String);
-      '2006', '10': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\4.0', 'RootDir', '') as String);
-      '2007', '11': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\5.0', 'RootDir', '') as String);
-      '2009', '12': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\6.0', 'RootDir', '') as String);
-      '2010', '14': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\7.0', 'RootDir', '') as String);
-      'XE', '2011', '15': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
-      'XE2', '2012', '16': lRootPath := coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
-    else
-     raise new Exception('Invalid "delphi" flag; Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
-    end;
+    lRootPath := DelphiGetBaseBath(lVer);
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     
     if aOptions:platform:ToLower in ['macosx', 'osx'] then
@@ -231,4 +220,24 @@ begin
       exit [0,0,0,0];
   end;
 end;
+
+class method DelphiPlugin.DelphiGetBaseBath(aVer: String): String;
+begin
+  if aVer.StartsWith('d') or aVer.StartsWith('D') then aVer := aVer.Substring(1);
+  case aVer of
+    '6': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\6.0', 'RootDir', '') as String);
+    '7': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\7.0', 'RootDir', '') as String);
+    '8': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\2.0', 'RootDir', '') as String);
+    '2005', '9': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\3.0', 'RootDir', '') as String);
+    '2006', '10': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\4.0', 'RootDir', '') as String);
+    '2007', '11': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\5.0', 'RootDir', '') as String);
+    '2009', '12': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\6.0', 'RootDir', '') as String);
+    '2010', '14': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\7.0', 'RootDir', '') as String);
+    'XE', '2011', '15': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
+    'XE2', '2012', '16': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
+  else
+    raise new Exception('Invalid "delphi" flag; Supported version 6,7,8,9,10,11,13,14,15,16 (2005,2006,2007,2008,2009,2010, 2011, XE, 2012, XE2)');
+  end;
+end;
+
 end.

@@ -236,6 +236,7 @@ end;
 
 class method BaseXmlLogger.Filter(s: String): String;
 begin
+  if s = nil then exit '';
   if s.IndexOfAny([#0,#1, #2,#3,#4,#5,#6,#7,#8,#11,#12,#14,#15,#16,#17,#18,#19,#20,#21,#22,#23,#34,#25,#26,#27,#28,#29,#30,#31]) < 0 then exit s;
   var sb := new StringBuilder;
   for i: Integer := 0 to length(s) -1 do begin
