@@ -57,6 +57,7 @@ begin
   if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;
   var lZip := new Ionic.Zip.ZipFile();
+  lZip.ParallelDeflateThreshold := -1;
   for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
   for each el in System.IO.Directory.EnumerateFiles(aInputFolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
     var lFal := el;
@@ -76,6 +77,7 @@ end;
 class method ZipRegistration.ZipList(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String): array of ZipEntryData;
 begin
   using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
+    zr.ParallelDeflateThreshold := -1;
     exit zr.Entries.Select(a->new ZipEntryData(name := a.FileName, compressedSize := a.CompressedSize, size := a.UncompressedSize)).ToArray;
   end;
 end;
@@ -83,6 +85,7 @@ end;
 class method ZipRegistration.ZipExtractFile(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aDestinationFile: String; aEntry: ZipEntryData);
 begin
   using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
+    zr.ParallelDeflateThreshold := -1;
     using sr:= new System.IO.FileStream(aServices.ResolveWithBase(ec,aDestinationFile), System.IO.FileMode.Create, System.IO.FileAccess.Write) do
       zr[aEntry.name].Extract(sr);
   end;
@@ -91,6 +94,7 @@ end;
 class method ZipRegistration.ZipExtractFiles(aServices: IApiRegistrationServices;ec: ExecutionContext;  zip: String; aDestinationPath: String; aEntry: array of ZipEntryData; aFlatten: Boolean := false);
 begin
   using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
+    zr.ParallelDeflateThreshold := -1;
     zr.FlattenFoldersOnExtract := aFlatten;
     if length(aEntry) = 0 then 
       zr.ExtractAll(aServices.ResolveWithBase(ec,aDestinationPath), Ionic.Zip.ExtractExistingFileAction.OverwriteSilently)

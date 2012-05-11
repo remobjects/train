@@ -31,7 +31,7 @@ type
     [WrapAs('ini.getValue', SkipDryRun := true, wantSelf := true, Important := false)]
     class method GetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String; aDefault: Object := nil): Object;
     [WrapAs('ini.setValue', SkipDryRun := true, wantSelf := true, Important := false)]
-    class method SetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection, aKey: String; aValue: Object);
+    class method SetString(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;aSelf: IniFile; aSection, aKey: String; aValue: Object);
     [WrapAs('ini.deleteSection', SkipDryRun := true, wantSelf := true, Important := false)]
     class method DeleteSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String);
     [WrapAs('ini.deleteValue', SkipDryRun := true, wantSelf := true, Important := false)]
@@ -128,10 +128,10 @@ begin
   exit aDefault;
 end;
 
-class method IniPlugin.SetString(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String; aKey: String; aValue: Object);
+class method IniPlugin.SetString(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;aSelf: IniFile; aSection: String; aKey: String; aValue: Object);
 begin
   var lSec := aSelf.AddSection(aSection);
-  lSec.Item[aKey] := aValue:ToString;
+  lSec.Item[aKey] := aServices.Expand(ec, aValue:ToString);
 end;
 
 class method IniPlugin.DeleteSection(aServices: IApiRegistrationServices; aSelf: IniFile; aSection: String);
