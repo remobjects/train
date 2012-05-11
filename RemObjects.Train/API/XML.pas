@@ -83,11 +83,10 @@ begin
   if res is IEnumerable then begin
     var lRes := new List<Object>;
     for each x: Object in IEnumerable(res) do begin
-      lRes.Add(x);
+      lRes.Add(x.ToString());
     end;
     res := lRes.ToArray;
   end;
-
   exit res;
 end;
 
