@@ -182,8 +182,11 @@ begin
 
   if System.IO.Directory.Exists(lVal2) then
     System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), true)
-  else
+  else begin
+    var lTargetDir := System.IO.Path.GetDirectoryName(lVal2);
+    if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
     System.IO.File.Copy(lVal, lVal2, true);
+  end;
   aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
 
