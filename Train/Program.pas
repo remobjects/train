@@ -6,7 +6,7 @@ uses
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
   System.IO,
-  System.Linq, 
+  System.Linq,
   NDesk.Options;
 
 
@@ -107,7 +107,15 @@ begin
     lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.White;
   end;
-  var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
+  var lArgs := '';
+  if length(args) > 0 then 
+    for each a in args do begin
+      var s := a.ToString; 
+      if length(s) > 50 then s := s.Substring(0, 47)+'...';
+      if length(lArgs) > 0 then lArgs := lArgs+', ';
+      lArgs := lArgs+s;
+    end;
+  //var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
   Console.Write(aScript+'('+lArgs+') { ... ');
   Console.Out.Flush();
         
@@ -126,12 +134,16 @@ begin
     lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.White;
   end;
-  dec(fIndent);
+  if fIndent > 0 then dec(fIndent);
   var lRet:= '';
-  if (aReturn <> nil) and (aReturn <> Undefined.Instance) then
-    lRet:= ': '+aReturn
-  else
+  if (aReturn <> nil) and (aReturn <> Undefined.Instance) then begin
+    var s := aReturn.ToString;
+    if length(s) > 50 then s := s.Substring(0, 47)+'...';
+    lRet := ': '+s;
+  end
+  else begin
     lRet := ' ';
+  end;
   if fWriteEnter then begin
     fWriteEnter := false;
     Console.WriteLine(#8#8#8#8'} '+lRet);
