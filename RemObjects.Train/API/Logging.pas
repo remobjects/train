@@ -186,7 +186,7 @@ end;
 method BaseXmlLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
   if not aImportant and not LoggerSettings.ShowDebug then exit;
-  var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a-> if a is EcmaScriptObject then  EcmaScriptObject(a).Root.JSONStringify(EcmaScriptObject(a).Root.ExecutionContext, nil, a):ToString else  a.ToString()).ToArray);
+  var lArgsString := if args = nil then '' else String.Join(', ', args.Select(a-> if a is EcmaScriptObject then EcmaScriptObject(a).Root.JSONStringify(EcmaScriptObject(a).Root.ExecutionContext, nil, a):ToString else if assigned(a) then a.ToString() else 'null').ToArray);
   var lNode := new XElement('action', new XAttribute('name', Filter(aScript)), new XAttribute('args', Filter(lArgsString)));
   self.fXmlData.Add(lNode);
   fXmlData := lNode;
