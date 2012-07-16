@@ -31,6 +31,7 @@ type
     method LogError(s: System.String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
+    method &Write; empty;
   end;
 
 implementation
@@ -110,7 +111,7 @@ begin
   var lArgs := '';
   if length(args) > 0 then 
     for each a in args do begin
-      var s := a.ToString; 
+      var s := coalesce(a:ToString, 'null');
       if length(s) > 50 then s := s.Substring(0, 47)+'...';
       if length(lArgs) > 0 then lArgs := lArgs+', ';
       lArgs := lArgs+s;
@@ -259,6 +260,7 @@ begin
       exit 1;
     end;
   finally
+    lMulti.Write;
     lMulti.Dispose;
     if lWait then begin
       Console.WriteLine('Waiting for enter to continue');

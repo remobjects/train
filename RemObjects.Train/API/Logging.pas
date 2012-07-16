@@ -51,6 +51,7 @@ type
     method LogInfo(s: String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object := nil);
+    method &Write;
   end;  
 
   MultiLogger = public class(ILogger, IDisposable)
@@ -59,6 +60,7 @@ type
     constructor;
     property Loggers: List<ILogger> := new List<ILogger>; readonly;
     method Dispose;
+    method &Write; locked;
     method LogError(s: String); locked;
     method LogMessage(s: String);locked;
     method LogWarning(s: String);locked;
@@ -77,6 +79,7 @@ type
   public
     constructor;
     method Dispose; virtual; 
+    method Write; abstract;
     method LogError(s: String); locked;
     method LogMessage(s: String);locked;
     method LogWarning(s: String);locked;
@@ -94,6 +97,7 @@ type
     fXSLT, fTargetXML, fTargetHTML: String;
   public
     constructor(aTargetXML, aTargetHTML, aXSLT: String);
+    method &Write; override;
     method Dispose; override;
   end;
 
@@ -132,6 +136,10 @@ method XmlLogger.Dispose;
 begin
   inherited;
   
+end;
+
+method XmlLogger.&Write;
+begin
   if not String.IsNullOrEmpty(fTargetXML) then 
     fXmlData.Document.Save(fTargetXML);
   if not String.IsNullOrEmpty(fTargetHTML) then begin
@@ -318,6 +326,11 @@ end;
 method MultiLogger.LogInfo(s: String);
 begin
   Loggers.ForEach(a->a.LogInfo(s));
+end;
+
+method MultiLogger.&Write;
+begin
+  Loggers.ForEach(a->a.Write);
 end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);

@@ -18,6 +18,7 @@ type
     method LogHint(s: String);
     method LogDebug(s: String);
     method LogInfo(s: String);
+    method &Write; empty;
 
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
