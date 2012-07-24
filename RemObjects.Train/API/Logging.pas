@@ -79,7 +79,7 @@ type
   public
     constructor;
     method Dispose; virtual; 
-    method Write; abstract;
+    method Write; virtual;
     method LogError(s: String); locked;
     method LogMessage(s: String);locked;
     method LogWarning(s: String);locked;
@@ -140,6 +140,8 @@ end;
 
 method XmlLogger.&Write;
 begin
+  inherited;
+
   if not String.IsNullOrEmpty(fTargetXML) then 
     fXmlData.Document.Save(fTargetXML);
   if not String.IsNullOrEmpty(fTargetHTML) then begin
@@ -264,8 +266,6 @@ end;
 
 method BaseXmlLogger.Dispose;
 begin
-  var lFailElement: XElement := nil;
-  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
 end;
 
 class method BaseXmlLogger.MyToString(s: Object): String;
@@ -276,6 +276,12 @@ begin
   if s is EcmaScriptObject then  
     exit coalesce(EcmaScriptObject(s).Root.JSONStringify(EcmaScriptObject(s).Root.ExecutionContext, nil, s):ToString, '');
   exit s.ToString;
+end;
+
+method BaseXmlLogger.&Write;
+begin
+  var lFailElement: XElement := nil;
+  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
 end;
 
 constructor MultiLogger;
