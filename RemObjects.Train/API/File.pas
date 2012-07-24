@@ -153,7 +153,11 @@ class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: Execu
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
-  if (lVal.IndexOfAny(['*', '?']) >= 0) or System.IO.Directory.Exists(lVal2) or System.IO.Directory.Exists(lVal) then begin
+  if (lVal.IndexOfAny(['*', '?']) >= 0) 
+      or System.IO.Directory.Exists(lVal2) 
+      or System.IO.Directory.Exists(lVal) 
+      or lVal2.EndsWith('/') or lVal2.EndsWith('\') then begin
+    
     if (lVal.IndexOfAny(['*', '?']) < 0) and System.IO.Directory.Exists(lVal) then lVal := System.IO.Path.Combine(lVal, '*');
     var lMask := '';
     var lDir := lVal;
