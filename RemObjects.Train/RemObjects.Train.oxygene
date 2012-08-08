@@ -63,6 +63,18 @@
       <HintPath>Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="nunit.core">
+      <HintPath>Libraries\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.core.interfaces">
+      <HintPath>Libraries\nunit.core.interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>Libraries\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.util">
+      <HintPath>Libraries\nunit.util.dll</HintPath>
+    </Reference>
     <Reference Include="Renci.SshNet">
       <HintPath>Libraries\Renci.SshNet.dll</HintPath>
     </Reference>
@@ -92,6 +104,7 @@
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Mail.pas" />
     <Compile Include="API\MSBuild.pas" />
+    <Compile Include="API\NUnit.pas" />
     <Compile Include="API\Resources.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\SSH.pas" />
@@ -134,29 +147,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
