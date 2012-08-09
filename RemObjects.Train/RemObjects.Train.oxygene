@@ -84,6 +84,7 @@
     <Compile Include="API\Delphi.pas" />
     <Compile Include="API\Environment.pas" />
     <Compile Include="API\File.pas" />
+    <Compile Include="API\FTP.pas" />
     <Compile Include="API\Gac.pas" />
     <Compile Include="API\Images.pas" />
     <Compile Include="API\Ini.pas" />
