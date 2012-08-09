@@ -16,7 +16,7 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
     [WrapAs('zip.compress', SkipDryRun := true)]
-    class method ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean := true);
+    class method ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean := true; aPassword: String := nil);
 
     [WrapAs('zip.list', SkipDryRun := true, Important := false)]
     class method ZipList(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String): array of ZipEntryData;
@@ -47,7 +47,7 @@ begin
     ;
 end;
 
-class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean);
+class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean; aPassword: String := nil);
 begin
   zip := aServices.ResolveWithBase(ec,zip);
   //if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
@@ -57,6 +57,7 @@ begin
   if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;
   var lZip := new Ionic.Zip.ZipFile();
+  if not String.IsNullOrEmpty(aPassword) then lZip.Password := aPassword;
   lZip.ParallelDeflateThreshold := -1;
   for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
   for each el in System.IO.Directory.EnumerateFiles(aInputFolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
