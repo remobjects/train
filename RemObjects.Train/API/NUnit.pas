@@ -6,8 +6,7 @@ uses
   RemObjects.Train,
   System.Threading,
   System.Text,
-  RemObjects.Script.EcmaScript, 
-  RemObjects.Script.EcmaScript.Internal;
+  RemObjects.Script.EcmaScript;
 type
 
   [PluginRegistration]
