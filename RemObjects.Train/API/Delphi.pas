@@ -85,7 +85,7 @@ begin
     lRootPath := DelphiGetBaseBath(lVer);
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     
-    if aOptions:platform:ToLower in ['macosx', 'osx'] then
+    if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') 
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') 
