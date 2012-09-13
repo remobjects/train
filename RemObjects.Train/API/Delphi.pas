@@ -92,7 +92,7 @@ begin
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then 
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx")');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
