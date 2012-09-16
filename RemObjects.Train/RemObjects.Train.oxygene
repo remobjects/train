@@ -84,6 +84,7 @@
     <Compile Include="API\Delphi.pas" />
     <Compile Include="API\Environment.pas" />
     <Compile Include="API\File.pas" />
+    <Compile Include="API\FTP.pas" />
     <Compile Include="API\Gac.pas" />
     <Compile Include="API\Images.pas" />
     <Compile Include="API\Ini.pas" />
@@ -91,10 +92,13 @@
     <Compile Include="API\Interfaces.pas" />
     <Compile Include="API\Logging.pas" />
     <Compile Include="API\Mail.pas" />
+    <Compile Include="API\MD5.pas" />
     <Compile Include="API\MSBuild.pas" />
+    <Compile Include="API\NUnit.pas" />
     <Compile Include="API\Resources.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\SSH.pas" />
+    <Compile Include="API\TextFile.pas" />
     <Compile Include="API\Web.pas" />
     <Compile Include="API\Wrapper.pas" />
     <Compile Include="API\Xcode.pas" />
@@ -134,29 +138,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
   <PropertyGroup>
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PreBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
-    <PostBuildEvent />
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
 </Project>
