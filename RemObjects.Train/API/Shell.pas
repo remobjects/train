@@ -11,16 +11,28 @@ type
     method &Register(aServices: IApiRegistrationServices);
   end;
 
+  MyProcess = public class(Process)
+  private
+  public
+    property Killed: Boolean;
+  end;
+
+
   Shell = public class
   private
     fEngine: IApiRegistrationServices;
 
   public
-    class method ExecuteProcess(aCommand, aArgs, AWD: String; aComSpec: Boolean; aTargetError: Action<String>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
+    class method ExecuteProcess(aCommand, aArgs, AWD: String; aComSpec: Boolean; 
+      aTargetError: Action<String>; aTargetOutput: Action<String>; 
+      environment: array of KeyValuePair<String, String>; 
+      aTimeout: nullable TimeSpan;
+      aUseProcess: Process := nil): Integer;
     constructor(aItem: IApiRegistrationServices);
     method Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
     method ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
     method INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
+    method Kill(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
   end;
 
 implementation
@@ -133,6 +145,7 @@ begin
     end;
   end;
   var lLogger := new RemObjects.Train.DelayedLogger;
+  var lProc := new MyProcess;
   var lTask := new System.Threading.Tasks.Task(method begin
     lLogger.Enter(true,String.Format('shell.execAsync({0})', lCMD), lArg);
     try
@@ -147,8 +160,9 @@ begin
         end;
       end, a-> begin
         locking(sb) do sb.AppendLine(a);
-      end, lEnv.ToArray, lTimeout);
+      end, lEnv.ToArray, lTimeout, lProc);
       lLogger.LogInfo('Output: '#13#10+sb.ToString);
+      if lProc.Killed then exit;
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
         lLogger.LogError(lErr);
@@ -160,8 +174,30 @@ begin
     end;
   end);
   fEngine.RegisterTask(lTask, String.Format('[{0}] {1} {2}', lTask.Id, lCMD, lArg), lLogger);
-  exit new TaskWrapper(fEngine.Engine.Engine.GlobalObject, fEngine.AsyncWorker.TaskProto, Task := lTask);
+  lTask.Start();
+  exit new TaskWrapper(fEngine.Engine.Engine.GlobalObject, fEngine.AsyncWorker.TaskProto, Task := lTask, Process := lProc);
 end;
+
+method Shell.Kill(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
+begin
+  var lArg := TaskWrapper(Utilities.GetArg(args, 0));
+  if (lArg = nil) or (lArg.Process = nil) then raise new Exception('No async process passed!');
+
+  try
+    MyProcess(lArg.Process).Killed := true;
+    lArg.Process.Kill;
+  except
+  end;
+  lArg.Process := nil;
+  try
+    lArg.Task.Wait();
+  except
+  end;
+  fEngine.UnregisterTask(lArg.Task);
+
+  exit Undefined.Instance;
+end;
+
 
 method Shell.INTSystem(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
@@ -198,9 +234,9 @@ begin
   fEngine := aItem;
 end;
 
-class method Shell.ExecuteProcess(aCommand: String; aArgs, AWD: String; aComSpec: Boolean; aTargetError: Action<String>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan): Integer;
+class method Shell.ExecuteProcess(aCommand: String; aArgs, AWD: String; aComSpec: Boolean; aTargetError: Action<String>; aTargetOutput: Action<String>; environment: array of KeyValuePair<String, String>; aTimeout: nullable TimeSpan; aUseProcess: Process): Integer;
 begin
-  var lProcess := new Process();
+  var lProcess := coalesce(aUseProcess, new Process());
   if lProcess.StartInfo = nil then lProcess.StartInfo := new ProcessStartInfo();
   if aComSpec then begin
     lProcess.StartInfo.FileName := if MUtilities.Windows then coalesce(System.Environment.GetEnvironmentVariable('COMSPEC'), 'CMD.EXE') else coalesce(System.Environment.GetEnvironmentVariable('SHELL'), '/bin/sh');
@@ -240,11 +276,16 @@ begin
     if not lProcess.Start then raise new Exception('Could not start process');
     if aTargetOutput <> nil then lProcess.BeginOutputReadLine;
     if aTargetError <> nil then lProcess.BeginErrorReadLine;
-    if aTimeout = nil then
-      lProcess.WaitForExit()
-    else 
-      if not lProcess.WaitForExit(Integer(aTimeout.TotalMilliseconds)) then raise new Exception('Timeout!');
-    exit lProcess.ExitCode;
+    try
+      if aTimeout = nil then
+        lProcess.WaitForExit()
+      else 
+        if not lProcess.WaitForExit(Integer(aTimeout.TotalMilliseconds)) then raise new Exception('Timeout!');
+      exit lProcess.ExitCode;
+    except
+      on e: System.ComponentModel.Win32Exception do ;
+      on e: SystemException do;
+    end;
   finally
     aTargetError := nil;
     aTargetOutput := nil;
@@ -284,6 +325,7 @@ begin
     end))
   .AddValue('exec', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.Exec))
   .AddValue('execAsync', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.ExecAsync))
+  .AddValue('kill', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.Kill))
   .AddValue('system', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, @lInstance.INTSystem)));
 end;
 

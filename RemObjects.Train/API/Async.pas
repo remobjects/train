@@ -28,6 +28,7 @@ type
   TaskWrapper = public class(EcmaScriptObject)
   public
     property Task: Task;
+    property Process: System.Diagnostics.Process;
   end;
 
 
