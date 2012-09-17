@@ -257,6 +257,7 @@ class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrat
 begin
   for each el in aFile.Split([';', ','], StringSplitOptions.RemoveEmptyEntries).Select(a->aServices.ResolveWithBase(ec, a)) do begin
     var lFile := File.ReadAllText(el);
+    var lOrg := lFile;
     var lFoundAsmVer := false;
     var lFoundAsmFileVer := false;
     if fVersionRegex = nil then begin
@@ -282,7 +283,7 @@ begin
       #13#10'[assembly: AssemblyVersion("'+aFileVersion+'")]'#13#10;
 
     end;
-
+    if lOrg <> lFile then 
     File.WriteAllText(el, lFile);
   end;
 end;
