@@ -15,6 +15,7 @@ type
   public
     class method Main(args: array of String): Integer;
     class property ShowColors: Boolean := true;
+    class method StripQuotes(s: String): String;
   end;
 
   Logger = public class(ILogger)
@@ -197,7 +198,7 @@ begin
   lOptions.Add('m|message', 'Show info messages', v-> begin LoggerSettings.ShowMessage := assigned(v); end);
   lOptions.Add("h|?|help", "show help", v -> begin lShowHelp := assigned(v); end );
   lOptions.Add('v|var=', 'Defines global vars; sets {0:name}={1:value}; multiple allowed', (k, v) -> begin if assigned(k) and assigned(v) then begin
-    lGlobalVars.Add(k, v); end; end);
+    lGlobalVars.Add(k, StripQuotes(v)); end; end);
   lOptions.Add('xslt=', 'Override XSLT for html output', (v) -> begin lXSLT := v; end);
   lOptions.Add('t|html=', 'Write HTML log to file ', (v) -> begin lHtmlOut := v; end);
   lOptions.Add('x|xml=', 'Write XML log to file', (v) -> begin lXMLOut := v; end);
@@ -267,6 +268,18 @@ begin
       Console.ReadLine;
     end;
   end;
+end;
+
+class method ConsoleApp.StripQuotes(s: String): String;
+begin
+  if s = nil then exit nil;
+  if s.Length > 1 then begin
+    if s.StartsWith('"') and (s.EndsWith('"')) then
+      s := s.Substring(1, s.Length -2).Replace('""', '"')
+    else if s.StartsWith(#39) and (s.EndsWith(#39)) then
+      s := s.Substring(1, s.Length -2).Replace(#39#39, #39);
+  end;
+  exit s;
 end;
 
 end.
