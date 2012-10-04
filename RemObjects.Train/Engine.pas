@@ -277,7 +277,7 @@ end;
 method Engine.Expand(ec: ExecutionContext; s: String): String;
 begin
   if fRegEx = nil then 
-    fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9\.]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
+    fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9\. ]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
   exit fRegEx.Replace(s, method (match: System.Text.RegularExpressions.Match) begin
    var lValue := match.Groups['value']:Value;
    if lValue = '' then exit '$';

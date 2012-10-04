@@ -34,8 +34,6 @@
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <SuppressWarnings />
     <FutureHelperClassName />
-    <DebugClass />
-    <AssertMethodName />
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

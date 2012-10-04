@@ -26,7 +26,7 @@ type
     class method DelphiGetBaseBath(aVer: String): String;
     [WrapAs('delphi.build', SkipDryRun := false)]
     class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
-    class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext;aDelphi, aInput: String): String;
+    class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext;aDelphi, aInput, aPlatform: String): String;
   end;
   DelphiOptions = public class
   private
@@ -85,14 +85,14 @@ begin
     lRootPath := DelphiGetBaseBath(lVer);
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     
-    if aOptions:platform:ToLower in ['macosx', 'osx'] then
+    if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') 
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') 
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then 
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx")');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
@@ -124,10 +124,10 @@ begin
     sb.AppendFormat(' -LE"{0}" -LN"{0}" -E"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
-    sb.AppendFormat(' -I"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.includeSearchPath));
+    sb.AppendFormat(' -I"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.includeSearchPath,aOptions:platform));
 
   if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
-    sb.AppendFormat(' -U"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.unitSearchPath));
+    sb.AppendFormat(' -U"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.unitSearchPath,aOptions:platform));
 
 
   sb.Append(aOptions.otherParameters);
@@ -165,11 +165,14 @@ begin
   if n <> 0 then raise new Exception('Delphi failed');
 end;
 
-class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aDelphi, aInput: String): String;
+class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aDelphi, aInput, aPlatform: String): String;
 begin
   var lItems := aInput.Split([';'], StringSplitOptions.RemoveEmptyEntries);
   for i: Integer := 0 to lItems.Length -1 do begin
     lItems[i] := aServices.ResolveWithBase(ec, lItems[i]);
+    if not String.IsNullOrEmpty(aPlatform) then lItems[i] := Regex.Replace(lItems[i], '\$\(Platform\)', aPlatform, RegexOptions.IgnoreCase);
+    lItems[i] := Regex.Replace(lItems[i], '\$\(BDSLIB\)', '$(BDS)\Lib', RegexOptions.IgnoreCase);
+    lItems[i] := Regex.Replace(lItems[i], '\$\(BDS\)', aDelphi, RegexOptions.IgnoreCase);
     lItems[i] := Regex.Replace(lItems[i], '\$\(DELPHI\)', aDelphi, RegexOptions.IgnoreCase);
   end;
   exit String.Join(';', lItems);

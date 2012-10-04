@@ -89,6 +89,7 @@ begin
   aServices.RegisterValue('path', 
     new EcmaScriptObject(aServices.Globals)
     .AddValue('directorySeperator', System.IO.Path.DirectorySeparatorChar.ToString())
+    .AddValue('directorySeparator', System.IO.Path.DirectorySeparatorChar.ToString())
     .AddValue('combine', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Combine'))
     .AddValue('resolve', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_Resolve'))
     .AddValue('getFileName', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Path_GetFilename'))
