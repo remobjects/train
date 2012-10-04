@@ -20,6 +20,8 @@ type
 
     class method Find(aPath: String): sequence of String;
 
+    [WrapAs('file.setAttributes', SkipDryRun := true)]
+    class method File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('file.copy', SkipDryRun := true)]
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
     [WrapAs('file.move', SkipDryRun := true)]
@@ -60,6 +62,13 @@ type
     class method Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
   end;
 
+  FileFlagsOptions = public class
+  public
+    property &ReadOnly: Boolean;
+    property Hidden: Boolean;
+    property Archive: Boolean;
+  end;
+
 implementation
 
 
@@ -67,6 +76,7 @@ method FilePlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('file', 
     new EcmaScriptObject(aServices.Globals)
+    .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_SetAttributes'))
     .AddValue('copy', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
     .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Move'))
     .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_List'))
@@ -327,6 +337,23 @@ begin
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
   System.IO.Directory.Move(lVal, lVal2);
   aServices.Logger.LogMessage('Moved {0} to {1}', lVal, lVal2);
+end;
+
+class method FilePlugin.File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
+begin
+  var lVal := aServices.ResolveWithBase(ec, aFileName);
+  var fileAttribs: System.IO.FileAttributes;
+  if assigned(aFileFlagsOptions) then
+  begin
+    if aFileFlagsOptions.Hidden then fileAttribs := fileAttribs or System.IO.FileAttributes.Hidden;
+    if aFileFlagsOptions.ReadOnly then fileAttribs := fileAttribs or System.IO.FileAttributes.ReadOnly;
+    if aFileFlagsOptions.Archive then fileAttribs := fileAttribs or System.IO.FileAttributes.Archive;
+  end
+  else
+  begin
+    fileAttribs := System.IO.FileAttributes.Normal;
+  end;
+  System.IO.File.SetAttributes(lVal, fileAttribs);
 end;
 
 end.
