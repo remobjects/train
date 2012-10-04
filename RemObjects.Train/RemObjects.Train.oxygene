@@ -11,7 +11,7 @@
     <AllowLegacyOutParams>False</AllowLegacyOutParams>
     <AllowLegacyCreate>False</AllowLegacyCreate>
     <AllowUnsafeCode>False</AllowUnsafeCode>
-    <ApplicationIcon />
+    <ApplicationIcon>..\GtkTrain\Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RemObjects.Builder</Name>
@@ -98,7 +98,6 @@
     <Compile Include="API\Resources.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\SSH.pas" />
-    <Compile Include="API\TextFile.pas" />
     <Compile Include="API\Web.pas" />
     <Compile Include="API\Wrapper.pas" />
     <Compile Include="API\Xcode.pas" />
