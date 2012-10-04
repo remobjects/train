@@ -40,6 +40,8 @@ type
     class method File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
     [WrapAs('file.exists', Important := false)]
     class method File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+    [WrapAs('folder.setAttributes', SkipDryRun := true)]
+    class method Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('folder.list', SkipDryRun := true, Important := false)]
     class method Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
     [WrapAs('folder.exists', Important := false)]
@@ -89,6 +91,7 @@ begin
 
   aServices.RegisterValue('folder', 
     new EcmaScriptObject(aServices.Globals)
+    .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_SetAttributes'))
     .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
     .AddValue('exists', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Exists'))
     .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Move'))
@@ -354,6 +357,30 @@ begin
     fileAttribs := System.IO.FileAttributes.Normal;
   end;
   System.IO.File.SetAttributes(lVal, fileAttribs);
+end;
+
+class method FilePlugin.Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions);
+  
+  method folderCrawler(aSubFolder: String);
+  begin
+    var files := System.IO.Directory.GetFiles(aSubFolder);
+    for each file in files do
+    begin
+      File_SetAttributes(aServices, ec, file, aFileFlagsOptions);
+    end;
+    if aRecurse then
+    begin
+      var folders := System.IO.Directory.GetDirectories(aSubFolder);
+      for each folder in folders do
+      begin
+        folderCrawler(folder);
+      end;  
+    end;
+  end;
+
+begin
+  var lVal := aServices.ResolveWithBase(ec, aFolderName);
+  folderCrawler(lVal);  
 end;
 
 end.
