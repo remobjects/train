@@ -173,7 +173,7 @@ begin
     if not String.IsNullOrEmpty(aOptions.configuration) then
       sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.platform) then
-      sb.Append(' "/property:Platform='+aOptions.configuration+'"');
+      sb.Append(' "/property:Platform='+aOptions.platform+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
       sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
@@ -219,7 +219,7 @@ begin
     if not String.IsNullOrEmpty(aOptions.configuration) then
       sb.Append(' "/property:Configuration='+aOptions.configuration+'"');
     if not String.IsNullOrEmpty(aOptions.platform) then
-      sb.Append(' "/property:Platform='+aOptions.configuration+'"');
+      sb.Append(' "/property:Platform='+aOptions.platform+'"');
     if not String.IsNullOrEmpty(aOptions.destinationFolder) then
       sb.Append(' "/property:OutputPath='+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
