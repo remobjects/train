@@ -187,6 +187,7 @@ begin
   var lXMLOut: String := nil;
   var lHtmlOut: String := nil;
   var lXSLT: String := nil;
+  var lPluginFolder: String := nil;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
@@ -202,6 +203,7 @@ begin
   lOptions.Add('xslt=', 'Override XSLT for html output', (v) -> begin lXSLT := v; end);
   lOptions.Add('t|html=', 'Write HTML log to file ', (v) -> begin lHtmlOut := v; end);
   lOptions.Add('x|xml=', 'Write XML log to file', (v) -> begin lXMLOut := v; end);
+  lOptions.Add('plugin=', 'use this folder to load plugins', (v) -> begin lPluginFolder := v; end);
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
@@ -239,6 +241,18 @@ begin
     for each el in lGlobalVars do lRoot[el.Key] := el.Value;
     if LoggerSettings.ShowDebug then
       lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
+
+    if not String.IsNullOrEmpty(lPluginFolder) then
+    begin
+      if Directory.Exists(lPluginFolder) then
+      begin
+        var files := Directory.GetFiles(lPluginFolder, '*.dll');
+        for each file in files do
+        begin
+          System.Reflection.Assembly.LoadFile(file);
+        end;
+      end;
+    end;
 
     for each el in lArgs do begin
       if not File.Exists(el) then begin
