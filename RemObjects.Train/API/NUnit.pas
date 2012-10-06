@@ -19,7 +19,6 @@ type
     class method NUnitRun(aServices: IApiRegistrationServices;  ec: ExecutionContext; aFilename: String);
   end;
 
-
 implementation
 
 uses

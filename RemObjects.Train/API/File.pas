@@ -20,6 +20,8 @@ type
 
     class method Find(aPath: String): sequence of String;
 
+    [WrapAs('file.setAttributes', SkipDryRun := true)]
+    class method File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('file.copy', SkipDryRun := true)]
     class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
     [WrapAs('file.move', SkipDryRun := true)]
@@ -38,6 +40,8 @@ type
     class method File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
     [WrapAs('file.exists', Important := false)]
     class method File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+    [WrapAs('folder.setAttributes', SkipDryRun := true)]
+    class method Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('folder.list', SkipDryRun := true, Important := false)]
     class method Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
     [WrapAs('folder.exists', Important := false)]
@@ -60,6 +64,13 @@ type
     class method Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
   end;
 
+  FileFlagsOptions = public class
+  public
+    property &ReadOnly: Boolean;
+    property Hidden: Boolean;
+    property Archive: Boolean;
+  end;
+
 implementation
 
 
@@ -67,6 +78,7 @@ method FilePlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterValue('file', 
     new EcmaScriptObject(aServices.Globals)
+    .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_SetAttributes'))
     .AddValue('copy', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
     .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Move'))
     .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_List'))
@@ -79,6 +91,7 @@ begin
 
   aServices.RegisterValue('folder', 
     new EcmaScriptObject(aServices.Globals)
+    .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_SetAttributes'))
     .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
     .AddValue('exists', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Exists'))
     .AddValue('move', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Move'))
@@ -327,6 +340,47 @@ begin
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
   System.IO.Directory.Move(lVal, lVal2);
   aServices.Logger.LogMessage('Moved {0} to {1}', lVal, lVal2);
+end;
+
+class method FilePlugin.File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
+begin
+  var lVal := aServices.ResolveWithBase(ec, aFileName);
+  var fileAttribs: System.IO.FileAttributes;
+  if assigned(aFileFlagsOptions) then
+  begin
+    if aFileFlagsOptions.Hidden then fileAttribs := fileAttribs or System.IO.FileAttributes.Hidden;
+    if aFileFlagsOptions.ReadOnly then fileAttribs := fileAttribs or System.IO.FileAttributes.ReadOnly;
+    if aFileFlagsOptions.Archive then fileAttribs := fileAttribs or System.IO.FileAttributes.Archive;
+  end
+  else
+  begin
+    fileAttribs := System.IO.FileAttributes.Normal;
+  end;
+  System.IO.File.SetAttributes(lVal, fileAttribs);
+end;
+
+class method FilePlugin.Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions);
+  
+  method folderCrawler(aSubFolder: String);
+  begin
+    var files := System.IO.Directory.GetFiles(aSubFolder);
+    for each file in files do
+    begin
+      File_SetAttributes(aServices, ec, file, aFileFlagsOptions);
+    end;
+    if aRecurse then
+    begin
+      var folders := System.IO.Directory.GetDirectories(aSubFolder);
+      for each folder in folders do
+      begin
+        folderCrawler(folder);
+      end;  
+    end;
+  end;
+
+begin
+  var lVal := aServices.ResolveWithBase(ec, aFolderName);
+  folderCrawler(lVal);  
 end;
 
 end.
