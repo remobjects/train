@@ -107,6 +107,7 @@
     <Compile Include="DelayedLogger.pas" />
     <Compile Include="Engine.pas" />
     <Compile Include="Ini.pas" />
+    <Compile Include="PluginSystem.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Utilities.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">

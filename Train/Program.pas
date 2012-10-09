@@ -249,7 +249,7 @@ begin
         var files := Directory.GetFiles(lPluginFolder, '*.dll');
         for each file in files do
         begin
-          System.Reflection.Assembly.LoadFile(file);
+          PluginSystem.Load(file);
         end;
       end;
     end;
