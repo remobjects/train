@@ -118,9 +118,12 @@ begin
     sb.AppendFormat(' -NS"{0}"', aOptions.namespaces);
 
   if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
-    sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+    if Int32.Parse(lVer) > 7 then
+      sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder))
+    else
+      sb.AppendFormat(' -N"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder));
 
-  if not String.IsNullOrEmpty(aOptions.destinationFolder) then 
+  if not String.IsNullOrEmpty(aOptions.destinationFolder) then
     sb.AppendFormat(' -LE"{0}" -LN"{0}" -E"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
@@ -129,8 +132,8 @@ begin
   if not String.IsNullOrEmpty(aOptions.unitSearchPath) then
     sb.AppendFormat(' -U"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.unitSearchPath,aOptions:platform));
 
-
-  sb.Append(aOptions.otherParameters);
+  if not String.IsNullOrEmpty(aOptions.otherParameters) then
+    sb.Append(' '+aOptions.otherParameters);
 
   if not String.IsNullOrEmpty(aOptions.updateIcon) or (aOptions.updateVersionInfo <> nil) then begin
     var lRes := Path.ChangeExtension(aProject, '.res');
