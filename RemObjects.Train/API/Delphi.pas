@@ -197,8 +197,8 @@ begin
     pev.FileVerBuild := lFileVer[3];
     pev.ProductVerMaj := lVer[0];
     pev.ProductVerMin := lVer[1];
-    pev.ProductVerRelease := lVer[1];
-    pev.ProductVerBuild := lVer[2];
+    pev.ProductVerRelease := lVer[2];
+    pev.ProductVerBuild := lVer[3];
     pev.Values.Add(new KeyValuePair<String,String>('ProductVersion', String.Format(System.Globalization.CultureInfo.InvariantCulture, '{0}.{1}.{2}.{3}', pev.ProductVerMaj, pev.ProductVerMin, pev.ProductVerBuild, pev.ProductVerRelease)));
     pev.Values.Add(new KeyValuePair<String,String>('FileVersion', String.Format(System.Globalization.CultureInfo.InvariantCulture, '{0}.{1}.{2}.{3}', pev.FileVerMaj, pev.FileVerMin, pev.FileVerBuild, pev.FileVerRelease)));
 
