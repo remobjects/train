@@ -80,7 +80,9 @@ end;
 class method GacPlugin.GacUninstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
 begin
   if MUtilities.Windows then begin
-    MSWinGacUtil.Unregister(aServices.ResolveWithBase(ec, aFile));
+    var list := MSWinGacUtil.List(aFile);
+    for l in list do
+      MSWinGacUtil.Unregister(l);
   end else
     raise new Exception('GacUtil only implemented for Windows');
 end;
