@@ -17,7 +17,7 @@ type
   [PluginRegistration]
   DelphiPlugin = public class(IPluginRegistration)
   private
-    class method UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo);
+    class method UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
     class method ParseVersion(aVal: String): array of Integer;
   public
     method &Register(aServices: IApiRegistrationServices);
@@ -59,6 +59,7 @@ type
     property legalTrademarks: String;
     property productName: String;
     property title: String;
+    property extraFields: EcmaScriptObject;
   end;
 
 implementation
@@ -137,7 +138,7 @@ begin
 
   if not String.IsNullOrEmpty(aOptions.updateIcon) or (aOptions.updateVersionInfo <> nil) then begin
     var lRes := Path.ChangeExtension(aProject, '.res');
-    UpdateResource(lRes, aServices.ResolveWithBase(ec, aOptions.updateIcon), aOptions.updateVersionInfo);
+    UpdateResource(lRes, aServices.ResolveWithBase(ec, aOptions.updateIcon), aOptions.updateVersionInfo, ec);
   end;
 
   
@@ -181,7 +182,7 @@ begin
   exit String.Join(';', lItems);
 end;
 
-class method DelphiPlugin.UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo);
+class method DelphiPlugin.UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
 begin
   var lRes := UnmanagedResourceFile.FromFile(aRes);
 
@@ -211,6 +212,9 @@ begin
     if not String.IsNullOrEmpty(aVersion.legalTrademarks) then    pev.Values.Add(new KeyValuePair<String,String>('LegalTrademarks', aVersion.legalTrademarks));
     if not String.IsNullOrEmpty(aVersion.productName) then    pev.Values.Add(new KeyValuePair<String,String>('ProductName', aVersion.productName));
     if not String.IsNullOrEmpty(aVersion.title) then    pev.Values.Add(new KeyValuePair<String,String>('Title', aVersion.title));
+    if assigned(aVersion.extraFields) then       
+      for each el in aVersion.extraFields.Values do 
+        pev.Values.Add(new KeyValuePair<String,String>(el.Key, Utilities.GetObjAsString(el.Value.Value, ec)));
     lRes.AddVersionInfo(true, 0, pev);
   end;
 
