@@ -3,6 +3,7 @@
 interface
 
 uses
+  RemObjects.Script.EcmaScript,
   RemObjects.Train,
   System.Collections.Generic,
   System.Linq,
@@ -132,6 +133,8 @@ begin
     for i: Integer := 0 to lArr.Length -1 do begin
       Array(Result).SetValue(Convert(ec,lArr.Get(self.fServices.Globals.ExecutionContext, 0, i.ToString()), aDestType.GetElementType(), nil), i);
     end;
+  end else if (aDestType = typeOf(EcmaScriptObject)) then begin
+    exit RemObjects.Script.EcmaScript.EcmaScriptObject(aVal);
   end else if (&Type.GetTypeCode(aDestType) = TypeCode.Object) and (aVal is RemObjects.Script.EcmaScript.EcmaScriptObject) then begin
     var lVal := RemObjects.Script.EcmaScript.EcmaScriptObject(aVal);
     result := Activator.CreateInstance(aDestType);

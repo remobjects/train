@@ -23,7 +23,8 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
 
-    class method CheckSettings(aServices: IApiRegistrationServices);
+    class method DetectMSBuild(aServices: IApiRegistrationServices;ec: ExecutionContext; aOptions: MSBuildOptions): String;
+    class method getDefaultMSBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aVersion: String; aRaiseException: Boolean): String;
 
     [WrapAs('msbuild.custom', SkipDryRun := false)]
     class method MSBuildCustom(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -56,6 +57,7 @@ type
     property platform: String;
     property destinationFolder: String;
     property extraArgs: String;
+    property toolsVersion: String;
   end;  // MSBuild
 
 implementation
@@ -80,7 +82,9 @@ end;
 class method GacPlugin.GacUninstall(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String);
 begin
   if MUtilities.Windows then begin
-    MSWinGacUtil.Unregister(aServices.ResolveWithBase(ec, aFile));
+    var list := MSWinGacUtil.List(aFile);
+    for l in list do
+      MSWinGacUtil.Unregister(l);
   end else
     raise new Exception('GacUtil only implemented for Windows');
 end;
@@ -107,17 +111,11 @@ begin
 
 end;
 
-class method MSBuildPlugin.CheckSettings(aServices: IApiRegistrationServices);
-begin
-  if not File.Exists(coalesce(aServices.Environment['MSBuild']:ToString, '')) then
-    raise new Exception('MSBuild is not set in the environment path!');
-end;
-
 class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
   //aServices.Logger.LogMessage('Building: '+aProject);
-  CheckSettings(aServices);
+  var lbuild := DetectMSBuild(aServices, ec, aOptions);
 
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
@@ -134,9 +132,9 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -164,7 +162,7 @@ class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; ec:
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
   //aServices.Logger.LogMessage('Building: '+aProject);
-  CheckSettings(aServices);
+  var lbuild := DetectMSBuild(aServices, ec, aOptions);
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
   sb.Append('/nologo "'+aProject+'"');
@@ -179,9 +177,9 @@ begin
     sb.Append(' '+aOptions.extraArgs);
   end;
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -209,7 +207,7 @@ class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; e
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
   //aServices.Logger.LogMessage('Building: '+aProject);
-  CheckSettings(aServices);
+  var lbuild := DetectMSBuild(aServices, ec, aOptions);
 
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
@@ -226,9 +224,9 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -292,7 +290,7 @@ class method MSBuildPlugin.MSBuildCustom(aServices: IApiRegistrationServices; ec
 begin
   aProject := aServices.ResolveWithBase(ec, aProject);
   //aServices.Logger.LogMessage('Building: '+aProject);
-  CheckSettings(aServices);
+  var lbuild := DetectMSBuild(aServices, ec, aOptions);
 
   if aServices.Engine.DryRun then exit;
   var sb := new StringBuilder;
@@ -308,9 +306,9 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', String(aServices.Environment['MSBuild']), sb.ToString);
+  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(String(aServices.Environment['MSBuild']), sb.ToString, nil,false ,
+  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -333,6 +331,58 @@ begin
 
   if n <> 0 then raise new Exception('MSBuild failed');
 
+end;
+
+class method MSBuildPlugin.getDefaultMSBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aVersion: String; aRaiseException: Boolean := true):String;
+const
+  msbuild20 = '$(windir)/Microsoft.NET/Framework/v2.0.50727/MSBuild.exe';
+  msbuild35 = '$(windir)/Microsoft.NET/Framework/v3.5/MSBuild.exe';
+  msbuild40 = '$(windir)/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe';
+
+begin  
+  result := '';
+  var lbuild: String;
+
+  case aVersion of 
+    '2','2.0': begin
+      lbuild := coalesce(aServices.Environment['MSBuild20']:ToString, '');
+      if File.Exists(lbuild) then exit lbuild; 
+      lbuild := aServices.Expand(ec, msbuild20);
+      if File.Exists(lbuild) then exit lbuild; 
+      exit getDefaultMSBuild(aServices, ec,  '3.5', aRaiseException);
+    end;
+    '3.5': begin
+      lbuild := coalesce(aServices.Environment['MSBuild35']:ToString, '');
+      if File.Exists(lbuild) then exit lbuild; 
+      lbuild := aServices.Expand(ec, msbuild35);
+      if File.Exists(lbuild) then exit lbuild; 
+      exit getDefaultMSBuild(aServices, ec,  '4.0', aRaiseException);
+    end;
+    '4','4.0': begin
+      lbuild := coalesce(aServices.Environment['MSBuild40']:ToString, '');
+      if File.Exists(lbuild) then exit lbuild; 
+      lbuild := aServices.Expand(ec, msbuild40);
+      if File.Exists(lbuild) then exit lbuild; 
+    end; 
+  else
+    lbuild := coalesce(aServices.Environment['MSBuild']:ToString, '');
+    if File.Exists(lbuild) then exit lbuild; 
+    
+    lbuild :=  getDefaultMSBuild(aServices, ec,  '4.0', false);
+    if not String.IsNullOrEmpty(lbuild) then exit lbuild;
+    lbuild :=  getDefaultMSBuild(aServices, ec,  '3.5', false);
+    if not String.IsNullOrEmpty(lbuild) then exit lbuild;
+    lbuild :=  getDefaultMSBuild(aServices, ec,  '2.0', true);
+    if not String.IsNullOrEmpty(lbuild) then exit lbuild;
+  end;
+
+  if aRaiseException then 
+    raise new Exception('MSBuild is not found!');
+end;
+
+class method MSBuildPlugin.DetectMSBuild(aServices: IApiRegistrationServices;ec: ExecutionContext;aOptions: MSBuildOptions): String;  
+begin
+  exit getDefaultMSBuild(aServices, ec, aOptions:toolsVersion, true);
 end;
 
 end.
