@@ -50,6 +50,7 @@ type
   VersionInfo = public class
   private
   public
+    constructor ();
     property codePage: UInt16;
     property resLang: UInt16;
     property isDll: Boolean;
@@ -252,6 +253,12 @@ begin
   else
     raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3)');
   end;
+end;
+
+constructor VersionInfo();
+begin
+  codePage := 1252;   
+  resLang := 1033;
 end;
 
 end.
