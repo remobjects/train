@@ -284,7 +284,7 @@ begin
 
     end;
     if lOrg <> lFile then 
-    File.WriteAllText(el, lFile);
+    File.WriteAllText(el, lFile, Encoding.Unicode);
   end;
 end;
 
