@@ -50,6 +50,8 @@ type
   VersionInfo = public class
   private
   public
+    property codePage: UInt16;
+    property resLang: UInt16;
     property isDll: Boolean;
     property version: String;
     property fileVersion: String;
@@ -184,14 +186,15 @@ end;
 
 class method DelphiPlugin.UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
 begin
-  var lRes := iif(file.Exists(aRes), UnmanagedResourceFile.FromFile(aRes), new UnmanagedResourceFile());
+  var lRes := iif(File.Exists(aRes), UnmanagedResourceFile.FromFile(aRes), new UnmanagedResourceFile());
 
   if not String.IsNullOrEmpty(aIcon) then
     lRes.ReplaceIcons(File.ReadAllBytes(aIcon));
 
   if aVersion <> nil then begin
     var pev := new Win32VersionInfoResource();
-    pev.ResLang := 0;
+    pev.CodePage := aVersion.codePage;
+    pev.ResLang := aVersion.resLang;
     pev.IsDll := aVersion.isDll;
     var lVer := ParseVersion(coalesce(aVersion.version, ''));
     var lFileVer := ParseVersion(coalesce(aVersion.fileVersion,aVersion.version, ''));
