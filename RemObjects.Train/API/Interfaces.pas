@@ -14,6 +14,7 @@ type
     method RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: String; aLogger: DelayedLogger);
     method UnregisterTask(aTask: System.Threading.Tasks.Task);
     
+    property WorkDir: String read;
     property Environment: Environment read;
     property Globals: GlobalObject read;
     property Engine: Engine read;
