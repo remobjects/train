@@ -282,7 +282,7 @@ begin
 
     end;
     if lOrg <> lFile then 
-    File.WriteAllText(el, lFile, Encoding.Unicode);
+    File.WriteAllText(el, lFile, Encoding.UTF8);
   end;
 end;
 

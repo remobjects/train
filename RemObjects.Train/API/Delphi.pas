@@ -184,7 +184,7 @@ end;
 
 class method DelphiPlugin.UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
 begin
-  var lRes := iif(file.Exists(aRes), UnmanagedResourceFile.FromFile(aRes), new UnmanagedResourceFile());
+  var lRes := iif(File.Exists(aRes), UnmanagedResourceFile.FromFile(aRes), new UnmanagedResourceFile());
 
   if not String.IsNullOrEmpty(aIcon) then
     lRes.ReplaceIcons(File.ReadAllBytes(aIcon));
