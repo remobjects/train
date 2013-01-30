@@ -15,7 +15,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('inno.build')]
-    class method InnoBuild(aServices: IApiRegistrationServices; aFilename: String; aOptions: InnoSetupOptions);
+    class method InnoBuild(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aFilename: String; aOptions: InnoSetupOptions);
   end;
 
   InnoSetupOptions = public class
@@ -33,8 +33,9 @@ begin
     .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(InnoSetupPlugin), 'InnoBuild'));
 end;
 
-class method InnoSetupPlugin.InnoBuild(aServices: IApiRegistrationServices; aFilename: String; aOptions: InnoSetupOptions);
+class method InnoSetupPlugin.InnoBuild(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aFilename: String; aOptions: InnoSetupOptions);
 begin
+  aFilename := aServices.ResolveWithBase(ec, aFilename);
   var lPath := String(aServices.Environment['InnoSetup']);
   if String.IsNullOrEmpty(lPath) then
     lPath := String(Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Inno Setup 5_is1', 'InstallLocation', ''));
@@ -46,7 +47,7 @@ begin
   var sb := new StringBuilder;
   sb.AppendFormat('"{0}"', aFilename);
   if not String.IsNullOrEmpty(aOptions:destinationFolder) then
-    sb.AppendFormat(' /O"{0}"', aOptions.destinationFolder);
+    sb.AppendFormat(' /O"{0}"', aServices.ResolveWithBase(ec, aOptions.destinationFolder));
 
 
  if aOptions <> nil then begin
@@ -57,7 +58,7 @@ begin
  end;
 
  var lOutput:= new StringBuilder;
-  var n:= Shell.ExecuteProcess(lPath, sb.ToString, nil,false ,
+  var n:= Shell.ExecuteProcess(lPath, sb.ToString, aServices.WorkDir,false ,
   a-> locking lOutput do lOutput.Append(a),a-> locking lOutput do lOutput.Append(a), nil, nil);
 
 

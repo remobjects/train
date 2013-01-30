@@ -435,7 +435,7 @@ begin
   wr.Write(0 as System.UInt16);
   wr.Write(0 as System.UInt16);
   wr.Write(0 as System.UInt16);
-  b := Encoding.Unicode.GetBytes(String.Format('{0:X4}{1:X4}', CodePage, ResLang));
+  b := Encoding.Unicode.GetBytes(String.Format('{0:X4}{1:X4}', ResLang, CodePage));
   wr.Write(b);
   wr.Write(0 as System.UInt16);
   var z: System.UInt16;
