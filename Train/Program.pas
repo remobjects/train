@@ -208,7 +208,7 @@ begin
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
-  lOptions.Add('l|lfnenter', 'Enable/Disable function enter logging', v->begin lLogFNEnter := assigned(v); end);
+  lOptions.Add('l|lfnenter', 'Enable/Disable function enter/exit logging', v->begin lLogFNEnter := assigned(v); end);
   var lArgs: List<String>;
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);

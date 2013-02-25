@@ -157,7 +157,17 @@ begin
   if e.Name.Contains('.') then exit;
   if e.WasException then begin
     if not LogFunctionEnter or e.Name.StartsWith('_') then begin
-      fEngineDebugFrameEnter(sender, e);
+      var lEnv := fEngine.CallStack.LastOrDefault():Frame;
+      var n := if (lEnv = nil) or (not lEnv.HasBinding('arguments')) then nil else lEnv.GetBindingValue('arguments', false);
+      var ev :=  EcmaScriptObject(n);
+      var lArgs: List<Object> := new List<Object>;
+      if ev <> nil then begin
+        for i: Integer := 0 to RemObjects.Script.ecmascript.Utilities.GetObjAsInteger(ev.Get('length'), fEngine.GlobalObject.ExecutionContext) -1 do begin
+          lArgs.Add(ev.Get(i.ToString));
+        end;
+      end;
+
+      Logger:Enter(true, 'function '+e.Name, lArgs.ToArray);
     end;
     var lVal := ScriptRuntimeException.Unwrap(e.Result);
     if lVal is not AbortException then begin
