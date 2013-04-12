@@ -38,7 +38,7 @@ begin
   if String.IsNullOrEmpty(lPath) then raise new Exception('"NUnit" env var is not set');
   lPath := System.IO.Path.Combine(lPath, 'nunit-console.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath + ' could not be found');
-  var n:= Shell.ExecuteProcess(lPath, aFilename, nil, false, 
+  var n:= Shell.ExecuteProcess(lPath, aFilename.Quote(), nil, false, 
     a-> aServices.Logger.LogError(a),
     a-> aServices.Logger.LogMessage(a), nil, nil);
   if n <> 0 then raise new Exception('Units test(s) failed');

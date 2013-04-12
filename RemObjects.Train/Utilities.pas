@@ -35,6 +35,8 @@ type
     class operator Add(aLeft: T; aRight: SLinkedListNode<T>): SLinkedListNode<T>;
   end;
 
+  extension method String.Quote: String;
+
 implementation
 
 constructor SLinkedListNode<T>(aNext: SLinkedListNode<T>; aValue: T);
@@ -91,6 +93,11 @@ begin
     if args[i] is EcmaScriptObject then
       args[i] := EcmaScriptObject(args[i]).Root.JSONStringify(EcmaScriptObject(args[i]).Root.ExecutionContext, nil, EcmaScriptObject(args[i]));
   exit String.Format(s, args);
+end;
+
+extension method String.Quote: String;
+begin
+  result := '"' + self + '"';
 end;
 
 
