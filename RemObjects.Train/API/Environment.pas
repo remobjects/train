@@ -12,7 +12,7 @@ type
     property Owner: Engine read fOwner;
     constructor(aOwner: Engine);
     method DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean; override;
-    method GetOwnProperty(aName: String): PropertyValue; override;
+    method GetOwnProperty(name: String): PropertyValue; override;
   end;
   Environment = public class(Dictionary<String, Object>)
   private
@@ -118,9 +118,9 @@ begin
   fOwner.Environment[aName] := aValue:Value;
 end;
 
-method JVariables.GetOwnProperty(aName: String): PropertyValue;
+method JVariables.GetOwnProperty(name: String): PropertyValue;
 begin
-  var lValue := fOwner.Environment[aName];
+  var lValue := fOwner.Environment[name];
   if lValue = nil then exit nil;
   exit new PropertyValue(PropertyAttributes.Configurable or PropertyAttributes.Enumerable, lValue);
 end;

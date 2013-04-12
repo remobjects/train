@@ -46,6 +46,7 @@ type
     property AsyncWorker: AsyncWorker;
     property Environment: Environment read fEnvironment;
     property DryRun: Boolean;
+    property LogFunctionEnter: Boolean := true;
 
     method Initialize;
     method LoadInclude(aInclude: String);
@@ -136,6 +137,8 @@ end;
 method Engine.fEngineDebugFrameEnter(sender: Object; e: ScriptDebugEventArgs);
 begin
   if e.Name.Contains('.') then exit;
+  if not LogFunctionEnter then exit;
+  if e.Name.StartsWith('_') then exit;
   var lEnv := fEngine.CallStack.LastOrDefault():Frame;
   var n := if (lEnv = nil) or (not lEnv.HasBinding('arguments')) then nil else lEnv.GetBindingValue('arguments', false);
   var ev :=  EcmaScriptObject(n);
@@ -152,15 +155,20 @@ end;
 method Engine.fEngineDebugFrameExit(sender: Object; e: ScriptDebugExitScopeEventArgs);
 begin
   if e.Name.Contains('.') then exit;
+  if not LogFunctionEnter then exit;
+  if e.Name.StartsWith('_') then exit;
   if e.WasException then begin
     var lVal := ScriptRuntimeException.Unwrap(e.Result);
     if lVal is not AbortException then begin
       if lVal is Exception then lVal := Exception(lVal).Message; // don't want the callstack.
       Logger:LogError(lVal:ToString);
     end;
+
     Logger:&Exit(true, 'function '+e.Name, FailMode.Yes, nil);
-  end else
+  end else begin
+
     Logger:&Exit(true, 'function '+e.Name, FailMode.No, ScriptRuntimeException.Unwrap(e.Result));
+  end;
 end;
 
 method Engine.CreateChildEngine: Engine;

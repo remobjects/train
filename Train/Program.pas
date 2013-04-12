@@ -187,6 +187,7 @@ begin
   var lXMLOut: String := nil;
   var lHtmlOut: String := nil;
   var lXSLT: String := nil;
+  var lLogFNEnter: Boolean := true;
   var lPluginFolder: String := nil;
   var lWait := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
@@ -207,6 +208,7 @@ begin
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
+  lOptions.Add('l|lfnenter', 'Enable/Disable function enter/exit logging', v->begin lLogFNEnter := assigned(v); end);
   var lArgs: List<String>;
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);
@@ -261,6 +263,7 @@ begin
       end;
       var lEngine := new Engine(lRoot, el);
       lEngine.Logger := lLogger;
+      lEngine.LogFunctionEnter := lLogFNEnter;
       lEngine.DryRun := lDryRun;
       for each incl in lIncludes do
         lEngine.LoadInclude(incl);

@@ -50,7 +50,7 @@ begin
     if String.IsNullOrWhiteSpace(lfn) then lfn := 'download.bin';
     aTarget := System.IO.Path.Combine(aTarget, lfn);
     using fs := new System.IO.FileStream(aTarget, System.IO.FileMode.Create, System.IO.FileAccess.Write) do 
-      using fs2 := res.GetResponseStream() do fs.CopyTo(fs);
+      using fs2 := res.GetResponseStream() do fs2.CopyTo(fs);
   end;
   exit aTarget;
 end;
