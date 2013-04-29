@@ -89,14 +89,18 @@ begin
     lRootPath := DelphiGetBaseBath(lVer);
     if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
     
-    if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
+    if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccios32.exe') 
+    else if aOptions:platform:ToLower in ['iosarm', 'iosdevice'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciosarm.exe') 
+    else if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe') 
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe') 
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then 
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx32")');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "iossimulator","iosdevice")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
@@ -252,7 +256,7 @@ begin
     'XE3',  '17': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String);
     'XE4',  '18': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String);
   else
-    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4)');
+    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4)');
   end;
 end;
 
