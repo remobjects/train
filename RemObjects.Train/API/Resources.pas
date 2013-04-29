@@ -405,12 +405,12 @@ begin
   wr.Write(0 as System.UInt32);
   wr.Write(FileVerMin);
   wr.Write(FileVerMaj);
-  wr.Write(FileVerRelease);
   wr.Write(FileVerBuild);
+  wr.Write(FileVerRelease);
   wr.Write(ProductVerMin);
   wr.Write(ProductVerMaj);
-  wr.Write(ProductVerRelease);
   wr.Write(ProductVerBuild);
+  wr.Write(ProductVerRelease);
   wr.Write($3f as System.UInt32);
   wr.Write(System.UInt32(&Flags));
   wr.Write(4 as System.UInt32); // VOS_WIN32
