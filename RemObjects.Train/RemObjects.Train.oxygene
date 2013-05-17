@@ -96,6 +96,7 @@
     <Compile Include="API\MD5.pas" />
     <Compile Include="API\MSBuild.pas" />
     <Compile Include="API\NUnit.pas" />
+    <Compile Include="API\PEVerify.pas" />
     <Compile Include="API\Resources.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\SSH.pas" />
