@@ -35,6 +35,8 @@ type
     class method xmlXpathElement(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
     [WrapAs('xml.value', SkipDryRun := true, wantSelf := true, Important := false)]
     class method xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;
+    [WrapAs('xml.xlstTransform', SkipDryRun := true, wantSelf := true, Important := false)]
+    class method xmlXLSTTransform(aServices: IApiRegistrationServices;ec: ExecutionContext; aSelf: XElement; aXLSTFile: String): String;
   end;
 
 
@@ -43,6 +45,7 @@ implementation
 method XmlPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   var lProto := new EcmaScriptObject(aServices.Globals);
+  lProto.AddValue('xlstTransform', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXLSTTransform')); 
   lProto.AddValue('toFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToFile')); 
   lProto.AddValue('toString', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlToString')); 
   lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath', lProto));
@@ -98,6 +101,15 @@ end;
 class method XmlPlugin.xmlXpathElement(aServices: IApiRegistrationServices; aSelf: XElement; aPath: String): XElement;
 begin
   exit System.Xml.XPath.Extensions.XPathSelectElement(aSelf, aPath);
+end;
+
+class method XmlPlugin.xmlXLSTTransform(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: XElement; aXLSTFile: String): String;
+begin
+  var xlst := new System.Xml.Xsl.XslCompiledTransform();
+  var output := new StringWriter();
+  xlst.Load(aServices.ResolveWithBase(ec,aXLSTFile));
+  xlst.Transform(aSelf.CreateReader(), nil, output);
+  result := output.ToString();
 end;
 
 end.
