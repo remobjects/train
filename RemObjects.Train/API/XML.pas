@@ -37,7 +37,6 @@ type
     class method xmlValue(aServices: IApiRegistrationServices; aSelf: XElement): String;
   end;
 
-
 implementation
 
 method XmlPlugin.&Register(aServices: IApiRegistrationServices);
@@ -48,8 +47,6 @@ begin
   lProto.AddValue('xpath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpath', lProto));
   lProto.AddValue('xpathElement', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlXpathElement', lProto));
   lProto.DefineOwnProperty('value', new PropertyValue(PropertyAttributes.Enumerable, RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'xmlValue'), nil)); 
-  
-  
 
   aServices.RegisterObjectValue('xml')
     .AddValue('fromFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(self),'xmlFromFile', lProto))
