@@ -171,9 +171,8 @@ begin
         using lTransform := new XslTransform() do begin
           
           if not String.IsNullOrEmpty(fXSLT) then begin
-            using lTextReader := new StringReader(fXSLT) do
-              using lXslt := new XmlTextReader(lTextReader) do
-                lTransform.Load(lXslt);
+            using lXslt := new XmlTextReader(fXSLT) do
+              lTransform.Load(lXslt);
           end
           else begin
             using lXslt := new XmlTextReader(typeOf(XmlLogger).Assembly.GetManifestResourceStream('RemObjects.Train.Resources.Train2HTML.xslt')) do
