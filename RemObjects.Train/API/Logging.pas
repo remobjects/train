@@ -3,16 +3,18 @@
 interface
 
 uses
-  RemObjects.Train.API,
+  System.Collections.Generic,
   System.IO,
+  System.Linq,
   System.Reflection,
+  System.Security.Cryptography.X509Certificates,
+  System.Text,
   System.Xml,
   System.Xml.Linq,
-  System.Linq,
-  RemObjects.Script.EcmaScript,
-  System.Collections.Generic,
-  System.Text, 
+  System.Xml.XPath,
   System.Xml.Xsl,
+  RemObjects.Script.EcmaScript,
+  RemObjects.Train.API,
   DiscUtils.Iscsi;
 
 type
@@ -145,22 +147,47 @@ begin
   if not String.IsNullOrEmpty(fTargetXML) then 
     fXmlData.Document.Save(fTargetXML);
   if not String.IsNullOrEmpty(fTargetHTML) then begin
-     //var myXPathDoc := new XPathDocument(lLogFile);
-     var myXslTrans := new XslCompiledTransform();
-     if not String.IsNullOrEmpty(fXSLT) then
-       myXslTrans.Load(fXSLT)
-     else begin
-       using sr := new XmlTextReader(typeOf(XmlLogger).Assembly.GetManifestResourceStream('RemObjects.Train.Resources.Train2HTML.xslt')) do begin
-         myXslTrans.Load(sr);
-       end;
-     end;
-     var lOutput := new XDocument;
-     using sw := lOutput.CreateWriter do
-       myXslTrans.Transform(fXmlData.Document.CreateReader, sw);
-     if lOutput.Declaration = nil then begin
-       lOutput.Declaration := new XDeclaration('1.0', 'utf-8', 'yes');
-     end;
-     lOutput.Save(fTargetHTML);
+
+    {var myXslTrans := new XslCompiledTransform();
+    if not String.IsNullOrEmpty(fXSLT) then
+      myXslTrans.Load(fXSLT)
+    else begin
+      using sr := new XmlTextReader(typeOf(XmlLogger).Assembly.GetManifestResourceStream('RemObjects.Train.Resources.Train2HTML.xslt')) do begin
+        myXslTrans.Load(sr);
+      end;
+    end;
+    var lOutput := new XDocument;
+    using sw := lOutput.CreateWriter do
+      myXslTrans.Transform(fXmlData.Document.CreateReader, sw);
+    if lOutput.Declaration = nil then begin
+      lOutput.Declaration := new XDeclaration('1.0', 'utf-8', 'yes');
+    end;
+    lOutput.Save(fTargetHTML);}
+
+    using lReader := fXmlData.CreateReader() do begin
+      using lXPathDoc := new XPathDocument(lReader) do begin
+        {$HIDE W37}
+        // XslTransform may be deprecated, but it works. XslCompiledTransform as used above generates bad HTML!
+        using lTransform := new XslTransform() do begin
+          
+          if not String.IsNullOrEmpty(fXSLT) then begin
+            using lTextReader := new StringReader(fXSLT) do
+              using lXslt := new XmlTextReader(lTextReader) do
+                lTransform.Load(lXslt);
+          end
+          else begin
+            using lXslt := new XmlTextReader(typeOf(XmlLogger).Assembly.GetManifestResourceStream('RemObjects.Train.Resources.Train2HTML.xslt')) do
+              lTransform.Load(lXslt);
+          end;
+
+          using lWriter := new XmlTextWriter(fTargetHTML, nil) do
+            lTransform.Transform(lXPathDoc, nil, lWriter);
+
+        end;
+        {$SHOW W37}
+      end;
+    end;
+
   end;
 end;
 
