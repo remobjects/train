@@ -22,6 +22,7 @@ type
 
     method Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 
+    property DoExpand: Boolean := false;
     method Convert(ec: RemObjects.Script.EcmaScript.ExecutionContext; aVal: Object; aDestType: &Type; aDefault: Object): Object;
     method ConvertBack(aVal: Object): Object;
   end;
@@ -123,7 +124,7 @@ method Wrapper.Convert(ec: RemObjects.Script.EcmaScript.ExecutionContext; aVal: 
 begin
   if (aVal = nil) or (aVal = RemObjects.Script.EcmaScript.Undefined.Instance) then aVal := aDefault;
   if aVal = DBNull.Value then aVal := nil;
-  if aVal is String then
+  if (aVal is String) and DoExpand then
     aVal := fServices.Expand(ec, String(aVal));
   if aVal is WrapperObject then 
     exit WrapperObject(aVal).Val else 
