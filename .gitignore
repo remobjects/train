@@ -1,5 +1,6 @@
 *.user
 *.suo
+*.fire.cache
 Bin
 bin
 obj
