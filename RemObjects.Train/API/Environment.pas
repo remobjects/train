@@ -46,7 +46,7 @@ begin
   aServices.RegisterValue('env', lEnv);
   aServices.RegisterProperty('wd', -> aServices.Engine.WorkDir, a-> begin aServices.Engine.WorkDir := Utilities.GetObjAsString(a, aServices.Globals.ExecutionContext) end);
   aServices.RegisterValue('export', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, a-> begin
-    aServices.Logger.Enter('export', a);
+    aServices.Logger.Enter(false, 'export', a);
     try
       var lValue := a.Skip(1):FirstOrDefault();
       if lValue is EcmaScriptObject then 
@@ -55,12 +55,12 @@ begin
       System.Environment.SetEnvironmentVariable(a:FirstOrDefault():ToString, lValue:ToString);
       exit Undefined.Instance;
     finally
-      aServices.Logger.Exit('export', FailMode.No);
+      aServices.Logger.Exit(false, 'export', FailMode.No);
     end;
   end));
   aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
-    aServices.Logger.Enter('ignoreErrors', c);
+    aServices.Logger.Enter(false, 'ignoreErrors', c);
     var lFail := false;
     try
       try
@@ -80,7 +80,7 @@ begin
     end));
   aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
-      aServices.Logger.Enter('retry', c);
+      aServices.Logger.Enter(false, 'retry', c);
       var lFailMode := FailMode.No;
       try
         var lCount := Utilities.GetArgAsInteger(c, 0, a, false);

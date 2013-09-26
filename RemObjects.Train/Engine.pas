@@ -261,9 +261,9 @@ begin
   for each el in fTasks do begin
     if (el.Item1 = aTask) then begin
       if el.Item1.IsCompleted then
-        Logger.Enter('Finished Task: '+el.Item2) 
+        Logger.Enter(false, 'Finished Task: '+el.Item2) 
       else
-        Logger.Enter('Unfinished Task: '+el.Item2);
+        Logger.Enter(false, 'Unfinished Task: '+el.Item2);
       el.Item3.Replay(Logger);
       Logger.Exit('Finished Task: '+el.Item2, if  el.Item1.IsFaulted then FailMode.Yes else FailMode.No);
 
