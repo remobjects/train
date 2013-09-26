@@ -225,13 +225,13 @@ end;
 
 class method FilePlugin.File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
 begin
-  var lVal := aServices.ResolveWithBase(ec, aFN);
+  var lVal := aServices.ResolveWithBase(ec, aFN, true);
   System.IO.File.WriteAllText(lVal, aData);
 end;
 
 class method FilePlugin.File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData:String);
 begin
-  var lVal := aServices.ResolveWithBase(ec, aFN);
+  var lVal := aServices.ResolveWithBase(ec, aFN, true);
   System.IO.File.AppendAllText(lVal, aData);
 end;
 
