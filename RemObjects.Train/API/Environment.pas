@@ -12,7 +12,7 @@ type
     property Owner: Engine read fOwner;
     constructor(aOwner: Engine);
     method DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean; override;
-    method GetOwnProperty(name: String): PropertyValue; override;
+    method GetOwnProperty(name: String; getPropertyValue: Boolean): PropertyValue; override;
   end;
   Environment = public class(Dictionary<String, Object>)
   private
@@ -46,7 +46,7 @@ begin
   aServices.RegisterValue('env', lEnv);
   aServices.RegisterProperty('wd', -> aServices.Engine.WorkDir, a-> begin aServices.Engine.WorkDir := Utilities.GetObjAsString(a, aServices.Globals.ExecutionContext) end);
   aServices.RegisterValue('export', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, a-> begin
-    aServices.Logger.Enter(false, 'export', a);
+    aServices.Logger.Enter('export', a);
     try
       var lValue := a.Skip(1):FirstOrDefault();
       if lValue is EcmaScriptObject then 
@@ -118,7 +118,7 @@ begin
   fOwner.Environment[aName] := aValue:Value;
 end;
 
-method JVariables.GetOwnProperty(name: String): PropertyValue;
+method JVariables.GetOwnProperty(name: String; getPropertyValue: Boolean): PropertyValue;
 begin
   var lValue := fOwner.Environment[name];
   if lValue = nil then exit nil;
