@@ -46,7 +46,7 @@ begin
   aServices.RegisterValue('env', lEnv);
   aServices.RegisterProperty('wd', -> aServices.Engine.WorkDir, a-> begin aServices.Engine.WorkDir := Utilities.GetObjAsString(a, aServices.Globals.ExecutionContext) end);
   aServices.RegisterValue('export', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, a-> begin
-    aServices.Logger.Enter('export', a);
+    aServices.Logger.Enter(false, 'export', [a]);
     try
       var lValue := a.Skip(1):FirstOrDefault();
       if lValue is EcmaScriptObject then 
