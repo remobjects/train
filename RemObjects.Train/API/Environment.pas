@@ -12,7 +12,7 @@ type
     property Owner: Engine read fOwner;
     constructor(aOwner: Engine);
     method DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean; override;
-    method GetOwnProperty(name: String): PropertyValue; override;
+    method GetOwnProperty(name: String; getPropertyValue: Boolean): PropertyValue; override;
   end;
   Environment = public class(Dictionary<String, Object>)
   private
@@ -55,12 +55,12 @@ begin
       System.Environment.SetEnvironmentVariable(a:FirstOrDefault():ToString, lValue:ToString);
       exit Undefined.Instance;
     finally
-      aServices.Logger.Exit('export', FailMode.No);
+      aServices.Logger.Exit(false, 'export', FailMode.No);
     end;
   end));
   aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
-    aServices.Logger.Enter('ignoreErrors', c);
+    aServices.Logger.Enter(false, 'ignoreErrors', c);
     var lFail := false;
     try
       try
@@ -80,7 +80,7 @@ begin
     end));
   aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
-      aServices.Logger.Enter('retry', c);
+      aServices.Logger.Enter(false, 'retry', c);
       var lFailMode := FailMode.No;
       try
         var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
@@ -118,7 +118,7 @@ begin
   fOwner.Environment[aName] := aValue:Value;
 end;
 
-method JVariables.GetOwnProperty(name: String): PropertyValue;
+method JVariables.GetOwnProperty(name: String; getPropertyValue: Boolean): PropertyValue;
 begin
   var lValue := fOwner.Environment[name];
   if lValue = nil then exit nil;

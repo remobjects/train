@@ -17,7 +17,7 @@ type
     class method SimpleFunction(aOwner: Engine; aDelegate: InternalDelegate): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<Object, array of Object, Object>): EcmaScriptFunctionObject;
     class method SimpleFunction(aOwner: Engine; aDelegate: Func<array of Object, Object>): EcmaScriptFunctionObject;
-    class method SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
+    class method SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil; aExpand: Boolean := true): EcmaScriptFunctionObject;
     class method Windows: Boolean;
 
     class method MyFormat(s: String; params args: array of Object): String;
@@ -78,9 +78,9 @@ begin
   exit Environment.OSVersion.Platform in [PlatformID.Win32NT, PlatformID.Win32S, PlatformID.Win32Windows, PlatformID.WinCE];
 end;
 
-class method MUtilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil): EcmaScriptFunctionObject;
+class method MUtilities.SimpleFunction(aOwner: Engine; aType: &Type; aMethod: String; aProto: EcmaScriptObject := nil; aExpand: Boolean := true): EcmaScriptFunctionObject;
 begin
-  var lRes := new RemObjects.Train.API.Wrapper(aOwner, aType.GetMethod(aMethod), aProto);
+  var lRes := new RemObjects.Train.API.Wrapper(aOwner, aType.GetMethod(aMethod), aProto, DoExpand := aExpand);
 
   exit new EcmaScriptFunctionObject(aOwner.Engine.GlobalObject, aMethod, @lRes.Run, 0);
 end;
