@@ -34,8 +34,8 @@ begin
   aFilename := aServices.ResolveWithBase(ec, aFilename);
   using file := new FileStream(aFilename, FileMode.Open) do
   begin
-    var md5: MD5 := new MD5CryptoServiceProvider();
-    var retVal := md5.ComputeHash(file);
+    var md := new MD5CryptoServiceProvider();
+    var retVal := md.ComputeHash(file);
     var sb := new StringBuilder();
     for i: Int32 := 0 to retVal.Length - 1 do
     begin
