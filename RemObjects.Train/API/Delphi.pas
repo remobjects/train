@@ -16,14 +16,30 @@ uses
 type
   [PluginRegistration]
   DelphiPlugin = public class(IPluginRegistration)
+  private const
+    DELPHI_6    = 6;
+    DELPHI_7    = 7;
+    DELPHI_8    = 8;
+    DELPHI_2005 = 9;
+    DELPHI_2006 = 10;
+    DELPHI_2007 = 11;
+    DELPHI_2009 = 12;
+    DELPHI_2010 = 14;
+    DELPHI_XE   = 15;
+    DELPHI_XE2  = 16;
+    DELPHI_XE3  = 17;
+    DELPHI_XE4  = 18;
+    DELPHI_XE5  = 19;
   private
     class method UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
     class method ParseVersion(aVal: String): array of Integer;
+    class method DelphiVersion(aVersion: String): Integer;
+    class method DelphiVersionName(aVersion: Integer): String;
   public
     method &Register(aServices: IApiRegistrationServices);
 
     [WrapAs('delphi.getBasePath', skipDryRun := false)]
-    class method DelphiGetBaseBath(aVer: String): String;
+    class method DelphiGetBaseBath(aVersion: Integer): String;
     [WrapAs('delphi.build', SkipDryRun := false)]
     class method DelphiBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
     class method RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext;aDelphi, aInput, aPlatform: String): String;
@@ -82,12 +98,15 @@ begin
   var lRootPath: String;
   aProject := aServices.ResolveWithBase(ec, aProject);
   aServices.Logger.LogMessage('Building: '+aProject);
-  var lVer := coalesce(aOptions.delphi:Trim(), '');
+
+  var iVer := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
+  var sVer := DelphiVersionName(iVer);
+
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
   else begin
-    lRootPath := DelphiGetBaseBath(lVer);
-    if lRootPath = nil then raise new Exception('Cannot find delphi registry key for version: '+lVer);
+    lRootPath := DelphiGetBaseBath(iVer);
+    if lRootPath = nil then raise new Exception('Cannot find Delphi registry key for Delphi '+sVer);
     
     if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccios32.exe') 
@@ -126,7 +145,7 @@ begin
     sb.AppendFormat(' -NS"{0}"', aOptions.namespaces);
 
   if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
-    if Int32.Parse(lVer) > 7 then
+    if iVer > DELPHI_7 then
       sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder))
     else
       sb.AppendFormat(' -N"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder));
@@ -239,27 +258,72 @@ begin
   end;
 end;
 
-class method DelphiPlugin.DelphiGetBaseBath(aVer: String): String;
+class method DelphiPlugin.DelphiGetBaseBath(aVersion: Integer): String;
 begin
-  if aVer.StartsWith('d') or aVer.StartsWith('D') then aVer := aVer.Substring(1);
-  case aVer of
-    '6': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\6.0', 'RootDir', '') as String);
-    '7': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\7.0', 'RootDir', '') as String);
-    '8': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\2.0', 'RootDir', '') as String);
-    '2005', '9': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\3.0', 'RootDir', '') as String);
-    '2006', '10': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\4.0', 'RootDir', '') as String);
-    '2007', '11': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\5.0', 'RootDir', '') as String);
-    '2009', '12': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\6.0', 'RootDir', '') as String);
-    '2010', '14': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\7.0', 'RootDir', '') as String);
-    'XE',   '15': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
-    'XE2',  '16': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
-    'XE3',  '17': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String);
-    'XE4',  '18': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String);
-    'XE5',  '19': exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String);
+  case aVersion of
+    DELPHI_6    : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\6.0', 'RootDir', '') as String);
+    DELPHI_7    : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\Delphi\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\Delphi\7.0', 'RootDir', '') as String);
+    DELPHI_8    : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\2.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\2.0', 'RootDir', '') as String);
+    DELPHI_2005 : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\3.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\3.0', 'RootDir', '') as String);
+    DELPHI_2006 : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\4.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\4.0', 'RootDir', '') as String);
+    DELPHI_2007 : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Borland\BDS\5.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Borland\BDS\5.0', 'RootDir', '') as String);
+    DELPHI_2009 : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\6.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\6.0', 'RootDir', '') as String);
+    DELPHI_2010 : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\CodeGear\BDS\7.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\CodeGear\BDS\7.0', 'RootDir', '') as String);
+    DELPHI_XE   : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\8.0', 'RootDir', '') as String);
+    DELPHI_XE2  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\9.0', 'RootDir', '') as String);
+    DELPHI_XE3  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\10.0', 'RootDir', '') as String);
+    DELPHI_XE4  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String);
+    DELPHI_XE5  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String);
   else
-    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5)');
+    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5)');
   end;
 end;
+
+class method DelphiPlugin.DelphiVersion(aVersion: String): Integer;
+begin
+  if aVersion.StartsWith('d') or aVersion.StartsWith('D') then 
+    aVersion := aVersion.Substring(1);
+
+  case aVersion of
+    '6'         : result := DELPHI_6;
+    '7'         : result := DELPHI_7;
+    '8'         : result := DELPHI_8;
+    '2005',  '9': result := DELPHI_2005;
+    '2006', '10': result := DELPHI_2006;
+    '2007', '11': result := DELPHI_2007;
+    '2009', '12': result := DELPHI_2009;
+    '2010', '14': result := DELPHI_2010;
+    'XE',   '15': result := DELPHI_XE;
+    'XE2',  '16': result := DELPHI_XE2;
+    'XE3',  '17': result := DELPHI_XE3;
+    'XE4',  '18': result := DELPHI_XE4;
+    'XE5',  '19': result := DELPHI_XE5;
+  else
+    raise new Exception('Invalid "delphi" version; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5)');
+  end;
+end;
+
+class method DelphiPlugin.DelphiVersionName(aVersion: Integer): String;
+begin
+  case aVersion of
+    DELPHI_6    : exit 'Delphi 6';
+    DELPHI_7    : exit 'Delphi 7';
+    DELPHI_8    : exit 'Delphi 8';
+    DELPHI_2005 : exit 'Delphi 2005';
+    DELPHI_2006 : exit 'Delphi 2006';
+    DELPHI_2007 : exit 'Delphi 2007';
+    DELPHI_2009 : exit 'Delphi 2009';
+    DELPHI_2010 : exit 'Delphi 2010';
+    DELPHI_XE   : exit 'Delphi XE';
+    DELPHI_XE2  : exit 'Delphi XE2';
+    DELPHI_XE3  : exit 'Delphi XE3';
+    DELPHI_XE4  : exit 'Delphi XE4';
+    DELPHI_XE5  : exit 'Delphi XE5';
+  else
+    raise new Exception('Unsupported Delphi version; Supported = 6-19 (excl. 13)');
+  end;
+end;
+
 
 constructor VersionInfo();
 begin

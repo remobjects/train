@@ -48,7 +48,9 @@ begin
   var lCaptureMode: Boolean := false;
   var lCaptureFunc: EcmaScriptBaseFunctionObject := nil;
   var LWD: String := nil;
-  if lOpt <> nil then begin
+  var lAllowedErrorCodes := new Dictionary<String, RemObjects.Script.EcmaScript.PropertyValue>;
+  if lOpt <> nil then 
+  begin
     var lVal := lOpt.Get('capture');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then begin
       lCaptureFunc := EcmaScriptBaseFunctionObject(lVal);
@@ -56,10 +58,13 @@ begin
         lCaptureMode := true;
       end;
     end;
+    lVal := lOpt.Get('allowedErrorCodes');
+    if lVal is EcmaScriptArrayObject then 
+    begin
+      lAllowedErrorCodes := EcmaScriptArrayObject(lVal).Values;
+    end;
     lVal := lOpt.Get('workdir');
-    if lVal is String then
-      LWD := fEngine.ResolveWithBase(ec,String (lVal), true);
-
+    if lVal is String then LWD := fEngine.ResolveWithBase(ec, String(lVal), true);
     lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then 
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
@@ -98,11 +103,24 @@ begin
         end;
       end;
     end, lEnv.ToArray, lTimeout);
-    if 0 <> lExit then begin
-      var lErr := 'Failed with error code: '+lExit;
-      fEngine.Engine.Logger.LogError(lErr);
-      fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
-      raise new Exception(lErr);
+    if lExit <> 0 then 
+    begin   
+      var errorOK := false;
+      for each errorCode in lAllowedErrorCodes.Values do
+      begin
+        if errorCode.Value.Equals(lExit) then
+        begin
+          errorOK := true;
+          break;
+        end;
+      end;
+      if not errorOK then
+      begin
+        var lErr := 'Failed with error code: '+lExit;
+        fEngine.Engine.Logger.LogError(lErr);
+        fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+        raise new Exception(lErr);
+      end;
     end;
     fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     lFail := false;

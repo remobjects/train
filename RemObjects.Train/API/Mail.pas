@@ -62,10 +62,8 @@ begin
     lSMTP.Credentials := new System.Net.NetworkCredential(lUN, lPW);
   if aServices.Engine.DryRun then exit;
   if aOpt <> nil then begin
-    if String.IsNullOrEmpty(aOpt.cc) then
-      lMailMsg.CC.Add(aOpt.cc);
-    if String.IsNullOrEmpty(aOpt.bcc) then
-      lMailMsg.Bcc.Add(aOpt.bcc);
+    if not String.IsNullOrEmpty(aOpt.cc) then lMailMsg.CC.Add(aOpt.cc);
+    if not String.IsNullOrEmpty(aOpt.bcc) then lMailMsg.Bcc.Add(aOpt.bcc);
     for each el in aOpt.attachments do begin
       if (el.data = nil) and (el.filename = nil) then continue;
       if el.data <> nil then begin
