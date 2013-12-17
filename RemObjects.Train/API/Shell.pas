@@ -297,6 +297,8 @@ begin
     try
       if aTimeout = nil then
         lProcess.WaitForExit()
+      else if TimeSpan(aTimeout).TotalSeconds < 0 then
+        exit -1
       else 
         if not lProcess.WaitForExit(Integer(aTimeout.TotalMilliseconds)) then raise new Exception('Timeout!');
       exit lProcess.ExitCode;
