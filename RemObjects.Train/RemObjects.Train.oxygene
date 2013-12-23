@@ -15,7 +15,7 @@
     </ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>RemObjects.Builder</Name>
+    <Name>RemObjects.Train</Name>
     <ProjectGuid>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</ProjectGuid>
     <DefaultUses />
     <InternalAssemblyName />
