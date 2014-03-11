@@ -109,15 +109,20 @@ begin
     lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.White;
   end;
+  
+  var lMaxWidth := Console.WindowWidth-aScript.Length-(2*fIndent)-11;
+
   var lArgs := '';
   if length(args) > 0 then 
     for each a in args do begin
       var s := coalesce(a:ToString, 'null');
-      if length(s) > 50 then s := s.Substring(0, 47)+'...';
       if length(lArgs) > 0 then lArgs := lArgs+', ';
       lArgs := lArgs+s;
+      if length(lArgs) > lMaxWidth then begin
+        lArgs := lArgs.Substring(0, lMaxWidth-3)+'...';
+        break;
+      end;
     end;
-  //var lArgs := String.Join(', ', args).Replace(#13#10, #10).Replace(#10, ' ');
   Console.Write(aScript+'('+lArgs+') { ... ');
   Console.Out.Flush();
         
@@ -148,7 +153,10 @@ begin
   end;
   if fWriteEnter then begin
     fWriteEnter := false;
-    Console.WriteLine(#8#8#8#8'} '+lRet);
+    if Console.CursorLeft < Console.WindowWidth then
+      Console.WriteLine(#8#8#8#8'} '+lRet) // this crashes (on Mac, at least) if the wijdow was resized smaller than current cursorX
+    else
+      Console.WriteLine('} '+lRet);
   end else begin
     CheckEnter;
     Console.WriteLine('} '+aScript+lRet);

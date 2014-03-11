@@ -1,6 +1,7 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.Script", "Script\Source\RemObjects.Script\RemObjects.Script.oxygene", "{CAF9C919-D826-4452-910E-D8BA4861CD72}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.Train", "RemObjects.Train\RemObjects.Train.oxygene", "{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}"
@@ -9,22 +10,22 @@ Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Train", "Train\Train.oxygen
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Mixed Platforms = Debug|Mixed Platforms
-		Release|Mixed Platforms = Release|Mixed Platforms
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|Mixed Platforms.Build.0 = Debug
-		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|Mixed Platforms.ActiveCfg = Release
-		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|Mixed Platforms.Build.0 = Release
-		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|Mixed Platforms.Build.0 = Debug
-		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|Mixed Platforms.ActiveCfg = Release
-		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|Mixed Platforms.Build.0 = Release
-		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|Mixed Platforms.Build.0 = Debug
-		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|Mixed Platforms.ActiveCfg = Release
-		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|Mixed Platforms.Build.0 = Release
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|AnyCPU.ActiveCfg = Debug
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|AnyCPU.Build.0 = Debug
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|AnyCPU.ActiveCfg = Release
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|AnyCPU.Build.0 = Release
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|AnyCPU.ActiveCfg = Debug
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|AnyCPU.Build.0 = Debug
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|AnyCPU.ActiveCfg = Release
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|AnyCPU.Build.0 = Release
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|AnyCPU.ActiveCfg = Debug
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Debug|AnyCPU.Build.0 = Debug
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|AnyCPU.ActiveCfg = Release
+		{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}.Release|AnyCPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
