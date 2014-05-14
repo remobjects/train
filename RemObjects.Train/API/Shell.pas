@@ -169,7 +169,7 @@ begin
     try
       if fEngine.Engine.DryRun then begin
         lLogger.LogMessage('Dry run.');
-        exit '';
+        exit;
       end;
       var sb := new System.Text.StringBuilder;
       var lExit := ExecuteProcess(lCMD, lArg, coalesce(lWD, fEngine.Engine.WorkDir), false, a-> begin

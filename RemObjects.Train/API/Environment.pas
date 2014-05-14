@@ -179,14 +179,17 @@ end;
 
 method Environment.SetGlobal(aName: String; aValue: Object);
 begin
-var lSelf := self;
-  while assigned(lSelf) do begin
-    if lSelf.Previous = nil then 
-      lSelf[aName] := aValue 
-    else
-      lSelf.Remove(aName);
-    lSelf := lSelf.Previous;
+  locking self do begin
+    var lSelf := self;
+    while assigned(lSelf) do begin
+      if lSelf.Previous = nil then 
+        lSelf[aName] := aValue 
+      else
+        lSelf.Remove(aName);
+      lSelf := lSelf.Previous;
+    end;
   end;
+
 end;
 
 method Environment.&Add(key: String; value: Object);
