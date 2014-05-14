@@ -116,6 +116,7 @@ begin
   except
     on E: IOException do;
   end;
+  if lMaxWidth < 10 then lMaxWidth := 10;
 
   var lArgs := '';
   if length(args) > 0 then 
