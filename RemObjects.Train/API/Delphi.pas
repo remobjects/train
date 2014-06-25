@@ -87,7 +87,7 @@ implementation
 method DelphiPlugin.&Register(aServices: IApiRegistrationServices);
 begin
   aServices.RegisterObjectValue('delphi')
-    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiBuild'))
+    .AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiBuild',nil, false))
     .AddValue('getBasePath', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(DelphiPlugin), 'DelphiGetBaseBath'))
 ;
 end;
@@ -97,7 +97,7 @@ end;
 class method DelphiPlugin.DelphiBuild(aServices: IApiRegistrationServices;ec: ExecutionContext; aProject: String; aOptions: DelphiOptions);
 begin
   var lRootPath: String;
-  aProject := aServices.ResolveWithBase(ec, aProject);
+  aProject := aServices.ResolveWithBase(ec, aProject, true);
   aServices.Logger.LogMessage('Building: '+aProject);
 
   var iVer := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
@@ -145,14 +145,14 @@ begin
   if not String.IsNullOrEmpty(aOptions.namespaces) then
     sb.AppendFormat(' -NS"{0}"', aOptions.namespaces);
 
-  if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then 
+  if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then
     if iVer > DELPHI_7 then
-      sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder))
+      sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder,true))
     else
-      sb.AppendFormat(' -N"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder));
+      sb.AppendFormat(' -N"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder, true));
 
   if not String.IsNullOrEmpty(aOptions.destinationFolder) then
-    sb.AppendFormat(' -LE"{0}" -LN"{0}" -E"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder));
+    sb.AppendFormat(' -LE"{0}" -LN"{0}" -E"{0}"', aServices.ResolveWithBase(ec,aOptions.destinationFolder,True));
 
   if not String.IsNullOrEmpty(aOptions.includeSearchPath) then
     sb.AppendFormat(' -I"{0}"', RebuildMultiPath(aServices,ec,lDelphi,aOptions.includeSearchPath,aOptions:platform));
@@ -165,7 +165,7 @@ begin
 
   if not String.IsNullOrEmpty(aOptions.updateIcon) or (aOptions.updateVersionInfo <> nil) then begin
     var lRes := Path.ChangeExtension(aProject, '.res');
-    UpdateResource(lRes, aServices.ResolveWithBase(ec, aOptions.updateIcon), aOptions.updateVersionInfo, ec);
+    UpdateResource(lRes, aServices.ResolveWithBase(ec, aOptions.updateIcon, true), aOptions.updateVersionInfo, ec);
   end;
 
   
@@ -200,11 +200,11 @@ class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; 
 begin
   var lItems := aInput.Split([';'], StringSplitOptions.RemoveEmptyEntries);
   for i: Integer := 0 to lItems.Length -1 do begin
-    lItems[i] := aServices.ResolveWithBase(ec, lItems[i]);
     if not String.IsNullOrEmpty(aPlatform) then lItems[i] := Regex.Replace(lItems[i], '\$\(Platform\)', aPlatform, RegexOptions.IgnoreCase);
     lItems[i] := Regex.Replace(lItems[i], '\$\(BDSLIB\)', '$(BDS)\Lib', RegexOptions.IgnoreCase);
     lItems[i] := Regex.Replace(lItems[i], '\$\(BDS\)', aDelphi, RegexOptions.IgnoreCase);
     lItems[i] := Regex.Replace(lItems[i], '\$\(DELPHI\)', aDelphi, RegexOptions.IgnoreCase);
+    lItems[i] := aServices.ResolveWithBase(ec, lItems[i], true);
   end;
   exit String.Join(';', lItems);
 end;
