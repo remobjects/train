@@ -31,6 +31,7 @@ type
     DELPHI_XE4  = 18;
     DELPHI_XE5  = 19;
     DELPHI_XE6  = 20;
+    DELPHI_XE7  = 21;
   private
     class method UpdateResource(aRes: String; aIcon: String; aVersion: VersionInfo;ec: ExecutionContext);
     class method ParseVersion(aVal: String): array of Integer;
@@ -276,8 +277,9 @@ begin
     DELPHI_XE4  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\11.0', 'RootDir', '') as String);
     DELPHI_XE5  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\12.0', 'RootDir', '') as String);
     DELPHI_XE6  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\14.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\14.0', 'RootDir', '') as String);
+    DELPHI_XE7  : exit  coalesce(Microsoft.Win32.Registry.GetValue('HKEY_CURRENT_USER\Software\Embarcadero\BDS\15.0', 'RootDir', '') as String, Microsoft.Win32.Registry.GetValue('HKEY_LOCAL_MACHINE\Software\Embarcadero\BDS\15.0', 'RootDir', '') as String);
   else
-    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5, XE6)');
+    raise new Exception('Invalid "delphi" flag; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5, XE6, XE7)');
   end;
 end;
 
@@ -301,8 +303,9 @@ begin
     'XE4',  '18': result := DELPHI_XE4;
     'XE5',  '19': result := DELPHI_XE5;
     'XE6',  '20': result := DELPHI_XE6;
+    'XE7',  '21': result := DELPHI_XE7;
   else
-    raise new Exception('Invalid "delphi" version; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5, XE6)');
+    raise new Exception('Invalid "delphi" version; Supported version 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21 (2005, 2006, 2007, 2008, 2009, 2010, 2011, XE, XE2, XE3, XE4, XE5, XE6, XE7)');
   end;
 end;
 
@@ -323,8 +326,9 @@ begin
     DELPHI_XE4  : exit 'Delphi XE4';
     DELPHI_XE5  : exit 'Delphi XE5';
     DELPHI_XE6  : exit 'Delphi XE6';
+    DELPHI_XE7  : exit 'Delphi XE7';
   else
-    raise new Exception('Unsupported Delphi version; Supported = 6-20 (excl. 13)');
+    raise new Exception('Unsupported Delphi version; Supported = 6-21 (excl. 13)');
   end;
 end;
 
