@@ -101,8 +101,14 @@ begin
   aProject := aServices.ResolveWithBase(ec, aProject, true);
   aServices.Logger.LogMessage('Building: '+aProject);
 
-  var iVer := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
-  var sVer := DelphiVersionName(iVer);
+  var iver := 0;
+  var sver := 'Unknown';
+
+  if String.IsNullOrEmpty(aoptions.dcc) then
+  begin
+    iVer := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
+    sVer := DelphiVersionName(iVer);
+  end;
 
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
