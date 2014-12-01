@@ -16,7 +16,7 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
     [WrapAs('nunit.run')]
-    class method NUnitRun(aServices: IApiRegistrationServices;  ec: ExecutionContext; aFilename: String);
+    class method NUnitRun(aServices: IApiRegistrationServices;  ec: ExecutionContext; aFilename: String; aParams: String);
   end;
 
 implementation
@@ -30,7 +30,7 @@ begin
     .AddValue('run', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(NUnitPlugin), 'NUnitRun'));
 end;
 
-class method NUnitPlugin.NUnitRun(aServices: IApiRegistrationServices;  ec: ExecutionContext; aFilename: String);
+class method NUnitPlugin.NUnitRun(aServices: IApiRegistrationServices; ec: ExecutionContext; aFilename: String; aParams: String);
 begin
   aFilename := aServices.ResolveWithBase(ec, aFilename);
   aServices.Logger.LogMessage('Running Unit Tests in this file : ' + aFilename);
@@ -38,7 +38,8 @@ begin
   if String.IsNullOrEmpty(lPath) then raise new Exception('"NUnit" env var is not set');
   lPath := System.IO.Path.Combine(lPath, 'nunit-console.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath + ' could not be found');
-  var n:= Shell.ExecuteProcess(lPath, aFilename.Quote(), nil, false, 
+  var args := iif(assigned(aParams), aFilename.Quote() + ' ' + aParams, aFilename.Quote());
+  var n:= Shell.ExecuteProcess(lPath, args, nil, false, 
     a-> aServices.Logger.LogError(a),
     a-> aServices.Logger.LogMessage(a), nil, nil);
   if n <> 0 then raise new Exception('Units test(s) failed');
