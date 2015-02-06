@@ -258,9 +258,10 @@ begin
     var lOrg := lFile;
     var lFoundAsmVer := false;
     var lFoundAsmFileVer := false;
+    
     if fVersionRegex = nil then begin
-      fVersionRegex := new Regex('(?<=[. ]AssemblyVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
-      fFileVersionRegex := new Regex('(?<=[. ]AssemblyFileVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
+      fVersionRegex := new Regex('(?<=\:\s*AssemblyVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
+      fFileVersionRegex := new Regex('(?<=\:\s*AssemblyFileVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
     end;
     lFile := fVersionRegex.Replace(lFile, method (aMatch: Match): String begin
         lFoundAsmVer := true;
@@ -271,18 +272,23 @@ begin
         if String.IsNullOrEmpty(aFileVersion) then exit aNewVersion;
         exit aFileVersion;
       end);
+      
     if not lFoundAsmVer then begin
-      lFile := lFile+ 
-      #13#10'[assembly: AssemblyVersion("'+aNewVersion+'")]'#13#10;
-
+      if Path.GetExtension(el).ToLower = '.swift' then
+        lFile := lFile+#13#10'[assembly: AssemblyVersion("'+aNewVersion+'")]'#13#10
+      else
+        lFile := lFile+#13#10'@assembly:AssemblyVersion("'+aNewVersion+'")'#13#10;
     end;
+
     if not lFoundAsmFileVer and not String.IsNullOrEmpty(aFileVersion) then begin
-      lFile := lFile+ 
-      #13#10'[assembly: AssemblyVersion("'+aFileVersion+'")]'#13#10;
-
+      if Path.GetExtension(el).ToLower = '.swift' then
+        lFile := lFile+#13#10'@assembly:AssemblyVersion("'+aFileVersion+'")'#13#10
+      else
+        lFile := lFile+#13#10'[assembly: AssemblyVersion("'+aFileVersion+'")]'#13#10;
     end;
+
     if lOrg <> lFile then 
-    File.WriteAllText(el, lFile, Encoding.UTF8);
+      File.WriteAllText(el, lFile, Encoding.UTF8);
   end;
 end;
 
