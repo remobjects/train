@@ -5,32 +5,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>RemObjects Train</title>
+  <title>NUnit test</title>
   
 
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
-  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="./css/vs.css" type="text/css" />
-  <link rel="stylesheet" href="./css/lightbox.css" type="text/css" />
+  <link rel="stylesheet" href="../..//css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../..//css/vs.css" type="text/css" />
+  <link rel="stylesheet" href="../..//css/lightbox.css" type="text/css" />
 
-  <link href="css/Train.css" rel="stylesheet">
+  <link href="../../css/Train.css" rel="stylesheet">
 
 
-  <script src="./js/jquery.min.js"></script>
-  <script src="./js/jquery.cookie.js"></script>
-  <script src="./js/modernizr.min.js"></script>
-  <script src="./js/theme.js"></script>
-  <script src="./js/lightbox.min.js"></script>
-  <script src="./js/highlight.pack.js"></script>
+  <script src="../..//js/jquery.min.js"></script>
+  <script src="../..//js/jquery.cookie.js"></script>
+  <script src="../..//js/modernizr.min.js"></script>
+  <script src="../..//js/theme.js"></script>
+  <script src="../..//js/lightbox.min.js"></script>
+  <script src="../..//js/highlight.pack.js"></script>
    
   
   <script>
   hljs.initHighlightingOnLoad();
-  var baseurl = ".";
+  var baseurl = "../../";
   if (baseurl.charAt(baseurl.length-1) == '/')
 	baseurl = baseurl.substring(0, baseurl.length-1);
-  var current = "/index.html";
+  var current = "/API/NUnit/index.html";
   
   </script>
 
@@ -48,7 +48,7 @@
 
     <nav class="sidenav" data-toggle="navshift">
       <div class="navcolor sidenavsearch">
-        <a href="index.html" class="icon icon-home"> RemObjects Train</a>
+        <a href="../../index.html" class="icon icon-home"> RemObjects Train</a>
         
 
       </div>
@@ -56,20 +56,20 @@
       <ul class="current">
     
         
-        <span class="toctree-l0"><a href="index.html">RemObjects Train</a></span>
+        <span class="toctree-l0"><a href="../../index.html">RemObjects Train</a></span>
             
                 <li class="toctree toctree-l1 ">
-                    <a class="" href="Cmdline/index.html">Command Line</a>
+                    <a class="" href="../../Cmdline/index.html">Command Line</a>
                     
                 </li>
             
                 <li class="toctree toctree-l1 ">
-                    <a class="" href="API/index.html">Api</a>
+                    <a class="" href="../../API/index.html">Api</a>
                     
                 </li>
             
                 <li class="toctree toctree-l1 ">
-                    <a class="" href="Compiling/index.html">Compiling</a>
+                    <a class="" href="../../Compiling/index.html">Compiling</a>
                     
                 </li>
             
@@ -90,7 +90,7 @@
 
       <nav class="navcolor topnav">
         <i data-toggle="navsel" class="icon icon-reorder"></i>
-        <a href="index.html">RemObjects Train</a>
+        <a href="../../index.html">RemObjects Train</a>
       </nav>
 
       <div class="maincontentouter">
@@ -98,7 +98,9 @@
           <div>
 			  <ul class="breadcrumbs">
 				
-				<li>RemObjects Train	</li>
+				<li><a href="../../index.html">RemObjects Train</a> &raquo;</li>
+				
+				<li>NUnit test	</li>
 				  <li class="breadcrumbs-aside">
 
 				  </li>
@@ -112,25 +114,17 @@
           <div role="main">
             <div class="section main-content">
 			
-			<h1>RemObjects Train</h1>
-              <p>RemObjects &quot;Train&quot; is JavaScript based automated build engine, implemented in Oxygene and using the Script for .NET JavaScrip/ECMAScript engine,</p>
-<p>♫ far beyond the black horizon / beyond the things you know / everybody got a destination / everybody got a place to go ♫</p>
-<p>The wiki has the api and information how to use.</p>
-<p>Written in Oxygene.</p>
-<p>Licensed under the bsd license.</p>
+			<h1>NUnit test</h1>
+              <p>These APIs sepxect a NUnit env var to be set to the path to the NUnit binaries.</p>
+<ul>
+<li><strong>nunit.run(aFileToTest, aParameters)</strong> Runs nunit=console with this filename and parameters.</li>
+</ul>
 
 			
             </div>
           </div>
 
           <footer>
-  
-    <div class="footerbuttons">
-      
-        <a href="Cmdline/index.html" class="btn btn-neutral float-right" title="Command Line"/>Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-    </div>
   
 
   <hr/>

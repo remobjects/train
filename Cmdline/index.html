@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Command Line</title>
+  
+
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="..//css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="..//css/vs.css" type="text/css" />
+  <link rel="stylesheet" href="..//css/lightbox.css" type="text/css" />
+
+  <link href="../css/Train.css" rel="stylesheet">
+
+
+  <script src="..//js/jquery.min.js"></script>
+  <script src="..//js/jquery.cookie.js"></script>
+  <script src="..//js/modernizr.min.js"></script>
+  <script src="..//js/theme.js"></script>
+  <script src="..//js/lightbox.min.js"></script>
+  <script src="..//js/highlight.pack.js"></script>
+   
+  
+  <script>
+  hljs.initHighlightingOnLoad();
+  var baseurl = "../";
+  if (baseurl.charAt(baseurl.length-1) == '/')
+	baseurl = baseurl.substring(0, baseurl.length-1);
+  var current = "/Cmdline/index.html";
+  
+  </script>
+
+
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+  </style>
+</head>
+
+<body class="mainbackground">
+
+  <div class="mainbackgroundgrid">
+
+    <nav class="sidenav" data-toggle="navshift">
+      <div class="navcolor sidenavsearch">
+        <a href="../index.html" class="icon icon-home"> RemObjects Train</a>
+        
+
+      </div>
+      <div class="tocmenu maintoc">
+      <ul class="current">
+    
+        
+        <span class="toctree-l0"><a href="../index.html">RemObjects Train</a></span>
+            
+                <li class="toctree toctree-l1 current">
+                    <a class="current" href="../Cmdline/index.html">Command Line</a>
+                    
+                        <ul>
+                        
+                        </ul>
+                    
+                </li>
+            
+                <li class="toctree toctree-l1 ">
+                    <a class="" href="../API/index.html">Api</a>
+                    
+                </li>
+            
+                <li class="toctree toctree-l1 ">
+                    <a class="" href="../Compiling/index.html">Compiling</a>
+                    
+                </li>
+            
+			
+        
+
+    
+</ul>
+
+
+      </div>
+	  <div class="tocmenu searchresults" style="display: none;">
+	  </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="navshift" class="maincontentsection">
+
+      <nav class="navcolor topnav">
+        <i data-toggle="navsel" class="icon icon-reorder"></i>
+        <a href="../index.html">RemObjects Train</a>
+      </nav>
+
+      <div class="maincontentouter">
+        <div class="maincontent">
+          <div>
+			  <ul class="breadcrumbs">
+				
+				<li><a href="../index.html">RemObjects Train</a> &raquo;</li>
+				
+				<li>Command Line	</li>
+				  <li class="breadcrumbs-aside">
+
+				  </li>
+			  </ul>
+              
+
+			  <hr/>
+
+		  </div>
+
+          <div role="main">
+            <div class="section main-content">
+			
+			<h1>Command Line</h1>
+              <p>RemObjects Train has a simple command command line and expects the main script as a single parameter.</p>
+<pre><code>RemObjects Train - JavaScript-based build automation
+Copyright (c) RemObjects Software, 2013. All rights reserved.
+Train.exe &lt;script.js&gt; [options]
+  -o, --options=VALUE        Override the ini file with the global options
+  -c, --colors               Use colors
+  -d, --debug                Show debugging messages
+  -w, --warning              Show warning messages
+  -i, --hint                 Show hint messages
+  -m, --message              Show info messages
+  -h, -?, --help             show help
+  -v, --var=name:value       Defines global vars; sets name=value; multiple allowed
+      --xslt=VALUE           Override XSLT for html output
+  -t, --html=VALUE           Write HTML log to file
+  -x, --xml=VALUE            Write XML log to file
+      --plugin=VALUE         use this folder to load plugins
+      --include=VALUE        Include a script
+      --wait                 Wait for a key before finishing
+      --dryrun               Do a script dry run (skips file/exec actions)
+  -l, --lfnenter             Enable/Disable function enter/exit logging
+</code></pre>
+
+
+			
+            </div>
+          </div>
+
+          <footer>
+  
+    <div class="footerbuttons">
+      
+        <a href="../API/index.html" class="btn btn-neutral float-right" title="Api"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+  <!-- Originally based on https://github.com/snide/sphinx_rtd_theme -->
+</footer>
+
+	  
+        </div>
+      </div>
+    </section>
+  </div>
+    
+</body>
+</html>

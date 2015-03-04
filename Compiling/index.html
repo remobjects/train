@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Compiling</title>
+  
+
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="..//css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="..//css/vs.css" type="text/css" />
+  <link rel="stylesheet" href="..//css/lightbox.css" type="text/css" />
+
+  <link href="../css/Train.css" rel="stylesheet">
+
+
+  <script src="..//js/jquery.min.js"></script>
+  <script src="..//js/jquery.cookie.js"></script>
+  <script src="..//js/modernizr.min.js"></script>
+  <script src="..//js/theme.js"></script>
+  <script src="..//js/lightbox.min.js"></script>
+  <script src="..//js/highlight.pack.js"></script>
+   
+  
+  <script>
+  hljs.initHighlightingOnLoad();
+  var baseurl = "../";
+  if (baseurl.charAt(baseurl.length-1) == '/')
+	baseurl = baseurl.substring(0, baseurl.length-1);
+  var current = "/Compiling/index.html";
+  
+  </script>
+
+
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+  </style>
+</head>
+
+<body class="mainbackground">
+
+  <div class="mainbackgroundgrid">
+
+    <nav class="sidenav" data-toggle="navshift">
+      <div class="navcolor sidenavsearch">
+        <a href="../index.html" class="icon icon-home"> RemObjects Train</a>
+        
+
+      </div>
+      <div class="tocmenu maintoc">
+      <ul class="current">
+    
+        
+        <span class="toctree-l0"><a href="../index.html">RemObjects Train</a></span>
+            
+                <li class="toctree toctree-l1 ">
+                    <a class="" href="../Cmdline/index.html">Command Line</a>
+                    
+                </li>
+            
+                <li class="toctree toctree-l1 ">
+                    <a class="" href="../API/index.html">Api</a>
+                    
+                </li>
+            
+                <li class="toctree toctree-l1 current">
+                    <a class="current" href="../Compiling/index.html">Compiling</a>
+                    
+                        <ul>
+                        
+                        </ul>
+                    
+                </li>
+            
+			
+        
+
+    
+</ul>
+
+
+      </div>
+	  <div class="tocmenu searchresults" style="display: none;">
+	  </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="navshift" class="maincontentsection">
+
+      <nav class="navcolor topnav">
+        <i data-toggle="navsel" class="icon icon-reorder"></i>
+        <a href="../index.html">RemObjects Train</a>
+      </nav>
+
+      <div class="maincontentouter">
+        <div class="maincontent">
+          <div>
+			  <ul class="breadcrumbs">
+				
+				<li><a href="../index.html">RemObjects Train</a> &raquo;</li>
+				
+				<li>Compiling	</li>
+				  <li class="breadcrumbs-aside">
+
+				  </li>
+			  </ul>
+              
+
+			  <hr/>
+
+		  </div>
+
+          <div role="main">
+            <div class="section main-content">
+			
+			<h1>Compiling</h1>
+              <h2 id="before-compiling">Before compiling</h2>
+<ol>
+<li>Get Oxygene. The command line compiler is free, or there's a trial of the full Visual Studio integrated version. Download at
+<a href="http://www.remobjects.com/trials#oxygene" class="foreignlink">RemObjects.com/trials#oxygene</a>.</li>
+<li>Clone the Train repository: <code>git clone https://github.com/remobjects/train.git</code></li>
+<li>Do <code>git submodule update --init</code> to get the &quot;script&quot; repository. </li>
+<li><strong>Script\Source\RemObjects.Script\Properties\AssemblyInfo.pas</strong> has a [assembly: AssemblyKeyName('RemObjectsSoftware')], comment that out (or create &amp; install a &quot;RemObjectsSoftware&quot; key). </li>
+</ol>
+<h2 id="compiling-with-visual-studio">Compiling with Visual Studio</h2>
+<p>Compile in Visual Studio by opening <strong>..\RemObjects.Train.sln</strong> and building it. The resulting output files are in <strong>..\Train\bin\Debug</strong>.  The compiled binary is <strong>Train.exe</strong></p>
+<h2 id="compiling-at-the-command-line">Compiling at the Command Line</h2>
+<p>Use msbuild: <code>msbuild RemObjects.Train.sln /p:Configuration=Release</code></p>
+<p>(Note: if msbuild isn't in your path, it's probably located at C:\Windows\Microsoft.NET\Framework\V4.0.30319\msbuild.exe)</p>
+<p>Your resulting output files are in <strong>Train/bin/Release</strong>.</p>
+
+			
+            </div>
+          </div>
+
+          <footer>
+  
+    <div class="footerbuttons">
+      
+      
+        <a href="../API/index.html" class="btn btn-neutral" title="Api"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+  <!-- Originally based on https://github.com/snide/sphinx_rtd_theme -->
+</footer>
+
+	  
+        </div>
+      </div>
+    </section>
+  </div>
+    
+</body>
+</html>
