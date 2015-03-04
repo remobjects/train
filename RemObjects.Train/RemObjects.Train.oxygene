@@ -53,6 +53,9 @@
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK">
+      <HintPath>Libraries\AWSSDK.dll</HintPath>
+    </Reference>
     <Reference Include="DiscUtils">
       <HintPath>Libraries\DiscUtils.dll</HintPath>
     </Reference>
@@ -95,6 +98,7 @@
     <Compile Include="API\PEVerify.pas" />
     <Compile Include="API\Registry.pas" />
     <Compile Include="API\Resources.pas" />
+    <Compile Include="API\S3.pas" />
     <Compile Include="API\Shell.pas" />
     <Compile Include="API\SSH.pas" />
     <Compile Include="API\Web.pas" />
