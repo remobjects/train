@@ -23,7 +23,7 @@ type
     [WrapAs('file.setAttributes', SkipDryRun := true)]
     class method File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('file.copy', SkipDryRun := true)]
-    class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
+    class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
     [WrapAs('file.move', SkipDryRun := true)]
     class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aDelete: Boolean := true);
     [WrapAs('folder.move', SkipDryRun := true)]
@@ -163,7 +163,7 @@ begin
   aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', lVal,  lVal2));
 end;
 
-class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false);
+class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
@@ -189,7 +189,7 @@ begin
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-      System.IO.File.Copy(el, lTargetFN, true);
+      System.IO.File.Copy(el, lTargetFN, aOverride);
       lFiles .AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
     end;
     
@@ -199,11 +199,11 @@ begin
   end;
 
   if System.IO.Directory.Exists(lVal2) then
-    System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), true)
+    System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), aOverride)
   else begin
     var lTargetDir := System.IO.Path.GetDirectoryName(lVal2);
     if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-    System.IO.File.Copy(lVal, lVal2, true);
+    System.IO.File.Copy(lVal, lVal2, aOverride);
   end;
   aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;

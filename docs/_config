@@ -1,0 +1,6 @@
+output: "../../Train-Documentation",
+theme: "{builtin}/default",
+title: "RemObjects Train",
+extra_css: "/css/Train.css"
+fullfilename: true
+generatesearch: true

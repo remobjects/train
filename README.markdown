@@ -3,7 +3,7 @@ RemObjects "Train" is JavaScript based automated build engine, implemented in Ox
 
 ♫ far beyond the black horizon / beyond the things you know / everybody got a destination / everybody got a place to go ♫
 
-The [wiki](https://github.com/remobjects/train/wiki) has the api and information how to use.
+The [docs](http://remobjects.github.io/train/) has the api and information how to use.
 
 Written in [Oxygene](http://www.oxygenelanguage.com/).
 

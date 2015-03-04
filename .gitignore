@@ -1,6 +1,8 @@
 *.user
 *.suo
 *.fire.cache
+*.mdb
+Documentation/
 Bin
 bin
 obj
