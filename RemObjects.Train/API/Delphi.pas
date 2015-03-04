@@ -104,17 +104,17 @@ begin
   var iver := 0;
   var sver := 'Unknown';
 
-  if String.IsNullOrEmpty(aoptions.dcc) then
+  if String.IsNullOrEmpty(aOptions.dcc) then
   begin
-    iVer := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
-    sVer := DelphiVersionName(iVer);
+    iver := DelphiVersion(coalesce(aOptions.delphi:Trim(), ''));
+    sver := DelphiVersionName(iver);
   end;
 
   if not String.IsNullOrEmpty(aOptions.dcc) then
     lRootPath:= aOptions.dcc
   else begin
-    lRootPath := DelphiGetBaseBath(iVer);
-    if lRootPath = nil then raise new Exception('Cannot find Delphi registry key for Delphi '+sVer);
+    lRootPath := DelphiGetBaseBath(iver);
+    if lRootPath = nil then raise new Exception('Cannot find Delphi registry key for Delphi '+sver);
     
     if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccios32.exe') 
@@ -153,7 +153,7 @@ begin
     sb.AppendFormat(' -NS"{0}"', aOptions.namespaces);
 
   if not String.IsNullOrEmpty(aOptions.dcuDestinationFolder) then
-    if iVer > DELPHI_7 then
+    if iver > DELPHI_7 then
       sb.AppendFormat(' -NO"{0}" -N0"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder,true))
     else
       sb.AppendFormat(' -N"{0}"', aServices.ResolveWithBase(ec,aOptions.dcuDestinationFolder, true));
