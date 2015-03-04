@@ -1,0 +1,20 @@
+/*
+  Run this with the following command line to build it:
+    Train.exe build.train
+
+    use SET docsgen=c:\path\to\docsgen.exe to build documentation too.
+*/
+
+log.info("Syncing git submodules");
+
+shell.system("git submodule update --init", ".");
+msbuild.rebuild("remObjects.Train.sln", { configuration: "Release", destinationFolder: "Bin" });
+
+var dg = env["docsgen"];
+
+if (dg) {
+  log.info("Generating documentation");
+  shell.exec(dg, "build docs --overrideoption=output:../Documentation");
+} else {
+  log.warning("docsgen env var not set to the docsgen executable, cannot generate documentation");
+}
