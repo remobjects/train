@@ -30,6 +30,7 @@ type
     method LogHint(s: System.String);
     method LogInfo(s: String);
     method LogError(s: System.String);
+    property InIgnore: Boolean;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
     method &Write; empty;
@@ -54,7 +55,10 @@ begin
   CheckEnter;
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.Red;
+    if InIgnore then 
+      Console.ForegroundColor := ConsoleColor.DarkRed
+    else
+      Console.ForegroundColor := ConsoleColor.Red;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end else Console.WriteLine(s);

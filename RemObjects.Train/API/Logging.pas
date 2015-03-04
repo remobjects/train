@@ -54,10 +54,13 @@ type
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object := nil);
     method &Write;
+    property InIgnore: Boolean read write;
   end;  
 
   MultiLogger = public class(ILogger, IDisposable)
   private
+    method set_InIgnore(value: Boolean); locked;
+    method get_InIgnore: Boolean; locked;
   public
     constructor;
     property Loggers: List<ILogger> := new List<ILogger>; readonly;
@@ -71,6 +74,7 @@ type
     method LogInfo(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
+    property InIgnore: Boolean read get_InIgnore    write set_InIgnore;
   end;
 
   BaseXmlLogger = public abstract class(ILogger, IDisposable)
@@ -83,6 +87,7 @@ type
     method Dispose; virtual; 
     method Write; virtual;
     method LogError(s: String); locked;
+    property InIgnore: Boolean;
     method LogMessage(s: String);locked;
     method LogWarning(s: String);locked;
     method LogHint(s: String);locked;
@@ -192,7 +197,7 @@ end;
 
 method BaseXmlLogger.LogError(s: String);
 begin
-  fXmlData.Add(new XElement('error', Filter(s)));
+  fXmlData.Add(new XElement(if InIgnore then 'ignoredError' else 'error', Filter(s)));
 end;
 
 method BaseXmlLogger.LogMessage(s: String);
@@ -363,6 +368,18 @@ end;
 method MultiLogger.&Write;
 begin
   Loggers.ForEach(a->a.Write);
+end;
+
+method MultiLogger.get_InIgnore: Boolean;
+begin
+  if Loggers.Count = 0 then exit false;
+  exit Loggers[0].InIgnore;
+end;
+
+method MultiLogger.set_InIgnore(value: Boolean);
+begin
+  for each el in Loggers do
+    el.InIgnore := value;
 end;
 
 method LoggingRegistration.&Register(aServices: IApiRegistrationServices);
