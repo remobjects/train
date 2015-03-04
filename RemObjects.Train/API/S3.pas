@@ -27,7 +27,7 @@ type
     [WrapAs('S3.readFile', SkipDryRun := true, wantSelf := true)]
     class method ReadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aFilename: String): String;
     [WrapAs('S3.downloadFiles', SkipDryRun := true, wantSelf := true)]
-    class method DownLoadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix, aLocalTargetDir: String; aRecurse: Boolean);
+    class method DownloadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix, aLocalTargetDir: String; aRecurse: Boolean);
     [WrapAs('S3.uploadFile', SkipDryRun := true, wantSelf := true)]
     class method UploadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aLocalFile, aKey: String);
     [WrapAs('S3.writeFile', SkipDryRun := true, wantSelf := true)]
@@ -53,7 +53,7 @@ type
     [WrapAs('s3.secretAccessKey', wantSelf := true)]
     class method GetSecretAccessKey(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine): String;
     [WrapAs('s3.secretAccessKey', wantSelf := true)]
-    class method GetSecretAccessKey(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine; val: String);
+    class method SetSecretAccessKey(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine; val: String);
 
     [WrapAs('s3.regionEndpoint', wantSelf := true)]
     class method GetRegionEndpoint(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine): String;
@@ -71,7 +71,7 @@ implementation
 method S3PlugIn.&Register(aServices: IApiRegistrationServices);
 begin
   //aServices.RegisterValue('S3', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
-  var lProto := new EcmaScriptObject(aServices.Globals);
+  var   lProto := new EcmaScriptObject(aServices.Globals);
   lProto.Prototype := aServices.Globals.ObjectPrototype;
   lProto.AddValue('listFiles', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'ListFiles'));
   lProto.AddValue('downloadFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'DownloadFile'));
@@ -98,12 +98,12 @@ begin
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetSecretAccessKey')));
   lProto.DefineOwnProperty('regionEndpoint', 
     new PropertyValue(PropertyAttributes.All, 
-    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'getRegionEndpoint'),
-    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'setRegionEndpoint')));
+    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetRegionEndpoint'),
+    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetRegionEndpoint')));
 
   var lObj := new EcmaScriptFunctionObject(aServices.Globals, 'S3', (aCaller, aSElf, aArgs) ->
     begin
-      exit new WrapperObject(aCaller.Global, lProto, Value := new S3Engine);                                                                    
+      exit new WrapperObject(aCaller.Global, lProto, Val := new S3Engine);                                                                    
     end, 1, &Class := 'S3');
   aServices.Globals.Values.Add('S3', PropertyValue.NotEnum(lObj));
 
@@ -128,7 +128,7 @@ begin
 
 end;
 
-class method S3PlugIn.DownLoadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aLocalTargetDir: String; aRecurse: Boolean);
+class method S3PlugIn.DownloadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aLocalTargetDir: String; aRecurse: Boolean);
 begin
 
 end;
@@ -183,7 +183,7 @@ begin
 
 end;
 
-class method S3PlugIn.GetSecretAccessKey(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
+class method S3PlugIn.SetSecretAccessKey(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
 
 end;
