@@ -61,6 +61,8 @@ begin
   aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin 
     aServices.Logger.Enter(false, 'ignoreErrors', c);
+    var lIgnore := aServices.Logger.InIgnore;
+    aServices.Logger.InIgnore := true;
     var lFail := false;
     try
       try
@@ -76,12 +78,15 @@ begin
       end;
     finally
       aServices.Logger.Exit('ignoreErrors', if lFail then FailMode.Recovered else FailMode.No);
+      aServices.Logger.InIgnore := lIgnore;
     end;
     end));
   aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
     begin
       aServices.Logger.Enter(false, 'retry', c);
       var lFailMode := FailMode.No;
+      var lIgnore := aServices.Logger.InIgnore;
+      aServices.Logger.InIgnore := true;
       try
         var lCount := Utilities.GetArgAsInteger(c, 0, a, false);
         loop begin
@@ -100,6 +105,7 @@ begin
                   aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
                 continue;
               end;
+              aServices.Logger.InIgnore := lIgnore;
               aServices.Engine.Logger.LogError(e);
               lFailMode := FailMode.Yes;
               raise new AbortException;
@@ -108,6 +114,7 @@ begin
         end;
       finally
         aServices.Logger.Exit('retry', lFailMode);
+        aServices.Logger.InIgnore := lIgnore;
       end;
     end));
 

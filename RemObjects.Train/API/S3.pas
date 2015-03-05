@@ -1,4 +1,4 @@
-﻿namespace RemObjects.Train.API;
+namespace RemObjects.Train.API;
 
 interface
 
@@ -28,7 +28,7 @@ type
     [WrapAs('S3.readFile', SkipDryRun := true, wantSelf := true)]
     class method ReadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aKey: String): String;
     [WrapAs('S3.downloadFiles', SkipDryRun := true, wantSelf := true)]
-    class method DownLoadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix, aLocalTargetDir: String; aRecurse: Boolean);
+    class method DownloadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix, aLocalTargetDir: String; aRecurse: Boolean);
     [WrapAs('S3.uploadFile', SkipDryRun := true, wantSelf := true)]
     class method UploadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aLocalFile, aKey: String);
     [WrapAs('S3.writeFile', SkipDryRun := true, wantSelf := true)]
@@ -109,8 +109,8 @@ begin
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetSecretAccessKey')));
   lProto.DefineOwnProperty('regionEndpoint', 
     new PropertyValue(PropertyAttributes.All, 
-    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'getRegionEndpoint'),
-    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'setRegionEndpoint')));
+    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetRegionEndpoint'),
+    RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetRegionEndpoint')));
 
   var lObj := new EcmaScriptFunctionObject(aServices.Globals, 'S3', (aCaller, aSElf, aArgs) ->
     begin
@@ -149,7 +149,7 @@ begin
           result := r.ReadToEnd();
 end;
 
-class method S3PlugIn.DownLoadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aLocalTargetDir: String; aRecurse: Boolean);
+class method S3PlugIn.DownloadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aLocalTargetDir: String; aRecurse: Boolean);
 begin
   var lFiles := ListFiles(aServices, ec, aSelf, aPrefix, nil);
   for each f in lFiles do begin
@@ -276,3 +276,4 @@ begin
 end;
 
 end.
+
