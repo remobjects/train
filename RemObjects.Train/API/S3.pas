@@ -114,7 +114,7 @@ begin
 
   var lObj := new EcmaScriptFunctionObject(aServices.Globals, 'S3', (aCaller, aSElf, aArgs) ->
     begin
-      exit new WrapperObject(aCaller.Global, lProto, Value := new S3Engine);                                                                    
+      exit new WrapperObject(aCaller.Global, lProto, Val := new S3Engine);                                                                    
     end, 1, &Class := 'S3');
   aServices.Globals.Values.Add('S3', PropertyValue.NotEnum(lObj));
 
