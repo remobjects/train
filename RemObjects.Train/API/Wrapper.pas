@@ -34,6 +34,7 @@ type
     property WantSelf: Boolean;
     property Important: Boolean := true;
     property SkipDryRun: Boolean;
+    property SecretArguments: array of Integer;
     property LogName: String read fLogName;
   end;
 
@@ -61,8 +62,19 @@ end;
 method Wrapper.Run(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; aArgs: array of Object): Object;
 begin
   result := RemObjects.Script.EcmaScript.Undefined.Instance;
-  if not String.IsNullOrEmpty(fWrapInfo.LogName) then
-    fServices.Logger.Enter(fWrapInfo.Important, fWrapInfo.LogName, aArgs);
+  var lSecretArgs := aArgs;
+  if not String.IsNullOrEmpty(fWrapInfo.LogName) then begin
+    if length(fWrapInfo.SecretArguments) > 0 then begin
+      lSecretArgs := new Object[length(aArgs)];
+      for i: Integer := 0 to length(lSecretArgs)-1 do begin
+        if fWrapInfo.SecretArguments.Contains(i) then
+          lSecretArgs[i] := '**SECRET**'
+        else
+          lSecretArgs[i] := aArgs[i];
+      end;
+    end;
+    fServices.Logger.Enter(fWrapInfo.Important, fWrapInfo.LogName, lSecretArgs);
+  end;
   var lFail := true;
   try
     if (fServices.Engine.DryRun) and (fWrapInfo.SkipDryRun) then begin lFail := false; exit; end;

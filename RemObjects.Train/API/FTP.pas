@@ -18,7 +18,7 @@ type
   protected
   public
     method &Register(aServices: IApiRegistrationServices);  
-    [WrapAs('ftp.upload', SkipDryRun := true)]
+    [WrapAs('ftp.upload', SkipDryRun := true, SecretArguments := [1, 2])]
     class method FtpUpload(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext; aServer, aUsername, aPassword, aFileName, aRemote: String);
   end;
 

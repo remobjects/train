@@ -47,12 +47,12 @@ type
 
     [WrapAs('s3.accessKeyID', wantSelf := true)]
     class method GetAccessKeyID(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine): String;
-    [WrapAs('s3.accessKeyID', wantSelf := true)]
+    [WrapAs('s3.accessKeyID', wantSelf := true, SecretArguments := [0])]
     class method SetAccessKeyID(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine; val: String);
 
     [WrapAs('s3.secretAccessKey', wantSelf := true)]
     class method GetSecretAccessKey(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine): String;
-    [WrapAs('s3.secretAccessKey', wantSelf := true)]
+    [WrapAs('s3.secretAccessKey', wantSelf := true, SecretArguments := [0])]
     class method SetSecretAccessKey(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine; val: String);
 
     [WrapAs('s3.regionEndpoint', wantSelf := true)]
