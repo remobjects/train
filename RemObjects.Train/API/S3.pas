@@ -126,6 +126,9 @@ end;
 
 class method S3PlugIn.ListFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aSuffix: String): array of String;
 begin
+  aPrefix := aPrefix:Replace("//", "/");
+  if not aPrefix.EndsWith("/") then aPrefix := aPrefix+"/";
+
   var lRequest := new ListObjectsRequest(BucketName := aSelf.Bucket, Prefix := aPrefix);
   result := aSelf.S3Client.ListObjects(lRequest):S3Objects:&Where(o -> (not assigned(aSuffix)) or o.Key.EndsWith(aSuffix)).Select(o -> o.Key).ToArray();
 end;
@@ -170,7 +173,10 @@ end;
 
 class method S3PlugIn.UploadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFile: String; aKey: String);
 begin
-  aServices.Logger.LogMessage('Uploading {0} to {1} on S3', aLocalFile, aKey);
+  if aKey.EndsWith("/") then 
+    aKey := aKey+Path.GetFileName(aLocalFile); // if aKey is a folder, reuse local filename
+  
+  aServices.Logger.LogMessage('Uploading file {0} to {1} on S3', aLocalFile, aKey);
   using lStream := new FileStream(aLocalFile, FileMode.Open, FileAccess.Read, FileShare.Delete) do
     using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, InputStream := lStream, Timeout := aSelf.Timeout) do
       using lResponse := aSelf.S3Client.PutObject(lRequest) do;
@@ -184,6 +190,11 @@ end;
 
 class method S3PlugIn.UploadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFolderAndFilters: String; aPrefix: String; aRecurse: Boolean);
 begin
+  aPrefix := aPrefix:Replace("//", "/");
+  if not aPrefix.EndsWith("/") then 
+    aPrefix := aPrefix+"/"; // force aPrefix to be a folder
+  
+  aServices.Logger.LogMessage('Uploading files {0} to {1} on S3', aLocalFolderAndFilters, aPrefix);
   var lFolder := aLocalFolderAndFilters;
   var lFilter := Path.GetFileName(aLocalFolderAndFilters);
   if lFilter.Contains('*') or lFilter.Contains('?') then
@@ -214,7 +225,6 @@ end;
 class method S3PlugIn.SetBucket(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
   aSelf.Bucket := val;
-  //aSelf.ResetClient();
 end;
 
 class method S3PlugIn.GetServiceURL(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine): String;
@@ -265,9 +275,10 @@ method S3Engine.GetClient: AmazonS3Client;
 begin
   if not assigned(fClient) then begin
     var lConfig := new Amazon.S3.AmazonS3Config();
-    lConfig.ServiceURL := if assigned(ServiceURL) then ServiceURL else 'https://s3.amazonaws.com';
-    //if assigned(RegionEndpoint) then lConfig.RegionEndpoint := RegionEndpoint;
-    fClient := new Amazon.S3.AmazonS3Client(AccessKeyID, SecretAccessKey{, lConfig});  
+    lConfig.ServiceURL := if length(ServiceURL) > 0 then ServiceURL else 'https://s3.amazonaws.com';
+    //if length(RegionEndpoint) > 0 then lConfig.RegionEndpoint := RegionEndpoint;
+    Console.WriteLine("lConfig.ServiceURL is '"+lConfig.ServiceURL+"'");
+    fClient := new Amazon.S3.AmazonS3Client(AccessKeyID, SecretAccessKey, lConfig);  
   end;
   result := fClient;
 end;
