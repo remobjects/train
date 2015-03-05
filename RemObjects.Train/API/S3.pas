@@ -1,4 +1,4 @@
-namespace RemObjects.Train.API;
+﻿namespace RemObjects.Train.API;
 
 interface
 
@@ -122,7 +122,7 @@ begin
   lProto.Values['constructor'] := PropertyValue.NotEnum(lProto);
 end;
 
-
+{ S3 Logic }
 
 class method S3PlugIn.ListFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aSuffix: String): array of String;
 begin
@@ -132,6 +132,7 @@ end;
 
 class method S3PlugIn.DownloadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aKey: String; aLocalTarget: String);
 begin
+  aServices.Logger.LogMessage('Downloading {0} from S3 to {1}', aKey, aLocalTarget);
   Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do
     using lResult := aSelf.S3Client.GetObject(lRequest) do
@@ -160,15 +161,16 @@ begin
     if length(lFolder) > 0 then begin
       if not aRecurse then 
         continue;
-      //TODO: append
-      //lTargetFile :=
+      lFolder := lFolder.Replace("/",Path.DirectorySeparatorChar);
+      lTargetFile := Path.Combine(Path.Combine(aLocalTargetDir, lFolder), lFile);
     end;
-    //DownloadFile(aServices, ec, aSelf, )
+    DownloadFile(aServices, ec, aSelf, f, lTargetFile);
   end;
 end;
 
 class method S3PlugIn.UploadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFile: String; aKey: String);
 begin
+  aServices.Logger.LogMessage('Uploading {0} to {1} on S3', aLocalFile, aKey);
   using lStream := new FileStream(aLocalFile, FileMode.Open, FileAccess.Read, FileShare.Delete) do
     using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, InputStream := lStream, Timeout := aSelf.Timeout) do
       using lResponse := aSelf.S3Client.PutObject(lRequest) do;

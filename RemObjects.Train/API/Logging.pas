@@ -171,8 +171,8 @@ begin
 
     using lReader := fXmlData.CreateReader() do begin
       using lXPathDoc := new XPathDocument(lReader) do begin
-        {$HIDE W37}
-        // XslTransform may be deprecated, but it works. XslCompiledTransform as used above generates bad HTML!
+        {$HIDE W28}
+        // XslTransform may be deprecated, but it works. XslCompiledTransform as used above generates bad HTML.DO NOT UPDATE
         using lTransform := new XslTransform() do begin
           
           if not String.IsNullOrEmpty(fXSLT) then begin
@@ -188,7 +188,7 @@ begin
             lTransform.Transform(lXPathDoc, nil, lWriter);
 
         end;
-        {$SHOW W37}
+        {$SHOW W28}
       end;
     end;
 
