@@ -1,5 +1,5 @@
 ---
-title: Zip
+title: ZIP Files
 ---
 
 * **zip.compress(zip, inputFN, fileMask, recurse)** Create a new zip file with the input files in it; The masks can contain relative paths to include that path in the zip itself.

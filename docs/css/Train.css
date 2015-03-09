@@ -1,11 +1,33 @@
 
 .navcolor {
-    background-color: #5CDBCC;
+    background-color: #c000a0;
 }
 
 a {
-    color: #5CDBCC;
+    color: #c000a0;
 }
 a:hover {
-    color: #50D1CB;
+    color: #ff00af;
+}
+
+.box,
+.version,
+.note {
+	margin-bottom: 1em;
+	margin-left: -1em;
+	margin-right: -1em;
+	padding: 1em 1em 0 1em;
+}
+
+.box h2,
+.version h2,
+.note h2 {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+
+.box {
+	background-color: #f0f0f0;
+	border: 1px solid #c0c0c0;
 }

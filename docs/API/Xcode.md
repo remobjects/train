@@ -1,10 +1,10 @@
 ---
-title: XCode
+title: Xcode
 ---
 
-* **xcode.clean(project, options)**  Cleans an xcode project
-* **xcode.build(project, options)**  Builds an xcode project
-* **xcode.rebuild(project, options)**  Rebuild an xcode project
+* **xcode.clean(project, options)**  Cleans an Xcode project
+* **xcode.build(project, options)**  Builds an Xcode project
+* **xcode.rebuild(project, options)**  Rebuild an Xcode project
 
 ```
 options: {

@@ -1,5 +1,5 @@
 ---
-title: Mail
+title: Email
 ---
 
 Mail sending plugin. Requires these env vars to be set:
