@@ -6,6 +6,8 @@ uses
   System.Collections.Generic,
   RemObjects.Script.EcmaScript,
   System.Linq,
+  System.IO,
+  System.IO.Compression,
   System.Text;
 
 type
@@ -16,7 +18,7 @@ type
   public
     method &Register(aServices: IApiRegistrationServices);
     [WrapAs('zip.compress', SkipDryRun := true)]
-    class method ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean := true; aPassword: String := nil);
+    class method ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean := true);
 
     [WrapAs('zip.list', SkipDryRun := true, Important := false)]
     class method ZipList(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String): array of ZipEntryData;
@@ -24,7 +26,7 @@ type
     [WrapAs('zip.extractFile', SkipDryRun := true)]
     class method ZipExtractFile(aServices: IApiRegistrationServices; ec: ExecutionContext; zip, aDestinationFile: String; aEntry: ZipEntryData);
     [WrapAs('zip.extractFiles', SkipDryRun := true)]
-    class method ZipExtractFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; zip, aDestinationPath: String; aEntry: array of ZipEntryData; aFlatten: Boolean := false);
+    class method ZipExtractFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; zip, aDestinationPath: String; aEntry: array of ZipEntryData := nil; aFlatten: Boolean := false);
   end;
 
   ZipEntryData = public class
@@ -47,62 +49,68 @@ begin
     ;
 end;
 
-class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean; aPassword: String := nil);
+class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean);
 begin
+  
   zip := aServices.ResolveWithBase(ec,zip);
-  //if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
+  if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
   if String.IsNullOrEmpty(aFileMasks) then aFileMasks := '*';
   aFileMasks := aFileMasks.Replace(',', ';');
   aInputFolder := aServices.ResolveWithBase(ec,aInputFolder);
   if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;
-  var lZip := new Ionic.Zip.ZipFile();
-  if not String.IsNullOrEmpty(aPassword) then lZip.Password := aPassword;
-  lZip.ParallelDeflateThreshold := -1;
-  for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
-  for each el in System.IO.Directory.EnumerateFiles(aInputFolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
-    var lFal := el;
-    if lFal.StartsWith(aInputFolder) then
-      lFal := lFal.Substring(aInputFolder.Length).Replace('\', '/');
-    var lDir := lFal;
-    
-    if lDir.IndexOfAny(['/', '\']) < 0 then lDir := '' else
-      lDir := lDir.Substring(0, lDir.LastIndexOfAny(['/', '\'])+1).Replace('\', '/');
-    if (length(lDir) > 0) and (lZip[lDir] = nil) then 
-      lZip.AddDirectoryByName(lDir);
-    lZip.AddFile(el, lDir);
+  using sz := ZipStorer.Create(zip, '') do begin
+    for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do begin
+      var lRealInputFolder := aInputFolder;
+      var lRealMask := mask;
+      var lIdx := lRealMask.LastIndexOfAny(['/', '\']);
+      if lIdx <> -1 then begin
+        lRealInputFolder := Path.Combine(lRealInputFolder, lRealMask.Substring(0, lIdx));
+        lRealMask := lRealMask.Substring(lIdx+1);
+      end;
+
+      for each el in System.IO.Directory.EnumerateFiles(lRealInputFolder, lRealMask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
+        sz.AddFile(ZipStorer.Compression.Deflate, el, el.Substring(aInputFolder.Length), '');
+      end;
+    end;
   end;
-  lZip.Save(zip);
 end;
 
 class method ZipRegistration.ZipList(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String): array of ZipEntryData;
 begin
-  using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
-    zr.ParallelDeflateThreshold := -1;
-    exit zr.Entries.Select(a->new ZipEntryData(name := a.FileName, compressedSize := a.CompressedSize, size := a.UncompressedSize)).ToArray;
+  using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
+    exit zs.ReadCentralDir.Select(a->new ZipEntryData(
+      name := a.FilenameInZip, 
+      compressedSize := a.CompressedSize, 
+      size := a.FileSize)).ToArray;
   end;
 end;
 
 class method ZipRegistration.ZipExtractFile(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aDestinationFile: String; aEntry: ZipEntryData);
 begin
-  using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
-    zr.ParallelDeflateThreshold := -1;
-    using sr:= new System.IO.FileStream(aServices.ResolveWithBase(ec,aDestinationFile), System.IO.FileMode.Create, System.IO.FileAccess.Write) do
-      zr[aEntry.name].Extract(sr);
+  aDestinationFile := aServices.ResolveWithBase(ec, aDestinationFile);
+  using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
+    var lEntry := zs.ReadCentralDir().FirstOrDefault(a -> a.FilenameInZip = aEntry:name);
+    if lEntry.FilenameInZip = nil then raise new ArgumentException('No such file in zip: '+aEntry:name);
+    if not zs.ExtractFile(lEntry, aDestinationFile) then
+      raise new InvalidOperationException('Error extracting '+lEntry.FilenameInZip);
   end;
 end;
 
 class method ZipRegistration.ZipExtractFiles(aServices: IApiRegistrationServices;ec: ExecutionContext;  zip: String; aDestinationPath: String; aEntry: array of ZipEntryData; aFlatten: Boolean := false);
 begin
-  using zr := new Ionic.Zip.ZipFile(aServices.ResolveWithBase(ec,zip)) do begin
-    zr.ParallelDeflateThreshold := -1;
-    zr.FlattenFoldersOnExtract := aFlatten;
-    if length(aEntry) = 0 then 
-      zr.ExtractAll(aServices.ResolveWithBase(ec,aDestinationPath), Ionic.Zip.ExtractExistingFileAction.OverwriteSilently)
-    else begin
-      var x := aServices.ResolveWithBase(ec,aDestinationPath);
-      for each el in aEntry do begin
-        zr[el.name].Extract(x);
+  aDestinationPath := aServices.ResolveWithBase(ec, aDestinationPath);
+  using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
+    for each el in zs.ReadCentralDir do begin
+      if not ((length(aEntry) = 0) or (aEntry.Any(a->a.name = el.FilenameInZip)) ) then continue;
+      var lTargetFN: String;
+      var lInputFN := el.FilenameInZip.Replace('/', Path.DirectorySeparatorChar);
+      if aFlatten then
+        lTargetFN := Path.Combine(aDestinationPath, Path.GetFileName(lInputFN))
+      else begin
+        lTargetFN := Path.Combine(aDestinationPath, lInputFN);
+        if not zs.ExtractFile(el, lTargetFN) then
+          raise new InvalidOperationException('Error extracting '+el.FilenameInZip);
       end;
     end;
   end;

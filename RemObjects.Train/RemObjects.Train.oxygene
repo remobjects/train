@@ -59,9 +59,6 @@
     <Reference Include="DiscUtils">
       <HintPath>Libraries\DiscUtils.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip">
-      <HintPath>Libraries\Ionic.Zip.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="Renci.SshNet">
       <HintPath>Libraries\Renci.SshNet.dll</HintPath>
@@ -112,6 +109,7 @@
     <Compile Include="PluginSystem.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Utilities.pas" />
+    <Compile Include="ZipStorer.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
