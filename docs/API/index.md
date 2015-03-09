@@ -1,37 +1,46 @@
 ---
-title: Api
+status: needs-review
+title: API
 index: Globals.md
+index: Logging.md
 index: -
+index: MSBuild.md
+index: Xcode.md
 index: Delphi.md
+index: -
 index: File.md
 index: Folder.md
-index: FTP.md
-index: Gac.md
-index: Http.md
-index: INI.md
-index: Images.md
-index: InnoSetup.md
-index: Logging.md
-index: Mail.md
-index: MD5.md
-index: MSBuild.md
 index: Path.md
+index: FTP.md
+index: HTTP.md
+index: S3.md
+index: -
+index: Zip.md
+index: ISO.md
+index: XML.md
+index: INI.md
+index: -
+index: GAC.md
 index: PEVerify.md
 index: Registry.md
 index: Shell.md
 index: SSH.md
-index: Xcode.md
-index: XML.md
-index: Zip.md
+index: InnoSetup.md
+index: Mail.md
+index: MD5.md
 ---
 
-All scripts have an environment called "env", environments are linked to the parent environment. this is a variable that can be used to access any environment variable as defined by the parent process.
+All scripts have access to the environment variables via an indexer variable called called `env`. The environment is linked inherited from the parent environment.
 
-When setting something on env it's stored on the current envirnment. Reading first checks the current one, then the parent ones until it finds one (or returns undefined).
+When setting values on `env`, they are stored on the current envirnment. Reading `env` first checks the current environment, then the parent ones until it finds a value (or returns `Undefined`).
 
+Paramaters to Train APIs can use known variables inline using a `$(VariableName)` syntax, and are automatically expanded. This can be escaped using a double dollar sign, `$$`.
 
-## Work directory
+## Working directory
 
-Each script has it's own work directory, stored in the global **"wd"** property. All file operations are relative to the work directory, when a path starts with "~/" it's resolved to the user home dir. On Windows / is replaced with \ when used.
+Each script has it's own work directory, stored in the global `wd` property, preset to the script's location on disk. When including sub-scripts, the working directory changes as execution enters and exits the main flow of these sub-scripts.
 
-All arguments are automatically expanded, it turns $(Test) into the local or environment value _Test_, if 'Test' is not available in the scope and environment it leaves it as-is, use $$ when you want $.
+All file operations are relative to the work directory, unless absolute oaths are provided. When a path starts with "~/" it's resolved to the user home dir.
+
+On Windows, the forward slash "`/`" can be used in all filename parameters, and will be replaced with "`\`" internally. This makes it easy to write cross-platform scripts that can use "`/`" consistently, and avoids having to worry about escaping the "`\`" character in JavaScript string literals.
+

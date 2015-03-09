@@ -1,5 +1,5 @@
 ---
-title: Zip
+title: ZIP Files
 ---
 
 * **zip.compress(zip, inputFN, fileMask, recurse, aPassword)** Create a new zip file with the input files in it
