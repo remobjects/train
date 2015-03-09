@@ -92,6 +92,8 @@ begin
   using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
     var lEntry := zs.ReadCentralDir().FirstOrDefault(a -> a.FilenameInZip = aEntry:name);
     if lEntry.FilenameInZip = nil then raise new ArgumentException('No such file in zip: '+aEntry:name);
+    if aDestinationFile.EndsWith('/') or aDestinationFile.EndsWith('\') then
+      aDestinationFile := Path.Combine(aDestinationFile, Path.GetFileName(aEntry.name));
     if not zs.ExtractFile(lEntry, aDestinationFile) then
       raise new InvalidOperationException('Error extracting '+lEntry.FilenameInZip);
   end;
