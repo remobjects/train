@@ -202,11 +202,11 @@ namespace System.IO.Compression
 
 			//long offset;
 			if (this.Files.Count==0)
-				offset = 0;
+				;//offset = 0;
 			else
 			{
 				ZipFileEntry last = this.Files[this.Files.Count-1];
-				offset = last.HeaderOffset + last.HeaderSize;
+				/*offset =*/ last.HeaderOffset + last.HeaderSize;
 			}
 
 			// Prepare the fileinfo

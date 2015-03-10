@@ -288,7 +288,7 @@ end;
 
 class method S3PlugIn.SetSecretAccessKey(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.AccessKeyID := aServices.Expand(ec, val);
+  aSelf.SecretAccessKey := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
@@ -299,7 +299,7 @@ end;
 
 class method S3PlugIn.SetRegionEndpoint(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.AccessKeyID := aServices.Expand(ec, val);
+  aSelf.RegionEndpoint := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
