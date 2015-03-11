@@ -28,7 +28,7 @@ type
     [WrapAs('S3.readFile', SkipDryRun := true, wantSelf := true)]
     class method ReadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aKey: String): String;
     [WrapAs('S3.downloadFiles', SkipDryRun := true, wantSelf := true)]
-    class method DownloadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix, aLocalTargetDir: String; aRecurse: Boolean);
+    class method DownloadFiles(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aSuffix: String := nil;  aLocalTargetDir: String; aRecurse: Boolean);
     [WrapAs('S3.uploadFile', SkipDryRun := true, wantSelf := true)]
     class method UploadFile(aServices: IApiRegistrationServices;  ec: ExecutionContext; aSelf: S3Engine; aLocalFile, aKey: String);
     [WrapAs('S3.writeFile', SkipDryRun := true, wantSelf := true)]
@@ -146,6 +146,8 @@ end;
 class method S3PlugIn.DownloadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aKey: String; aLocalTarget: String);
 begin
   aLocalTarget := aServices.ResolveWithBase(ec, aLocalTarget);
+  aKey := aServices.Expand(ec, aKey);
+
   if aLocalTarget.EndsWith(Path.DirectorySeparatorChar) then
     aLocalTarget := Path.Combine(aLocalTarget, Path.GetFileName(aKey));
   aServices.Logger.LogMessage('Downloading {0} from S3 to {1}', aKey, aLocalTarget);
@@ -159,6 +161,8 @@ end;
 
 class method S3PlugIn.ReadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aKey: String): String;
 begin
+  aKey := aServices.Expand(ec, aKey);
+  
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do
     using lResult := aSelf.S3Client.GetObject(lRequest) do
       using s := lResult.ResponseStream do
@@ -166,10 +170,14 @@ begin
           result := r.ReadToEnd();
 end;
 
-class method S3PlugIn.DownloadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aLocalTargetDir: String; aRecurse: Boolean);
+class method S3PlugIn.DownloadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aPrefix: String; aSuffix: String := nil; aLocalTargetDir: String; aRecurse: Boolean);
 begin
   aLocalTargetDir := aServices.ResolveWithBase(ec, aLocalTargetDir);
-  var lFiles := ListFiles(aServices, ec, aSelf, aPrefix, nil);
+  aPrefix := aServices.Expand(ec, aPrefix);
+  aSuffix := aServices.Expand(ec, aSuffix);
+  
+  aServices.Logger.LogMessage('Downloading files in {0} from S3 to {1}', aPrefix, aLocalTargetDir);
+  var lFiles := ListFiles(aServices, ec, aSelf, aPrefix, aSuffix);
   for each f in lFiles do begin
     var f2 := f.Substring(aPrefix.Length).Trim();
     if length(f2) > 0 then begin
@@ -190,6 +198,7 @@ end;
 class method S3PlugIn.UploadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFile: String; aKey: String);
 begin
   aLocalFile := aServices.ResolveWithBase(ec, aLocalFile);
+  aKey := aServices.Expand(ec, aKey);
 
   if aKey.EndsWith("/") then 
     aKey := aKey+Path.GetFileName(aLocalFile); // if aKey is a folder, reuse local filename
@@ -202,6 +211,8 @@ end;
 
 class method S3PlugIn.WriteFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aString: String; aKey: String);
 begin
+  aKey := aServices.Expand(ec, aKey);
+
   using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, ContentBody := aString) do
     using lResponse := aSelf.S3Client.PutObject(lRequest) do;
 end;
@@ -209,6 +220,7 @@ end;
 class method S3PlugIn.UploadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFolderAndFilters: String; aPrefix: String; aRecurse: Boolean);
 begin
   aLocalFolderAndFilters := aServices.ResolveWithBase(ec, aLocalFolderAndFilters);
+  aPrefix := aServices.Expand(ec, aPrefix);
 
   aPrefix := aPrefix:Replace("//", "/");
   if not aPrefix.EndsWith("/") then 
@@ -244,7 +256,7 @@ end;
 
 class method S3PlugIn.SetBucket(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.Bucket := val;
+  aSelf.Bucket := aServices.Expand(ec, val);
 end;
 
 class method S3PlugIn.GetServiceURL(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine): String;
@@ -254,7 +266,7 @@ end;
 
 class method S3PlugIn.SetServiceURL(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.ServiceURL := val;
+  aSelf.ServiceURL := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
@@ -265,7 +277,7 @@ end;
 
 class method S3PlugIn.SetAccessKeyID(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.AccessKeyID := val;
+  aSelf.AccessKeyID := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
@@ -276,7 +288,7 @@ end;
 
 class method S3PlugIn.SetSecretAccessKey(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.SecretAccessKey := val;
+  aSelf.SecretAccessKey := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
@@ -287,7 +299,7 @@ end;
 
 class method S3PlugIn.SetRegionEndpoint(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; val: String);
 begin
-  aSelf.RegionEndpoint := val;
+  aSelf.RegionEndpoint := aServices.Expand(ec, val);
   aSelf.ResetClient();
 end;
 
@@ -297,7 +309,6 @@ begin
     var lConfig := new Amazon.S3.AmazonS3Config();
     lConfig.ServiceURL := if length(ServiceURL) > 0 then ServiceURL else 'https://s3.amazonaws.com';
     //if length(RegionEndpoint) > 0 then lConfig.RegionEndpoint := RegionEndpoint;
-    Console.WriteLine("lConfig.ServiceURL is '"+lConfig.ServiceURL+"'");
     fClient := new Amazon.S3.AmazonS3Client(AccessKeyID, SecretAccessKey, lConfig);  
   end;
   result := fClient;
