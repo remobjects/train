@@ -211,7 +211,10 @@ namespace System.IO.Compression
 
 			// Prepare the fileinfo
 			ZipFileEntry zfe = new ZipFileEntry();
-			zfe.Method = _method;
+			if (_source.Length < 10)
+				zfe.Method = Compression.Store;
+			else
+				zfe.Method = _method;
 			zfe.EncodeUTF8 = this.EncodeUTF8;
 			zfe.FilenameInZip = NormalizedFilename(_filenameInZip);
 			zfe.Comment = (_comment == null ? "" : _comment);
