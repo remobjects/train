@@ -70,7 +70,7 @@ begin
       end;
 
       for each el in System.IO.Directory.EnumerateFiles(lRealInputFolder, lRealMask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
-        sz.AddFile(ZipStorer.Compression.Deflate, el, el.Substring(aInputFolder.Length), '');
+        sz.AddFile(ZipStorer.Compression.Deflate, el, el.Substring(aInputFolder.Length), '', $81ED);
       end;
     end;
   end;

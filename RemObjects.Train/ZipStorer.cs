@@ -24,7 +24,7 @@ namespace System.IO.Compression
 		/// <summary>
 		/// Represents an entry in Zip file directory
 		/// </summary>
-		public struct ZipFileEntry
+		public class ZipFileEntry
 		{
 			/// <summary>Compression method</summary>
 			public Compression Method; 
@@ -48,6 +48,10 @@ namespace System.IO.Compression
 			public string Comment;
 			/// <summary>True if UTF8 encoding for filename and comments, false if default (CP 437)</summary>
 			public bool EncodeUTF8;
+			/// <summary>
+		    /// external file attributes
+		    /// </summary>
+			public ushort ExternalFileAttributes = 0x8100; // regular file + readable
 
 			/// <summary>Overriden method</summary>
 			/// <returns>Filename in Zip</returns>
@@ -178,13 +182,13 @@ namespace System.IO.Compression
 		/// <param name="_pathname">Full path of file to add to Zip storage</param>
 		/// <param name="_filenameInZip">Filename and path as desired in Zip directory</param>
 		/// <param name="_comment">Comment for stored file</param>		
-		public void AddFile(Compression _method, string _pathname, string _filenameInZip, string _comment)
+		public void AddFile(Compression _method, string _pathname, string _filenameInZip, string _comment, ushort access = 0x8100)
 		{
 			if (Access == FileAccess.Read)
 				throw new InvalidOperationException("Writing is not alowed");
 
 			FileStream stream = new FileStream(_pathname, FileMode.Open, FileAccess.Read);
-			AddStream(_method, _filenameInZip, stream, File.GetLastWriteTime(_pathname), _comment);
+			AddStream(_method, _filenameInZip, stream, File.GetLastWriteTime(_pathname), _comment, access);
 			stream.Close();
 		}
 		/// <summary>
@@ -195,7 +199,7 @@ namespace System.IO.Compression
 		/// <param name="_source">Stream object containing the data to store in Zip</param>
 		/// <param name="_modTime">Modification time of the data to store</param>
 		/// <param name="_comment">Comment for stored file</param>
-		public void AddStream(Compression _method, string _filenameInZip, Stream _source, DateTime _modTime, string _comment)
+		public void AddStream(Compression _method, string _filenameInZip, Stream _source, DateTime _modTime, string _comment, ushort access = 0x8100)
 		{
 			if (Access == FileAccess.Read)
 				throw new InvalidOperationException("Writing is not alowed");
@@ -218,6 +222,7 @@ namespace System.IO.Compression
 			zfe.EncodeUTF8 = this.EncodeUTF8;
 			zfe.FilenameInZip = NormalizedFilename(_filenameInZip);
 			zfe.Comment = (_comment == null ? "" : _comment);
+			zfe.ExternalFileAttributes = 0x8000 | access & 0xfff; // file
 
 			// Even though we write the header now, it will have to be rewritten, since we don't know compressed size or crc.
 			zfe.Crc32 = 0;  // to be updated later
@@ -539,7 +544,7 @@ namespace System.IO.Compression
 			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)0), 0, 2); // disk=0
 			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)0), 0, 2); // file type: binary
 			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)0), 0, 2); // Internal file attributes
-			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)0x8100), 0, 2); // External file attributes (normal/readable)
+			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)_zfe.ExternalFileAttributes), 0, 2); // External file attributes (normal/readable)
 			this.ZipFileStream.Write(BitConverter.GetBytes(_zfe.HeaderOffset), 0, 4);  // Offset of header
 
 			this.ZipFileStream.Write(encodedFilename, 0, encodedFilename.Length);
