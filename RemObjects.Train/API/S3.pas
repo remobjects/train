@@ -4,6 +4,7 @@ interface
 
 uses
   RemObjects.Train,
+  System.Collections.Generic,
   System.Linq,
   System.Threading,
   System.Text,
@@ -17,8 +18,6 @@ type
 
   [PluginRegistration]
   S3PlugIn = public class(IPluginRegistration)
-  private
-  protected
   public
     method &Register(aServices: IApiRegistrationServices);
     [WrapAs('S3.listFiles', SkipDryRun := true, wantSelf := true)]
@@ -129,10 +128,22 @@ begin
   aPrefix := aPrefix:Replace("//", "/");
   if not aPrefix.EndsWith("/") then aPrefix := aPrefix+"/";
 
-  var lRequest := new ListObjectsRequest(BucketName := aSelf.Bucket, Prefix := aPrefix);
+  var lastKey := "";
+  var preLastKey := "";
+  var lList := new List<String>();
+  repeat
+    preLastKey := lastKey;
+    
+    var lRequest := new ListObjectsRequest(BucketName := aSelf.Bucket, Prefix := aPrefix, Marker := lastKey);
+    var newObjects := aSelf.S3Client.ListObjects(lRequest):S3Objects:Select(o -> o.Key);
+    for each o in newObjects do begin
+      lList.Add(o);
+      lastKey := o;
+    end;
+      
+  until lastKey = preLastKey;
   
-  var lResult := aSelf.S3Client.ListObjects(lRequest):S3Objects:Select(o -> o.Key);
-  
+  var lResult: sequence of String := lList;
   if assigned(aSuffix) then lResult := lResult:&Where(o -> o.EndsWith(aSuffix));
   
   if not aRecurse then lResult := lResult:&Select(o -> begin
@@ -150,13 +161,44 @@ begin
 
   if aLocalTarget.EndsWith(Path.DirectorySeparatorChar) then
     aLocalTarget := Path.Combine(aLocalTarget, Path.GetFileName(aKey));
-  aServices.Logger.LogMessage('Downloading {0} from S3 to {1}', aKey, aLocalTarget);
+
+  var lCleanedKey := aSelf.Bucket+"-"+aKey.Replace("/","-");
+  
+  var lFileInCache: String;
+  var lDownloadTarget := aLocalTarget;
+  
+  var lS3CacheFolder := aServices.Environment.Item["TRAIN_S3_CACHE"] as String;
+  
+  if length(lS3CacheFolder) > 0 then begin
+    if not Directory.Exists(lS3CacheFolder) then
+      Directory.CreateDirectory(lS3CacheFolder);
+
+    lFileInCache := Path.Combine(lS3CacheFolder, lCleanedKey);
+    lDownloadTarget := lFileInCache;
+  end;
+
   Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
-  using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do
-    using lResult := aSelf.S3Client.GetObject(lRequest) do
-      using s := lResult.ResponseStream do
-        using w := new FileStream(aLocalTarget, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Delete) do
-          s.CopyTo(w);
+  using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
+    
+    using lResult := aSelf.S3Client.GetObject(lRequest) do begin
+      if File.Exists(lDownloadTarget) and (File.GetLastWriteTime(lDownloadTarget) > lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
+        aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
+      end
+      else begin
+        aServices.Logger.LogMessage('Downloading {0} from S3 to {1}.', aKey, lDownloadTarget);
+        using s := lResult.ResponseStream do
+          using w := new FileStream(lDownloadTarget, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Delete) do
+            s.CopyTo(w);
+      end;
+    end;
+  end;
+          
+  if lDownloadTarget ≠ aLocalTarget then begin
+    if File.Exists(aLocalTarget) then 
+      File.Delete(aLocalTarget);
+    aServices.Logger.LogMessage('Copying from cache to {0}.', aLocalTarget);
+    File.Copy(lDownloadTarget, aLocalTarget);
+  end;
 end;
 
 class method S3PlugIn.ReadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aKey: String): String;
@@ -200,6 +242,7 @@ begin
   aLocalFile := aServices.ResolveWithBase(ec, aLocalFile);
   aKey := aServices.Expand(ec, aKey);
 
+  aKey.Replace("//", "/"); // S3 really doesn't like those.
   if aKey.EndsWith("/") then 
     aKey := aKey+Path.GetFileName(aLocalFile); // if aKey is a folder, reuse local filename
   
