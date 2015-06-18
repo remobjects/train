@@ -190,7 +190,7 @@ begin
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
       System.IO.File.Copy(el, lTargetFN, aOverride);
-      lFiles .AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
+      lFiles.AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
     end;
     
     aServices.Logger.LogInfo(lFiles.ToString);
@@ -205,7 +205,7 @@ begin
     if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
     System.IO.File.Copy(lVal, lVal2, aOverride);
   end;
-  aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
+  //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
 
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String);

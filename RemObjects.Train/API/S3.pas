@@ -181,7 +181,7 @@ begin
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
     
     using lResult := aSelf.S3Client.GetObject(lRequest) do begin
-      if File.Exists(lDownloadTarget) and (File.GetLastWriteTime(lDownloadTarget) > lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
+      if File.Exists(lDownloadTarget) and (File.GetLastWriteTime(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
         aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
       end
       else begin
@@ -189,6 +189,7 @@ begin
         using s := lResult.ResponseStream do
           using w := new FileStream(lDownloadTarget, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Delete) do
             s.CopyTo(w);
+        File.SetLastWriteTime(lDownloadTarget, lResult.LastModified);
       end;
     end;
   end;

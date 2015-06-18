@@ -125,8 +125,8 @@ end;
 method Engine.fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
 begin
   fErrorPos := e.SourceSpan;
-  if assigned(e.SourceSpan:File) then
-    Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
+  //if assigned(e.SourceSpan:File) then
+  //  Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
 end;
 
 method Engine.fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
