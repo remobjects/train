@@ -125,8 +125,8 @@ end;
 method Engine.fEngineDebugTracePoint(sender: Object; e: ScriptDebugEventArgs);
 begin
   fErrorPos := e.SourceSpan;
-  if assigned(e.SourceSpan:File) then
-    Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
+  //if assigned(e.SourceSpan:File) then
+  //  Logger:LogDebug('Running line {0} ({1}:{2})',e.SourceSpan.File, e.SourceSpan.StartRow, e.SourceSpan.StartCol);
 end;
 
 method Engine.fEngineDebugException(sender: Object; e: ScriptDebugEventArgs);
@@ -284,6 +284,8 @@ end;
 
 method Engine.Expand(ec: ExecutionContext; s: String): String;
 begin
+  if length(s) = 0 then exit s;
+  
   if fRegEx = nil then 
     fRegEx := new System.Text.RegularExpressions.Regex('\$\$|\$(?<value>\([a-zA-Z_\-0-9\. ]+\))|\$(?<value>[a-zA-Z_\-0-9]+)', System.Text.RegularExpressions.RegexOptions.Compiled);
   exit fRegEx.Replace(s, method (match: System.Text.RegularExpressions.Match) begin
