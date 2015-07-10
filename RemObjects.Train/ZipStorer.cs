@@ -385,17 +385,24 @@ namespace System.IO.Compression
 			byte[] buffer = new byte[16384];
 			this.ZipFileStream.Seek(_zfe.FileOffset, SeekOrigin.Begin);
 			uint bytesPending = _zfe.FileSize;
+			uint crc32 = 0 ^ 0xffffffff;
 			while (bytesPending > 0)
 			{
 				int bytesRead = inStream.Read(buffer, 0, (int)Math.Min(bytesPending, buffer.Length));
 				_stream.Write(buffer, 0, bytesRead);
+				for (uint i = 0; i < bytesRead; i++)
+				{
+					crc32 = ZipStorer.CrcTable[(crc32 ^ buffer[i]) & 0xFF] ^ (crc32 >> 8);
+				}
 				bytesPending -= (uint)bytesRead;
 			}
 			_stream.Flush();
+			crc32 ^= 0xffffffff;
+
 
 			if (_zfe.Method == Compression.Deflate)
 				inStream.Dispose();
-			return true;
+			return crc32 == _zfe.Crc32;
 		}
 		/// <summary>
 		/// Removes one of many files in storage. It creates a new Zip file.
