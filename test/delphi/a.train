@@ -1,0 +1,135 @@
+function build(_version) {
+	ignoreErrors(function() {delphi.build("a.dpr", {delphi : _version})});
+}
+
+
+build('5');
+build('d5');
+build('D5');
+
+build('6');
+build('d6');
+build('D6');
+
+build('7');
+build('d7');
+build('D7');
+
+build('8');
+build('d8');
+build('D8');
+
+build('9');	//2005
+build('d9');	//2005
+build('D9');	//2005
+build('2005');	//2005
+build('d2005');	//2005
+build('D2005');	//2005
+
+build('10');	//2006
+build('d10');	//2006
+build('D10');	//2006
+build('2006');	//2006
+build('d2006');	//2006
+build('D2006');	//2006
+
+build('11');	//2007
+build('d11');	//2007
+build('D11');	//2007
+build('2007');	//2007
+build('d2007');	//2007
+build('D2007');	//2007
+
+build('12');	//2009
+build('d12');	//2009
+build('D12');	//2009
+build('2009');	//2009
+build('d2009');	//2009
+build('D2009');	//2009
+
+build('14');	//2010
+build('d14');	//2010
+build('D14');	//2010
+build('2010');	//2010
+build('d2010');	//2010
+build('D2010');	//2010
+
+build('15');	//XE
+build('d15');	//XE
+build('D15');	//XE
+build('XE');	//XE
+build('DXE');	//XE
+build('xe');	//XE
+build('dxe');	//XE
+
+build('16');	//XE2
+build('d16');	//XE2
+build('D16');	//XE2
+build('XE2');	//XE2
+build('DXE2');	//XE2
+build('xe2');	//XE2
+build('dxe2');	//XE2
+
+build('17');	//XE3
+build('d17');	//XE3
+build('D17');	//XE3
+build('XE3');	//XE3
+build('DXE3');	//XE3
+build('xe3');	//XE3
+build('dxe3');	//XE3
+
+build('18');	//XE4
+build('d18');	//XE4
+build('D18');	//XE4
+build('XE4');	//XE4
+build('DXE4');	//XE4
+build('xe4');	//XE4
+build('dxe4');	//XE4
+
+build('19');	//XE5
+build('d19');	//XE5
+build('D19');	//XE5
+build('XE5');	//XE5
+build('DXE5');	//XE5
+build('xe5');	//XE5
+build('dxe5');	//XE5
+
+build('20');	//XE6
+build('d20');	//XE6
+build('D20');	//XE6
+build('XE6');	//XE6
+build('DXE6');	//XE6
+build('xe6');	//XE6
+build('dxe6');	//XE6
+
+build('21');	//XE7
+build('d21');	//XE7
+build('D21');	//XE7
+build('XE7');	//XE7
+build('DXE7');	//XE7
+build('xe7');	//XE7
+build('dxe7');	//XE7
+
+build('22');	//XE8
+build('d22');	//XE8
+build('D22');	//XE8
+build('XE8');	//XE8
+build('DXE8');	//XE8
+build('xe8');	//XE8
+build('dxe8');	//XE8
+
+build('23');	//XE9
+build('d23');	//XE9
+build('D23');	//XE9
+build('XE9');	//XE9
+build('DXE9');	//XE9
+build('xe9');	//XE9
+build('dxe9');	//XE9
+
+build('24');	//XE10
+build('d24');	//XE10
+build('D24');	//XE10
+build('XE10');	//XE10
+build('DXE10');	//XE10
+build('xe10');	//XE10
+build('dxe10');	//XE10
