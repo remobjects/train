@@ -382,6 +382,13 @@ begin
     if not String.IsNullOrEmpty(lbuild) then exit lbuild;
   end;
 
+  lbuild := "/usr/bin/xbuild";
+  if File.Exists(lbuild) then exit lbuild; 
+  lbuild := "/usr/local/bin/xbuild";
+  if File.Exists(lbuild) then exit lbuild; 
+  lbuild := "/Library/Frameworks/Mono.framework/Versions/Current/bin/xbuild";
+  if File.Exists(lbuild) then exit lbuild; 
+
   if aRaiseException then 
     raise new Exception('MSBuild is not found!');
 end;
