@@ -194,7 +194,7 @@ begin
       else begin
         aServices.Logger.LogMessage('Downloading {0} from S3 to {1}.', aKey, lDownloadTarget);
         using s := lResult.ResponseStream do
-          using w := new FileStream(lDownloadTarget, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Delete) do
+          using w := new FileStream(lDownloadTarget, FileMode.Create, FileAccess.Write, FileShare.Delete) do
             s.CopyTo(w);
         File.SetLastWriteTime(lDownloadTarget, lResult.LastModified);
       end;
