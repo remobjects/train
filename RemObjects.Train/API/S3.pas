@@ -159,7 +159,7 @@ begin
   aLocalTarget := aServices.ResolveWithBase(ec, aLocalTarget);
   aKey := aServices.Expand(ec, aKey);
 
-  if aLocalTarget.EndsWith(Path.DirectorySeparatorChar) then
+  if aLocalTarget.EndsWith(Path.DirectorySeparatorChar) or Directory.Exists(aLocalTarget) then
     aLocalTarget := Path.Combine(aLocalTarget, Path.GetFileName(aKey));
 
   var lCleanedKey := aSelf.Bucket+"-"+aKey.Replace("/","-");
@@ -181,7 +181,14 @@ begin
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
     
     using lResult := aSelf.S3Client.GetObject(lRequest) do begin
-      if File.Exists(lDownloadTarget) and (File.GetLastWriteTime(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
+      {aServices.Logger.LogMessage("File.Exists?: {0}", File.Exists(lDownloadTarget));
+      aServices.Logger.LogMessage("lResult.LastModified: {0}", lResult.LastModified);
+      if File.Exists(lDownloadTarget) then begin
+        aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10): {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10));
+        aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified?: {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified);
+      end;}
+      
+      if File.Exists(lDownloadTarget) and (File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
         aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
       end
       else begin

@@ -94,8 +94,10 @@ begin
     if lEntry.FilenameInZip = nil then raise new ArgumentException('No such file in zip: '+aEntry:name);
     if aDestinationFile.EndsWith('/') or aDestinationFile.EndsWith('\') then
       aDestinationFile := Path.Combine(aDestinationFile, Path.GetFileName(aEntry.name));
+    if File.Exists(aDestinationFile) then
+      File.Delete(aDestinationFile);
     if not zs.ExtractFile(lEntry, aDestinationFile) then
-      raise new InvalidOperationException('Error extracting '+lEntry.FilenameInZip);
+      raise new InvalidOperationException('Error extracting '+lEntry.FilenameInZip+' to '+aDestinationFile);
   end;
 end;
 
@@ -111,8 +113,10 @@ begin
         lTargetFN := Path.Combine(aDestinationPath, Path.GetFileName(lInputFN))
       else begin
         lTargetFN := Path.Combine(aDestinationPath, lInputFN);
+        if File.Exists(lTargetFN) then
+          File.Delete(lTargetFN);
         if not zs.ExtractFile(el, lTargetFN) then
-          raise new InvalidOperationException('Error extracting '+el.FilenameInZip);
+          raise new InvalidOperationException('Error extracting '+el.FilenameInZip+' to '+lTargetFN);
       end;
     end;
   end;
