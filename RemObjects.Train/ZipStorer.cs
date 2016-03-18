@@ -49,8 +49,8 @@ namespace System.IO.Compression
 			/// <summary>True if UTF8 encoding for filename and comments, false if default (CP 437)</summary>
 			public bool EncodeUTF8;
 			/// <summary>
-		    /// external file attributes
-		    /// </summary>
+			/// external file attributes
+			/// </summary>
 			public ushort ExternalFileAttributes = 0x8100; // regular file + readable
 
 			/// <summary>Overriden method</summary>
@@ -209,8 +209,8 @@ namespace System.IO.Compression
 				;//offset = 0;
 			else
 			{
-				ZipFileEntry last = this.Files[this.Files.Count-1];
-				/*offset =*/ last.HeaderOffset + last.HeaderSize;
+				/*ZipFileEntry last = this.*/Files[this.Files.Count-1];
+				// /*offset =*/ last.HeaderOffset + last.HeaderSize;
 			}
 
 			// Prepare the fileinfo
