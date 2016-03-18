@@ -6,6 +6,10 @@ EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.Train", "RemObjects.Train\RemObjects.Train.elements", "{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Train", "Train\Train.elements", "{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB} = {7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}
+		{CAF9C919-D826-4452-910E-D8BA4861CD72} = {CAF9C919-D826-4452-910E-D8BA4861CD72}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,7 +18,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{CAF9C919-D826-4452-910E-D8BA4861CD72}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}.Release|AnyCPU.ActiveCfg = Release|AnyCPU

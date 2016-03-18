@@ -3,7 +3,6 @@
     <PropertyGroup>
         <ProductVersion>3.5</ProductVersion>
         <RootNamespace>RemObjects.Train</RootNamespace>
-        <StartupClass/>
         <OutputType>Exe</OutputType>
         <AssemblyName>Train</AssemblyName>
         <AllowGlobals>False</AllowGlobals>
@@ -16,13 +15,10 @@
         <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
         <Name>Train</Name>
         <ProjectGuid>{bd3c0f3c-4943-488f-9886-4bc65ffe4dc4}</ProjectGuid>
-        <DefaultUses/>
-        <InternalAssemblyName/>
-        <TargetFrameworkProfile/>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <Optimize>False</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
+        <OutputPath>..\Bin\Debug\</OutputPath>
         <DefineConstants>DEBUG;TRACE;</DefineConstants>
         <GeneratePDB>True</GeneratePDB>
         <GenerateMDB>True</GenerateMDB>
@@ -32,13 +28,11 @@
         <XmlDoc>False</XmlDoc>
         <XmlDocWarningLevel>WarningOnPublicMembers</XmlDocWarningLevel>
         <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
-        <SuppressWarnings/>
-        <FutureHelperClassName/>
         <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <Optimize>true</Optimize>
-        <OutputPath>.\bin\Release</OutputPath>
+        <OutputPath>..\Bin\Release</OutputPath>
         <GeneratePDB>False</GeneratePDB>
         <GenerateMDB>False</GenerateMDB>
         <EnableAsserts>False</EnableAsserts>
@@ -86,17 +80,17 @@
         <Folder Include="Properties\"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\RemObjects.Train\RemObjects.Train.oxygene">
+        <ProjectReference Include="..\RemObjects.Train\RemObjects.Train.elements">
             <Name>RemObjects.Train</Name>
             <Project>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</Project>
             <Private>True</Private>
-            <HintPath>..\RemObjects.Train\bin\Debug\RemObjects.Train.dll</HintPath>
+            <HintPath>..\Bin\Debug\RemObjects.Train.dll</HintPath>
         </ProjectReference>
         <ProjectReference Include="..\Script\Source\RemObjects.Script\RemObjects.Script.oxygene">
             <Name>RemObjects.Script</Name>
             <Project>{caf9c919-d826-4452-910e-d8ba4861cd72}</Project>
             <Private>True</Private>
-            <HintPath>..\Script\Source\RemObjects.Script\..\..\Bin\RemObjects.Script.dll</HintPath>
+            <HintPath>..\Script\Bin\RemObjects.Script.dll</HintPath>
         </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets"/>

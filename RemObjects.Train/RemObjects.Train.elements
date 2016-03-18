@@ -3,7 +3,6 @@
     <PropertyGroup>
         <ProductVersion>3.5</ProductVersion>
         <RootNamespace>RemObjects.Train</RootNamespace>
-        <StartupClass/>
         <OutputType>Library</OutputType>
         <AssemblyName>RemObjects.Train</AssemblyName>
         <AllowGlobals>False</AllowGlobals>
@@ -11,18 +10,14 @@
         <AllowLegacyOutParams>False</AllowLegacyOutParams>
         <AllowLegacyCreate>False</AllowLegacyCreate>
         <AllowUnsafeCode>False</AllowUnsafeCode>
-        <ApplicationIcon/>
         <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
         <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
         <Name>RemObjects.Train</Name>
         <ProjectGuid>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</ProjectGuid>
-        <DefaultUses/>
-        <InternalAssemblyName/>
-        <TargetFrameworkProfile/>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <Optimize>False</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
+        <OutputPath>..\Bin\Debug\</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <GeneratePDB>True</GeneratePDB>
         <GenerateMDB>True</GenerateMDB>
@@ -36,7 +31,7 @@
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <Optimize>true</Optimize>
-        <OutputPath>.\bin\Release</OutputPath>
+        <OutputPath>..\Bin\Release</OutputPath>
         <GeneratePDB>False</GeneratePDB>
         <GenerateMDB>False</GenerateMDB>
         <EnableAsserts>False</EnableAsserts>
