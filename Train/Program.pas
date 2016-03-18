@@ -30,6 +30,7 @@ type
     method LogHint(s: System.String);
     method LogInfo(s: String);
     method LogError(s: System.String);
+    method LogLive(s: String);
     property InIgnore: Boolean;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
@@ -188,6 +189,11 @@ begin
   LogDebug(s);
 end;
 
+method Logger.LogLive(s: String);
+begin
+  LogMessage(s);
+end;
+
 method Logger.CheckEnter;
 begin
   if fWriteEnter then begin
@@ -203,7 +209,7 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright (c) RemObjects Software, 2013-2015. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2016 RemObjects Software, LLC. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
@@ -215,6 +221,7 @@ begin
   var lLogFNEnter: Boolean := true;
   var lPluginFolder: String := nil;
   var lWait := false;
+  var lLiveOutput := false;
   var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
@@ -233,7 +240,8 @@ begin
   lOptions.Add('include=', 'Include a script', (v) -> begin if assigned(v) then lIncludes.Add(v); end);
   lOptions.Add('wait', 'Wait for a key before finishing', v-> begin lWait := assigned(v) end);
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
-  lOptions.Add('l|lfnenter', 'Enable/Disable function enter/exit logging', v->begin lLogFNEnter := assigned(v); end);
+  lOptions.Add('e|enterexit', 'Enable/Disable function enter/exit logging', v->begin lLogFNEnter := assigned(v); end);
+  lOptions.Add('l|live', 'Enable live output from exeucted tasks', v->begin lLiveOutput := assigned(v); end);
   var lArgs: List<String>;
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);
@@ -290,6 +298,7 @@ begin
       lEngine.Logger := lLogger;
       lEngine.LogFunctionEnter := lLogFNEnter;
       lEngine.DryRun := lDryRun;
+      lEngine.LiveOutput := lLiveOutput;
       for each incl in lIncludes do
         lEngine.LoadInclude(incl);
       lEngine.Run();
