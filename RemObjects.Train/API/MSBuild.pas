@@ -20,6 +20,7 @@ type
   private
     class var fVersionRegex,
     fFileVersionRegex: Regex;
+    fServices: IApiRegistrationServices;
   public
     method &Register(aServices: IApiRegistrationServices);
 
@@ -37,6 +38,7 @@ type
     [WrapAs('msbuild.updateAssemblyVersion', SkipDryRun := true)]
     class method MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String; aNewVersion: String; aFileVersion: String := '');
   end;
+  
   [PluginRegistration]
   GacPlugin = public class(IPluginRegistration)
   public
@@ -101,6 +103,7 @@ end;
 
 method MSBuildPlugin.&Register(aServices: IApiRegistrationServices);
 begin
+  fServices := aServices;
   aServices.RegisterObjectValue('msbuild')
     .AddValue('custom', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildCustom'))
     .AddValue('clean', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildClean'))
@@ -108,7 +111,6 @@ begin
     .AddValue('rebuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildRebuild'))
     .AddValue('updateAssemblyVersion', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(MSBuildPlugin), 'MSBuildUpdateAssemblyVersion'))
 ;
-
 end;
 
 class method MSBuildPlugin.MSBuildClean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -139,12 +141,16 @@ begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive("(stderr) "+a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.Contains(': error ') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive(a);
     end;
    end, nil, nil);
 
@@ -184,12 +190,16 @@ begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive("(stderr) "+a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.Contains(': error ') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive(a);
     end;
    end, nil, nil);
 
@@ -231,12 +241,16 @@ begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive("(stderr) "+a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.Contains(': error ') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive(a);
     end;
    end, nil, nil);
 
@@ -319,12 +333,17 @@ begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive("(stderr) "+a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
       if a.StartsWith('MSBUILD : error') then
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
+      writeLn(fServices.Engine.Logger);
+      if fServices.Engine.LiveOutput then
+        fServices.Engine.Logger.LogLive(a);
     end;
    end, nil, nil);
 

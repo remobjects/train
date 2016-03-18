@@ -20,6 +20,7 @@ type
     method LogHint(s: String);
     method LogDebug(s: String);
     method LogInfo(s: String);
+    method LogLive(s: String); empty;
     method &Write; empty;
     property InIgnore: Boolean read fInIgnore write  set_InIgnore;
 

@@ -51,6 +51,7 @@ type
     method LogHint(s: String);
     method LogDebug(s: String);
     method LogInfo(s: String);
+    method LogLive(s: String);
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object := nil);
     method &Write;
@@ -72,6 +73,7 @@ type
     method LogHint(s: String);locked;
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
+    method LogLive(s: String); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
     property InIgnore: Boolean read get_InIgnore    write set_InIgnore;
@@ -93,6 +95,7 @@ type
     method LogHint(s: String);locked;
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
+    method LogLive(s: String); empty;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
     class method MyToString(s: Object): String;
@@ -343,6 +346,11 @@ end;
 method MultiLogger.LogDebug(s: String);
 begin
   Loggers.ForEach(a->a.LogDebug(s));
+end;
+
+method MultiLogger.LogLive(s: String);
+begin
+  Loggers.ForEach(a -> a.LogLive(s) );
 end;
 
 method MultiLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);

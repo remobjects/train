@@ -1,8 +1,11 @@
 ﻿namespace RemObjects.Train.API;
 
 interface
-uses RemObjects.Train,
+
+uses
+  RemObjects.Train,
   System.Collections.Generic, System.Diagnostics, RemObjects.Script.EcmaScript;
+  
 type
   [PluginRegistration]
   ShellRegistration = public class(IPluginRegistration)
@@ -16,7 +19,6 @@ type
   public
     property Killed: Boolean;
   end;
-
 
   Shell = public class
   private
@@ -88,6 +90,8 @@ begin
       locking(sb) do begin
         sb.AppendLine(a);
       end;
+      if fEngine.Engine.LiveOutput then
+        fEngine.Engine.Logger.LogLive("(stderr) "+a);
       if assigned(lCaptureFunc) then begin
         try
           lCaptureFunc.Call(ec, a);
@@ -95,7 +99,11 @@ begin
         end;
       end;
     end, a-> begin
-      locking(sb) do sb.AppendLine(a);
+      locking(sb) do begin
+        sb.AppendLine(a);
+      end;
+      if fEngine.Engine.LiveOutput then
+        fEngine.Engine.Logger.LogLive(a);
       if assigned(lCaptureFunc) then begin
         try
           lCaptureFunc.Call(ec, a);
@@ -103,19 +111,16 @@ begin
         end;
       end;
     end, lEnv.ToArray, lTimeout);
-    if lExit <> 0 then 
-    begin   
+    
+    if lExit <> 0 then begin   
       var errorOK := false;
-      for each errorCode in lAllowedErrorCodes.Values do
-      begin
-        if errorCode.Value.Equals(lExit) then
-        begin
+      for each errorCode in lAllowedErrorCodes.Values do begin
+        if errorCode.Value.Equals(lExit) then begin
           errorOK := true;
           break;
         end;
       end;
-      if not errorOK then
-      begin
+      if not errorOK then begin
         var lErr := 'Failed with error code: '+lExit;
         fEngine.Engine.Logger.LogError(lErr);
         fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
@@ -130,7 +135,8 @@ begin
       exit Undefined.Instance;
   except
     on e: Exception do begin
-      fEngine.Engine.Logger.LogError('Error when calling Process.Execute: '+e.Message);
+      fEngine.Engine.Logger.LogError('Error calling Process.Execute: '+e.Message);
+      writeLn(e.ToString());
       raise new AbortException;
     end;
   finally

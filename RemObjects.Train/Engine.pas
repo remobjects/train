@@ -46,6 +46,7 @@ type
     property AsyncWorker: AsyncWorker;
     property Environment: Environment read fEnvironment;
     property DryRun: Boolean;
+    property LiveOutput: Boolean;
     property LogFunctionEnter: Boolean := true;
 
     method Initialize;
