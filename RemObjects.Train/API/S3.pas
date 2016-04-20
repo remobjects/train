@@ -164,48 +164,52 @@ begin
 
   var lCleanedKey := aSelf.Bucket+"-"+aKey.Replace("/","-");
   
-  var lFileInCache: String;
   var lDownloadTarget := aLocalTarget;
   
   var lS3CacheFolder := aServices.Environment.Item["TRAIN_S3_CACHE"] as String;
-  
   if length(lS3CacheFolder) > 0 then begin
     if not Directory.Exists(lS3CacheFolder) then
       Directory.CreateDirectory(lS3CacheFolder);
 
-    lFileInCache := Path.Combine(lS3CacheFolder, lCleanedKey);
-    lDownloadTarget := lFileInCache;
+    lDownloadTarget := Path.Combine(lS3CacheFolder, lCleanedKey);
   end;
 
   Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
-  using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
-    
-    using lResult := aSelf.S3Client.GetObject(lRequest) do begin
-      //aServices.Logger.LogMessage("File.Exists?: {0}", File.Exists(lDownloadTarget));
-      //aServices.Logger.LogMessage("lResult.LastModified: {0}", lResult.LastModified);
-      //if File.Exists(lDownloadTarget) then begin
-      //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10): {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10));
-      //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified?: {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified);
-      //end;
+  try
+    using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
       
-      if File.Exists(lDownloadTarget) and (File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
-        aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
-      end
-      else begin
-        aServices.Logger.LogMessage('Downloading {0} from S3 to {1}.', aKey, lDownloadTarget);
-        using s := lResult.ResponseStream do
-          using w := new FileStream(lDownloadTarget, FileMode.Create, FileAccess.Write, FileShare.Delete) do
-            s.CopyTo(w);
-        File.SetLastWriteTime(lDownloadTarget, lResult.LastModified);
+      using lResult := aSelf.S3Client.GetObject(lRequest) do begin
+        //aServices.Logger.LogMessage("File.Exists?: {0}", File.Exists(lDownloadTarget));
+        //aServices.Logger.LogMessage("lResult.LastModified: {0}", lResult.LastModified);
+        //if File.Exists(lDownloadTarget) then begin
+        //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10): {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10));
+        //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified?: {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified);
+        //end;
+        
+        if File.Exists(lDownloadTarget) and (File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
+          aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
+        end
+        else begin
+          aServices.Logger.LogMessage('Downloading {0} from S3 to {1}.', aKey, lDownloadTarget);
+          using s := lResult.ResponseStream do
+            using w := new FileStream(lDownloadTarget, FileMode.Create, FileAccess.Write, FileShare.Delete) do
+              s.CopyTo(w);
+          File.SetLastWriteTime(lDownloadTarget, lResult.LastModified);
+        end;
       end;
     end;
+  except
+    if File.Exists(lDownloadTarget) then
+      File.Delete(lDownloadTarget);
+    raise;
   end;
           
   if lDownloadTarget ≠ aLocalTarget then begin
     if File.Exists(aLocalTarget) then 
       File.Delete(aLocalTarget);
     aServices.Logger.LogMessage('Copying from cache to {0}.', aLocalTarget);
-    File.Copy(lDownloadTarget, aLocalTarget);
+    if File.Exists(lDownloadTarget) then
+      File.Copy(lDownloadTarget, aLocalTarget);
   end;
 end;
 
