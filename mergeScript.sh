@@ -1,0 +1,1 @@
+git subtree pull --squash --prefix=Script Script master -m "Merged Script"
