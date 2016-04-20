@@ -31,7 +31,7 @@ type
     DELPHI_XE4  = 18;
     DELPHI_XE5  = 19;
     DELPHI_XE6  = 20;
-    DELPHI_LAST_KNOWN_XE_VERSION = 9;   //XE9
+    DELPHI_LAST_KNOWN_XE_VERSION = 10;   //XE10
     DELPHI_MAX_SUPPORT_VERSION = DELPHI_XE+DELPHI_LAST_KNOWN_XE_VERSION-1;
   private class var
     DELPHI_SKIP_VERSIONS: List<Integer> := new List<Integer>([13]);
