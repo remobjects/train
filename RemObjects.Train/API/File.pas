@@ -226,6 +226,8 @@ end;
 class method FilePlugin.File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN, true);
+  if not System.IO.Directory.Exists(Path.GetDirectoryName(lVal)) then
+    Directory.CreateDirectory(Path.GetDirectoryName(lVal));
   System.IO.File.WriteAllText(lVal, aData);
 end;
 

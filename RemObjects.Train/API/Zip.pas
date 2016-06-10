@@ -94,6 +94,8 @@ begin
     if lEntry.FilenameInZip = nil then raise new ArgumentException('No such file in zip: '+aEntry:name);
     if aDestinationFile.EndsWith('/') or aDestinationFile.EndsWith('\') then
       aDestinationFile := Path.Combine(aDestinationFile, Path.GetFileName(aEntry.name));
+    if not System.IO.Directory.Exists(Path.GetDirectoryName(aDestinationFile)) then
+      Directory.CreateDirectory(Path.GetDirectoryName(aDestinationFile));
     if File.Exists(aDestinationFile) then
       File.Delete(aDestinationFile);
     if not zs.ExtractFile(lEntry, aDestinationFile) then
@@ -104,6 +106,7 @@ end;
 class method ZipRegistration.ZipExtractFiles(aServices: IApiRegistrationServices;ec: ExecutionContext;  zip: String; aDestinationPath: String; aEntry: array of ZipEntryData; aFlatten: Boolean := false);
 begin
   aDestinationPath := aServices.ResolveWithBase(ec, aDestinationPath);
+  Directory.CreateDirectory(aDestinationPath);
   using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
     for each el in zs.ReadCentralDir do begin
       if not ((length(aEntry) = 0) or (aEntry.Any(a->a.name = el.FilenameInZip)) ) then continue;

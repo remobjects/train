@@ -174,7 +174,8 @@ begin
     lDownloadTarget := Path.Combine(lS3CacheFolder, lCleanedKey);
   end;
 
-  Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
+  if not System.IO.Directory.Exists(Path.GetDirectoryName(aLocalTarget)) then
+    Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
   try
     using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
       
@@ -254,7 +255,7 @@ begin
   aLocalFile := aServices.ResolveWithBase(ec, aLocalFile);
   aKey := aServices.Expand(ec, aKey);
 
-  aKey.Replace("//", "/"); // S3 really doesn't like those.
+  aKey := aKey.Replace("//", "/"); // S3 really doesn't like those.
   if aKey.EndsWith("/") then 
     aKey := aKey+Path.GetFileName(aLocalFile); // if aKey is a folder, reuse local filename
   
