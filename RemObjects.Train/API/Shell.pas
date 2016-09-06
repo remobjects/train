@@ -87,30 +87,27 @@ begin
     end;
     var sb := new System.Text.StringBuilder;
     var lExit := ExecuteProcess(lCMD, lArg, coalesce(LWD, fEngine.Engine.WorkDir),false , a-> begin
-      locking(sb) do begin
-        sb.AppendLine(a);
-      end;
-      if fEngine.Engine.LiveOutput then
-        fEngine.Engine.Logger.LogLive("(stderr) "+a);
-      if assigned(lCaptureFunc) then begin
-        try
-          lCaptureFunc.Call(ec, a);
-        except
-        end;
-      end;
-    end, a-> begin
-      locking(sb) do begin
-        sb.AppendLine(a);
-      end;
-      if fEngine.Engine.LiveOutput then
-        fEngine.Engine.Logger.LogLive(a);
-      if assigned(lCaptureFunc) then begin
-        try
-          lCaptureFunc.Call(ec, a);
-        except
-        end;
-      end;
-    end, lEnv.ToArray, lTimeout);
+                                                                                                locking sb do sb.AppendLine(a);
+                                                                                                if fEngine.Engine.LiveOutput then
+                                                                                                  fEngine.Engine.Logger.LogLive("(stderr) "+a);
+                                                                                                if assigned(lCaptureFunc) then begin
+                                                                                                  try
+                                                                                                    lCaptureFunc.Call(ec, a);
+                                                                                                  except
+                                                                                                  end;
+                                                                                                end;
+                                                                                              end,
+                                                                                          a-> begin
+                                                                                                locking sb do sb.AppendLine(a);
+                                                                                                if fEngine.Engine.LiveOutput then
+                                                                                                  fEngine.Engine.Logger.LogLive(a);
+                                                                                                if assigned(lCaptureFunc) then begin
+                                                                                                  try
+                                                                                                    lCaptureFunc.Call(ec, a);
+                                                                                                  except
+                                                                                                  end;
+                                                                                                end;
+                                                                                              end, lEnv.ToArray, lTimeout);
     
     if lExit <> 0 then begin   
       var errorOK := false;
@@ -123,16 +120,18 @@ begin
       if not errorOK then begin
         var lErr := 'Failed with error code: '+lExit;
         fEngine.Engine.Logger.LogError(lErr);
-        fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+        locking sb do fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
         raise new Exception(lErr);
       end;
     end;
     fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     lFail := false;
-    if lCaptureMode then 
-      exit sb.ToString()
-    else
+    if lCaptureMode then  begin
+      locking sb do exit sb.ToString()
+    end
+    else begin
       exit Undefined.Instance;
+    end;
   except
     on e: Exception do begin
       fEngine.Engine.Logger.LogError('Error calling Process.Execute: '+e.Message);
@@ -179,12 +178,11 @@ begin
       end;
       var sb := new System.Text.StringBuilder;
       var lExit := ExecuteProcess(lCMD, lArg, coalesce(lWD, fEngine.Engine.WorkDir), false, a-> begin
-        locking(sb) do begin
-          sb.AppendLine(a);
-        end;
-      end, a-> begin
-        locking(sb) do sb.AppendLine(a);
-      end, lEnv.ToArray, lTimeout, lProc);
+                                                                                                  locking sb do sb.AppendLine(a);
+                                                                                                end,
+                                                                                            a-> begin
+                                                                                                  locking sb do sb.AppendLine(a);
+                                                                                                end, lEnv.ToArray, lTimeout, lProc);
       lLogger.LogInfo('Output: '#13#10+sb.ToString);
       if lProc.Killed then exit;
       if 0 <> lExit then begin
@@ -236,9 +234,9 @@ begin
     end;
     var sb := new System.Text.StringBuilder;
     var lExit := ExecuteProcess(nil, lArg, coalesce(lWD, fEngine.Engine.WorkDir),true , a-> begin
-      locking(sb) do sb.AppendLine(a);
+      locking sb do sb.AppendLine(a);
     end, a-> begin
-      locking(sb) do sb.AppendLine(a)
+      locking sb do sb.AppendLine(a)
     end, nil, nil);
     fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
