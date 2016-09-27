@@ -183,7 +183,7 @@ begin
                                                                                             a-> begin
                                                                                                   locking sb do sb.AppendLine(a);
                                                                                                 end, lEnv.ToArray, lTimeout, lProc);
-      lLogger.LogInfo('Output: '#13#10+sb.ToString);
+      locking sb do lLogger.LogInfo('Output: '#13#10+sb.ToString);
       if lProc.Killed then exit;
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
@@ -238,14 +238,14 @@ begin
     end, a-> begin
       locking sb do sb.AppendLine(a)
     end, nil, nil);
-    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
+    locking sb do fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);
       raise new AbortException;
     end;
     lFail := false;
-    exit sb.ToString();
+    locking sb do exit sb.ToString();
   finally
     fEngine.Engine.Logger.Exit(true,'shell.system()', if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
