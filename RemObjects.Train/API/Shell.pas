@@ -124,7 +124,7 @@ begin
         raise new Exception(lErr);
       end;
     end;
-    fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
+    locking sb do fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
     lFail := false;
     if lCaptureMode then  begin
       locking sb do exit sb.ToString()
