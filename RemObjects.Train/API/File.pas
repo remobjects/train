@@ -6,6 +6,7 @@ uses
   RemObjects.Script.EcmaScript,
   System.Collections.Generic,
   RemObjects.Train,
+  System.IO,
   System.Linq,
   System.Text;
 
