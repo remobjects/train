@@ -4,10 +4,7 @@ interface
 
 uses
   System.Collections.Generic,
-<<<<<<< HEAD
   RemObjects.Train,
-=======
->>>>>>> c8af4437bfddcf96c60ae471e129b7752943d8a6
   System.IO,
   System.Linq,
   System.Text,
