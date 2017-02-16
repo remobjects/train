@@ -119,10 +119,16 @@ begin
     lRootPath := DelphiGetBaseBath(iver);
     if lRootPath = nil then raise new Exception('Cannot find Delphi registry key for '+sver);
 
-    if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
+    if aOptions:platform:ToLower in ['android', 'aarm'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccaarm.exe')
+    else if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccios32.exe')
-    else if aOptions:platform:ToLower in ['iosarm', 'iosdevice'] then
+    else if aOptions:platform:ToLower in ['iosarm', 'iosdevice', 'iosdevice32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciosarm.exe')
+    else if aOptions:platform:ToLower in ['iosarm64', 'iosdevice64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciosarm64.exe')
+    else if aOptions:platform:ToLower in ['linux', 'linux64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcclinux64.exe')
     else if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe')
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
@@ -130,7 +136,7 @@ begin
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "iossimulator","iosdevice")');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "iossimulator","iosdevice32","iosdevice64","linux64","android" )');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
