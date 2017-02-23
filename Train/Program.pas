@@ -56,7 +56,7 @@ begin
   CheckEnter;
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
-    if InIgnore then 
+    if InIgnore then
       Console.ForegroundColor := ConsoleColor.DarkRed
     else
       Console.ForegroundColor := ConsoleColor.Red;
@@ -114,7 +114,7 @@ begin
     lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.White;
   end;
-  
+
   var lMaxWidth: Int32 := 80;
   try
     lMaxWidth := Console.WindowWidth-aScript.Length-(2*fIndent)-11;
@@ -124,7 +124,7 @@ begin
   if lMaxWidth < 10 then lMaxWidth := 10;
 
   var lArgs := '';
-  if length(args) > 0 then 
+  if length(args) > 0 then
     for each a in args do begin
       var s := coalesce(a:ToString, 'null');
       if length(lArgs) > 0 then lArgs := lArgs+', ';
@@ -136,8 +136,8 @@ begin
     end;
   Console.Write(aScript+'('+lArgs+') { ... ');
   Console.Out.Flush();
-        
-  if ConsoleApp.ShowColors then begin       
+
+  if ConsoleApp.ShowColors then begin
     Console.ForegroundColor := lCol;
   end;
   fWriteEnter := true;
@@ -164,7 +164,7 @@ begin
   end;
   if fWriteEnter then begin
     fWriteEnter := false;
-    
+
     try
       if Console.CursorLeft < Console.WindowWidth then
         Console.WriteLine(#8#8#8#8'} '+lRet) // this crashes (on Mac, at least) if the wijdow was resized smaller than current cursorX
@@ -209,7 +209,7 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright 2013-2016 RemObjects Software, LLC. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2017 RemObjects Software, LLC. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
@@ -270,7 +270,7 @@ begin
     end;
     var lRoot := new RemObjects.Train.API.Environment();
     lRoot.LoadSystem;
-    if File.Exists(lGlobalSettings) then 
+    if File.Exists(lGlobalSettings) then
       lRoot.LoadIni(lGlobalSettings);
      lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
     for each el in lGlobalVars do lRoot[el.Key] := el.Value;
@@ -308,7 +308,7 @@ begin
     on e: Exception do begin
       if e is not AbortException then
         lLogger.LogDebug('Exception: {0}', e.ToString);
-      
+
       exit 1;
     end;
   finally
