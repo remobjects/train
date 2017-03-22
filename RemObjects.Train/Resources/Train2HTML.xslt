@@ -61,7 +61,7 @@
         </xsl:if>
       </td>
       <td width="*">
-        <div><xsl:value-of select="@name" /><span class="args">(<xsl:value-of select="@args" />)</span></div>
+        <div><xsl:value-of select="@name" /><span class="args">(<xsl:value-of select="@args" />)</span>&#160;<span class="took">(took <xsl:value-of select="@took" />)</span></div>
       </td>
     </tr>
     <tr class="output" style="visibility: hidden; display:none;">
@@ -103,6 +103,7 @@
           td.error-summary { border: 5px solid #800000; background-color: #ffe0e0; }
           x.action .toggle { display: none; }
           x.action .args { display: none; }
+          .took { color: #808080; }
           a { color: #404040; text-decoration: none; }
         </style>
       </head>
