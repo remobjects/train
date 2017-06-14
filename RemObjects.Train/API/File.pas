@@ -12,7 +12,7 @@ uses
   RemObjects.Train;
 
 type
-  
+
   [PluginRegistration]
   FilePlugin = public class(IPluginRegistration)
   private
@@ -78,7 +78,7 @@ implementation
 
 method FilePlugin.&Register(aServices: IApiRegistrationServices);
 begin
-  aServices.RegisterValue('file', 
+  aServices.RegisterValue('file',
     new EcmaScriptObject(aServices.Globals)
     .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_SetAttributes'))
     .AddValue('copy', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Copy'))
@@ -91,7 +91,7 @@ begin
     .AddValue('exists', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'File_Exists'))
   );
 
-  aServices.RegisterValue('folder', 
+  aServices.RegisterValue('folder',
     new EcmaScriptObject(aServices.Globals)
     .AddValue('setAttributes', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_SetAttributes'))
     .AddValue('list', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_List'))
@@ -101,7 +101,7 @@ begin
     .AddValue('remove', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(FilePlugin), 'Folder_Delete'))
   );
 
-  aServices.RegisterValue('path', 
+  aServices.RegisterValue('path',
     new EcmaScriptObject(aServices.Globals)
     .AddValue('directorySeperator', System.IO.Path.DirectorySeparatorChar.ToString())
     .AddValue('directorySeparator', System.IO.Path.DirectorySeparatorChar.ToString())
@@ -119,9 +119,9 @@ begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
 
-  
+
   if (lVal.IndexOfAny(['*', '?']) >= 0)  then begin
-    
+
     var lMask := '';
     var lDir := lVal;
     lDir := System.IO.Path.GetDirectoryName(lVal);
@@ -130,14 +130,14 @@ begin
 
     var lZero: Boolean := true;
     var lFiles:= new StringBuilder;
-    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
+    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
     for each el in System.IO.Directory.GetFiles(lDir, mask, System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
       var lTargetFN := el.Substring(lDir.Length+1);
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-      
+
       if aDelete and System.IO.File.Exists(lTargetFN)  then
         System.IO.File.Delete(lTargetFN);
       System.IO.File.Move(el, lTargetFN);
@@ -169,11 +169,11 @@ class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: Execu
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
-  if (lVal.IndexOfAny(['*', '?']) >= 0) 
-      or System.IO.Directory.Exists(lVal2) 
-      or System.IO.Directory.Exists(lVal) 
+  if (lVal.IndexOfAny(['*', '?']) >= 0)
+      or System.IO.Directory.Exists(lVal2)
+      or System.IO.Directory.Exists(lVal)
       or lVal2.EndsWith('/') or lVal2.EndsWith('\') then begin
-    
+
     if (lVal.IndexOfAny(['*', '?']) < 0) and System.IO.Directory.Exists(lVal) then lVal := System.IO.Path.Combine(lVal, '*');
     var lMask := '';
     var lDir := lVal;
@@ -183,29 +183,37 @@ begin
 
     var lZero: Boolean := true;
     var lFiles := new System.Text.StringBuilder;
-    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
-    for each el in System.IO.Directory.GetFiles(lDir, mask, 
+    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
+    for each el in System.IO.Directory.GetFiles(lDir, mask,
       if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
       var lTargetFN := el.Substring(lDir.Length+1);
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-      System.IO.File.Copy(el, lTargetFN, aOverride);
+      if not aOverride and File.Exists(lTargetFN) thebn
+        raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
+      RemObjects.Elements.RTL.File.CopyTo(el, lTargetFN, true);
       lFiles.AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
     end;
-    
+
     aServices.Logger.LogInfo(lFiles.ToString);
     if lZero then raise new Exception('Zero files copied!');
     exit;
   end;
 
-  if System.IO.Directory.Exists(lVal2) then
-    System.IO.File.Copy(lVal, System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal)), aOverride)
+  if System.IO.Directory.Exists(lVal2) then begin
+    var lTargetFN := System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal));
+    if not aOverride and File.Exists(lTargetFN) thebn
+      raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
+    RemObjects.Elements.RTL.File.CopyTo(lVal, lTargetFN, true);
+  end
   else begin
     var lTargetDir := System.IO.Path.GetDirectoryName(lVal2);
     if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-    System.IO.File.Copy(lVal, lVal2, aOverride);
+    if not aOverride and File.Exists(lVal2) thebn
+      raise new Exception(String.Format("Target file '{0}' already exists.", lVal2));
+    RemObjects.Elements.RTL.File.CopyTo(lval, lVal2, true);
   end;
   //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
@@ -214,7 +222,7 @@ class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: Exe
 begin
   var lVal := aServices.ResolveWithBase(ec, AFN);
   if lVal = nil then exit;
-  for each el in Find(lVal) do 
+  for each el in Find(lVal) do
     System.IO.File.Delete(el);
 end;
 
@@ -264,7 +272,7 @@ end;
 class method FilePlugin.Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String; aRecurse: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
-  if System.IO.Directory.Exists(lVal) then 
+  if System.IO.Directory.Exists(lVal) then
   System.IO.Directory.Delete(lVal, aRecurse);
 end;
 
@@ -314,7 +322,7 @@ class method FilePlugin.File_List(aServices: IApiRegistrationServices; ec: Execu
 begin
   var lVal := aServices.ResolveWithBase(ec, aPathAndMask);
   var res := new List<String>;
-  for each el in System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(lVal), System.IO.Path.GetFileName(lVal), 
+  for each el in System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(lVal), System.IO.Path.GetFileName(lVal),
     if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do
     res.Add(el);
   exit res.ToArray;
@@ -364,7 +372,7 @@ begin
 end;
 
 class method FilePlugin.Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions);
-  
+
   method folderCrawler(aSubFolder: String);
   begin
     var files := System.IO.Directory.GetFiles(aSubFolder);
@@ -378,13 +386,13 @@ class method FilePlugin.Folder_SetAttributes(aServices: IApiRegistrationServices
       for each folder in folders do
       begin
         folderCrawler(folder);
-      end;  
+      end;
     end;
   end;
 
 begin
   var lVal := aServices.ResolveWithBase(ec, aFolderName);
-  folderCrawler(lVal);  
+  folderCrawler(lVal);
 end;
 
 end.

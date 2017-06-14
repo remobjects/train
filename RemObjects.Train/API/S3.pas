@@ -60,15 +60,15 @@ type
     [WrapAs('s3.regionEndpoint', wantSelf := true)]
     class method SetRegionEndpoint(aServices: IApiRegistrationServices;  ec: ExecutionContext;aSelf: S3Engine; val: String);
   end;
-  
+
   S3Engine = public class
-  private 
+  private
     fClient: AmazonS3Client;
     method GetClient: AmazonS3Client;
   assembly
     method ResetClient;
     property Bucket: String;
-    property ServiceURL: String; 
+    property ServiceURL: String;
     property AccessKeyID: String;
     property SecretAccessKey: String;
     property RegionEndpoint: String;
@@ -90,30 +90,30 @@ begin
   lProto.AddValue('uploadFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'UploadFile'));
   lProto.AddValue('writeFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'WriteFile'));
   lProto.AddValue('uploadFiles', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'UploadFiles'));
-  lProto.DefineOwnProperty('bucket', 
-    new PropertyValue(PropertyAttributes.All, 
+  lProto.DefineOwnProperty('bucket',
+    new PropertyValue(PropertyAttributes.All,
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetBucket'),
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetBucket')));
-  lProto.DefineOwnProperty('serviceURL', 
-    new PropertyValue(PropertyAttributes.All, 
+  lProto.DefineOwnProperty('serviceURL',
+    new PropertyValue(PropertyAttributes.All,
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetServiceURL'),
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetServiceURL')));
-  lProto.DefineOwnProperty('accessKeyID', 
-    new PropertyValue(PropertyAttributes.All, 
+  lProto.DefineOwnProperty('accessKeyID',
+    new PropertyValue(PropertyAttributes.All,
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetAccessKeyID'),
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetAccessKeyID')));
-  lProto.DefineOwnProperty('secretAccessKey', 
-    new PropertyValue(PropertyAttributes.All, 
+  lProto.DefineOwnProperty('secretAccessKey',
+    new PropertyValue(PropertyAttributes.All,
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetSecretAccessKey'),
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetSecretAccessKey')));
-  lProto.DefineOwnProperty('regionEndpoint', 
-    new PropertyValue(PropertyAttributes.All, 
+  lProto.DefineOwnProperty('regionEndpoint',
+    new PropertyValue(PropertyAttributes.All,
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'GetRegionEndpoint'),
     RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(S3PlugIn), 'SetRegionEndpoint')));
 
   var lObj := new EcmaScriptFunctionObject(aServices.Globals, 'S3', (aCaller, aSElf, aArgs) ->
     begin
-      exit new WrapperObject(aCaller.Global, lProto, Val := new S3Engine);                                                                    
+      exit new WrapperObject(aCaller.Global, lProto, Val := new S3Engine);
     end, 1, &Class := 'S3');
   aServices.Globals.Values.Add('S3', PropertyValue.NotEnum(lObj));
 
@@ -133,24 +133,24 @@ begin
   var lList := new List<String>();
   repeat
     preLastKey := lastKey;
-    
+
     var lRequest := new ListObjectsRequest(BucketName := aSelf.Bucket, Prefix := aPrefix, Marker := lastKey);
     var newObjects := aSelf.S3Client.ListObjects(lRequest):S3Objects:Select(o -> o.Key);
     for each o in newObjects do begin
       lList.Add(o);
       lastKey := o;
     end;
-      
+
   until lastKey = preLastKey;
-  
+
   var lResult: sequence of String := lList;
   if assigned(aSuffix) then lResult := lResult:&Where(o -> o.EndsWith(aSuffix));
-  
+
   if not aRecurse then lResult := lResult:&Select(o -> begin
                                                         o := o.Substring(aPrefix.Length);
                                                         result := o.Split('/').FirstOrDefault;
                                                       end):&Where(o -> assigned(o)):Distinct();
-  
+
   result := lResult.ToArray();
 end;
 
@@ -163,9 +163,9 @@ begin
     aLocalTarget := Path.Combine(aLocalTarget, Path.GetFileName(aKey));
 
   var lCleanedKey := aSelf.Bucket+"-"+aKey.Replace("/","-");
-  
+
   var lDownloadTarget := aLocalTarget;
-  
+
   var lS3CacheFolder := aServices.Environment.Item["TRAIN_S3_CACHE"] as String;
   if length(lS3CacheFolder) > 0 then begin
     if not Directory.Exists(lS3CacheFolder) then
@@ -178,7 +178,7 @@ begin
     Directory.CreateDirectory(Path.GetDirectoryName(aLocalTarget));
   try
     using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
-      
+
       using lResult := aSelf.S3Client.GetObject(lRequest) do begin
         //aServices.Logger.LogMessage("File.Exists?: {0}", File.Exists(lDownloadTarget));
         //aServices.Logger.LogMessage("lResult.LastModified: {0}", lResult.LastModified);
@@ -186,7 +186,7 @@ begin
         //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10): {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10));
         //  aServices.Logger.LogMessage("File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified?: {0}", File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified);
         //end;
-        
+
         if File.Exists(lDownloadTarget) and (File.GetLastWriteTimeUtc(lDownloadTarget).AddSeconds(+10) >= lResult.LastModified {and (new FileInfo(lDownloadTarget).Length = lResult.Size}) then begin
           aServices.Logger.LogMessage('File {0} is up to date locally.', Path.GetFileName(aLocalTarget));
         end
@@ -204,20 +204,20 @@ begin
       File.Delete(lDownloadTarget);
     raise;
   end;
-          
+
   if lDownloadTarget ≠ aLocalTarget then begin
-    if File.Exists(aLocalTarget) then 
+    if File.Exists(aLocalTarget) then
       File.Delete(aLocalTarget);
     aServices.Logger.LogMessage('Copying from cache to {0}.', aLocalTarget);
     if File.Exists(lDownloadTarget) then
-      File.Copy(lDownloadTarget, aLocalTarget);
+      RemObjects.Elements.RTL.File.CopyTo(lDownloadTarget, aLocalTarget, true);
   end;
 end;
 
 class method S3PlugIn.ReadFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aKey: String): String;
 begin
   aKey := aServices.Expand(ec, aKey);
-  
+
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do
     using lResult := aSelf.S3Client.GetObject(lRequest) do
       using s := lResult.ResponseStream do
@@ -230,7 +230,7 @@ begin
   aLocalTargetDir := aServices.ResolveWithBase(ec, aLocalTargetDir);
   aPrefix := aServices.Expand(ec, aPrefix);
   aSuffix := aServices.Expand(ec, aSuffix);
-  
+
   aServices.Logger.LogMessage('Downloading files in {0} from S3 to {1}', aPrefix, aLocalTargetDir);
   var lFiles := ListFiles(aServices, ec, aSelf, aPrefix, aSuffix);
   for each f in lFiles do begin
@@ -240,7 +240,7 @@ begin
       var lFile := Path.GetFileName(f2);
       var lTargetFile := Path.Combine(aLocalTargetDir, lFile);
       if length(lFolder) > 0 then begin
-        if not aRecurse then 
+        if not aRecurse then
           continue;
         lFolder := lFolder.Replace("/",Path.DirectorySeparatorChar);
         lTargetFile := Path.Combine(Path.Combine(aLocalTargetDir, lFolder), lFile);
@@ -256,9 +256,9 @@ begin
   aKey := aServices.Expand(ec, aKey);
 
   aKey := aKey.Replace("//", "/"); // S3 really doesn't like those.
-  if aKey.EndsWith("/") then 
+  if aKey.EndsWith("/") then
     aKey := aKey+Path.GetFileName(aLocalFile); // if aKey is a folder, reuse local filename
-  
+
   aServices.Logger.LogMessage('Uploading file {0} to {1} on S3', aLocalFile, aKey);
   using lStream := new FileStream(aLocalFile, FileMode.Open, FileAccess.Read, FileShare.Delete) do
     using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, InputStream := lStream, Timeout := aSelf.Timeout) do
@@ -279,9 +279,9 @@ begin
   aPrefix := aServices.Expand(ec, aPrefix);
 
   aPrefix := aPrefix:Replace("//", "/");
-  if not aPrefix.EndsWith("/") then 
+  if not aPrefix.EndsWith("/") then
     aPrefix := aPrefix+"/"; // force aPrefix to be a folder
-  
+
   aServices.Logger.LogMessage('Uploading files {0} to {1} on S3', aLocalFolderAndFilters, aPrefix);
   var lFolder := aLocalFolderAndFilters;
   var lFilter := Path.GetFileName(aLocalFolderAndFilters);
@@ -289,11 +289,11 @@ begin
     lFolder := Path.GetDirectoryName(lFolder)
   else
     lFilter := nil;
-  
+
   var lFiles := if assigned(lFilter) then Directory.GetFiles(lFolder,lFilter) else Directory.GetFiles(lFolder);
   for each f in lFiles do
     UploadFile(aServices, ec, aSelf, f, aPrefix+Path.GetFileName(f));
-  
+
   if aRecurse then begin
     var lFolders := Directory.GetDirectories(lFolder);
     for each f in lFolders do begin
@@ -365,7 +365,7 @@ begin
     var lConfig := new Amazon.S3.AmazonS3Config();
     lConfig.ServiceURL := if length(ServiceURL) > 0 then ServiceURL else 'https://s3.amazonaws.com';
     //if length(RegionEndpoint) > 0 then lConfig.RegionEndpoint := RegionEndpoint;
-    fClient := new Amazon.S3.AmazonS3Client(AccessKeyID, SecretAccessKey, lConfig);  
+    fClient := new Amazon.S3.AmazonS3Client(AccessKeyID, SecretAccessKey, lConfig);
   end;
   result := fClient;
 end;
@@ -376,4 +376,3 @@ begin
 end;
 
 end.
-
