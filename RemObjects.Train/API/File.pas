@@ -191,7 +191,7 @@ begin
       lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
       var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
       if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-      if not aOverride and File.Exists(lTargetFN) thebn
+      if not aOverride and File.Exists(lTargetFN) then
         raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
       RemObjects.Elements.RTL.File.CopyTo(el, lTargetFN, true);
       lFiles.AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
@@ -204,16 +204,16 @@ begin
 
   if System.IO.Directory.Exists(lVal2) then begin
     var lTargetFN := System.IO.Path.Combine(lVal2, System.IO.Path.GetFileName(lVal));
-    if not aOverride and File.Exists(lTargetFN) thebn
+    if not aOverride and File.Exists(lTargetFN) then
       raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
     RemObjects.Elements.RTL.File.CopyTo(lVal, lTargetFN, true);
   end
   else begin
     var lTargetDir := System.IO.Path.GetDirectoryName(lVal2);
     if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-    if not aOverride and File.Exists(lVal2) thebn
+    if not aOverride and File.Exists(lVal2) then
       raise new Exception(String.Format("Target file '{0}' already exists.", lVal2));
-    RemObjects.Elements.RTL.File.CopyTo(lval, lVal2, true);
+    RemObjects.Elements.RTL.File.CopyTo(lVal, lVal2, true);
   end;
   //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
