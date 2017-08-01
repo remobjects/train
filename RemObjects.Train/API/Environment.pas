@@ -14,13 +14,14 @@ type
     method DefineOwnProperty(aName: String; aValue: PropertyValue; aThrow: Boolean): Boolean; override;
     method GetOwnProperty(name: String; getPropertyValue: Boolean): PropertyValue; override;
   end;
+
   Environment = public class(Dictionary<String, Object>)
   private
     fPrevious : RemObjects.Train.API.Environment; readonly;
     method get_Item(s : String): Object;
     method set_Item(s : String; value: Object);
   public
-    constructor; 
+    constructor;
     method &Add(key: String; value: Object); reintroduce;
     method Clear; reintroduce;
     constructor(aEnv: Environment);
@@ -49,7 +50,7 @@ begin
     aServices.Logger.Enter(false, 'export', [a]);
     try
       var lValue := a.Skip(1):FirstOrDefault();
-      if lValue is EcmaScriptObject then 
+      if lValue is EcmaScriptObject then
       lValue := Utilities.GetObjectAsPrimitive(aServices.Globals.ExecutionContext, EcmaScriptObject(lValue), PrimitiveType.None);
       lEnv.Owner.Environment.SetGlobal(a:FirstOrDefault():ToString, lValue);
       System.Environment.SetEnvironmentVariable(a:FirstOrDefault():ToString, lValue:ToString);
@@ -58,8 +59,8 @@ begin
       aServices.Logger.Exit(false, 'export', FailMode.No);
     end;
   end));
-  aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
-    begin 
+  aServices.RegisterValue('ignoreErrors', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) ->
+    begin
     aServices.Logger.Enter(false, 'ignoreErrors', c);
     var lIgnore := aServices.Logger.InIgnore;
     aServices.Logger.InIgnore := true;
@@ -70,10 +71,10 @@ begin
       except
         on e: Exception do begin
           lFail := true;
-          if e is AbortException then 
+          if e is AbortException then
           aServices.Engine.Logger.LogWarning('Ignoring error') else
           aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
-          result := Undefined.Instance; 
+          result := Undefined.Instance;
         end;
       end;
     finally
@@ -81,7 +82,7 @@ begin
       aServices.Logger.InIgnore := lIgnore;
     end;
     end));
-  aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) -> 
+  aServices.RegisterValue('retry', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a, b, c) ->
     begin
       aServices.Logger.Enter(false, 'retry', c);
       var lFailMode := FailMode.No;
@@ -96,11 +97,11 @@ begin
             break;
           except
             on e: Exception do begin
-              
+
               if lCount > 0 then begin
                 lFailMode := FailMode.Recovered;
-                if e is AbortException then 
-                  aServices.Engine.Logger.LogWarning('Ignoring error') 
+                if e is AbortException then
+                  aServices.Engine.Logger.LogWarning('Ignoring error')
                 else
                   aServices.Engine.Logger.LogWarning('Ignoring error: '+e.Message);
                 continue;
@@ -153,7 +154,7 @@ end;
 
 method Environment.set_Item(s: String; value: Object);
 begin
-  locking self do 
+  locking self do
     inherited Item[s] := value;
 end;
 
@@ -168,8 +169,8 @@ begin
   locking self do begin
     var lIni := new IniFile();
     lIni.LoadFromFile(aPath);
-    for each el in lIni.Sections.SelectMany(a->a.Item2, (a,b) -> new Tuple<String, String>(if String.IsNullOrEmpty(a.Item1) or (a.Item1.ToLowerInvariant() = 'globals') then b.Key else a.Item1+'.'+b.Key, b.Value)) do 
-      Add(el.Item1, el.Item2);
+    for each el in lIni.Sections.SelectMany(a->a.Item2, (a,b) -> new Tuple<String, String>(if String.IsNullOrEmpty(a.Item1) or (a.Item1.ToLowerInvariant() = 'globals') then b.Key else a.Item1+'.'+b.Key, b.Value)) do
+      &Add(el.Item1, el.Item2);
   end;
 end;
 
@@ -178,7 +179,7 @@ begin
   locking self do begin
     for each el: System.Collections.DictionaryEntry in System.Environment.GetEnvironmentVariables() do begin
       var lVal := el.Value:ToString:Trim;
-      if not String.IsNullOrEmpty(lVal) then 
+      if not String.IsNullOrEmpty(lVal) then
         inherited Item[el.Key:ToString] := lVal;
     end;
   end;
@@ -189,8 +190,8 @@ begin
   locking self do begin
     var lSelf := self;
     while assigned(lSelf) do begin
-      if lSelf.Previous = nil then 
-        lSelf[aName] := aValue 
+      if lSelf.Previous = nil then
+        lSelf[aName] := aValue
       else
         lSelf.Remove(aName);
       lSelf := lSelf.Previous;
@@ -202,6 +203,8 @@ end;
 method Environment.&Add(key: String; value: Object);
 begin
   locking self do begin
+    if inherited ContainsKey(key) then
+      inherited Remove(key);
     inherited Add(key, value);
   end;
 end;
