@@ -502,8 +502,8 @@ begin
   wr.Write(b);
   wr.Write(0 as System.UInt16);
   Pad32Bits(wr);
-  wr.Write(System.UInt16(CodePage));
   wr.Write(System.UInt16(ResLang));
+  wr.Write(System.UInt16(CodePage));
   z := System.UInt16((wr.BaseStream.Length - strpos));
   wr.BaseStream.Position := strpos;
   wr.Write(z);
