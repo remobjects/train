@@ -33,7 +33,7 @@ type
     [WrapAs('file.list', SkipDryRun := true)]
     class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean := false): array of String;
     [WrapAs('file.remove', SkipDryRun := true)]
-    class method File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
+    class method File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
     [WrapAs('file.read', SkipDryRun := true)]
     class method File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('file.write', SkipDryRun := true)]
@@ -218,7 +218,7 @@ begin
   //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
 
-class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
+class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   if lVal = nil then exit;
