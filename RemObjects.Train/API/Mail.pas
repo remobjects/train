@@ -16,7 +16,7 @@ type
 
     [WrapAs('mail.send')]
     class method MailSend(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext;
-      aFrom: String := nil; 
+      aFrom: String := nil;
       aTo: String := nil;
       aSubject: String:= nil;
       aBody: String := nil;
@@ -58,7 +58,7 @@ begin
   var lSMTP := new System.Net.Mail.SmtpClient(lSMTPServer);
   var lUN := String(aServices.Environment['SMTP_ServerLogin']);
   var lPW := String(aServices.Environment['SMTP_ServerPassword']);
-  if assigned(lUN) and assigned(lPW) then 
+  if assigned(lUN) and assigned(lPW) then
     lSMTP.Credentials := new System.Net.NetworkCredential(lUN, lPW);
   if aServices.Engine.DryRun then exit;
   if aOpt <> nil then begin

@@ -64,14 +64,14 @@ end;
 
 method DelayedLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
 begin
-  if LoggerSettings.ShowDebug or aImportant then 
+  if LoggerSettings.ShowDebug or aImportant then
   locking fDelayStore do
   fDelayStore.AddLast(Tuple.Create(5, aScript, 0,args ));
 end;
 
 method DelayedLogger.&Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
 begin
-  if LoggerSettings.ShowDebug or aImportant then 
+  if LoggerSettings.ShowDebug or aImportant then
   locking fDelayStore do
   fDelayStore.AddLast(Tuple.Create(6, aScript, Integer(aFailMode),array of Object([aReturn])));
 end;

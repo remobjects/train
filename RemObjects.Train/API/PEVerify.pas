@@ -35,7 +35,7 @@ uses
 
 method PEVerifyPlugin.&Register(aServices: IApiRegistrationServices);
 begin
-   aServices.RegisterObjectValue('peverify') 
+   aServices.RegisterObjectValue('peverify')
     .AddValue('verifyFile', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(PEVerifyPlugin), 'VerifyFile'))
     .AddValue('verifyFolder', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(PEVerifyPlugin), 'VerifyFolder'));
 end;
@@ -48,7 +48,7 @@ begin
   lPath := System.IO.Path.Combine(lPath, 'PEVerify.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath + ' could not be found');
   var errorignore := iif(String.IsNullOrEmpty(aErrorIgnoreCodes), String.Empty, ' /ignore=' + aErrorIgnoreCodes);
-  var n:= Shell.ExecuteProcess(lPath, aFilename.Quote() + ' /hresult /nologo' + errorignore, nil, false, 
+  var n:= Shell.ExecuteProcess(lPath, aFilename.Quote() + ' /hresult /nologo' + errorignore, nil, false,
     a-> aServices.Logger.LogError(a), nil, nil, nil);
   if n <> 0 then raise new Exception('PEVerify failed');
 end;
@@ -56,9 +56,9 @@ end;
 class method PEVerifyPlugin.VerifyFolder(aServices: IApiRegistrationServices; ec: ExecutionContext; aFoldername, aSearchPattern: String; aVerifyOptions: array of PEVerifyOption);
 begin
   var aOptionsList := new List<PEVerifyOption>(aVerifyOptions);
-  aFoldername := aServices.ResolveWithBase(ec, aFoldername); 
+  aFoldername := aServices.ResolveWithBase(ec, aFoldername);
   var files := Directory.GetFiles(aFoldername, aSearchPattern);
-  for each f in files do 
+  for each f in files do
   begin
     var errorignore := String.Empty;
     var fn := Path.GetFileName(f);

@@ -19,7 +19,7 @@ interface
 
 uses
     System;
-    
+
 type
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
@@ -32,22 +32,22 @@ type
     [System.Diagnostics.DebuggerNonUserCodeAttribute]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
     Resources = class
-    private 
+    private
         class var resourceMan: System.Resources.ResourceManager;
         class var resourceCulture: System.Globalization.CultureInfo;
         class method get_ResourceManager: System.Resources.ResourceManager;
         class method get_Culture: System.Globalization.CultureInfo;
         class method set_Culture(value: System.Globalization.CultureInfo);
-    assembly 
+    assembly
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         class property ResourceManager: System.Resources.ResourceManager read get_ResourceManager;
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         class property Culture: System.Globalization.CultureInfo read get_Culture write set_Culture;
-    assembly and protected 
+    assembly and protected
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('Microsoft.Performance', 'CA1811:AvoidUncalledPrivateCode')]
         constructor;
     end;
-    
+
 implementation
 
 { Resources }

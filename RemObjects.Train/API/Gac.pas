@@ -70,11 +70,11 @@ type
     [PreserveSig()]
     method Clone(out ppEnum: IAssemblyEnum): System.Int32;
   end;
-    
+
   AssemblyCacheFlags = assembly flags (ASM_CACHE_GAC = 2);
 
   CreateAssemblyNameObjectFlags = assembly enum(
-    CANOF_DEFAULT = 0, 
+    CANOF_DEFAULT = 0,
     CANOF_PARSE_DISPLAY_NAME = 1
   );
 
@@ -111,7 +111,7 @@ type
   public
     class method Register(aName: String);
     class method Unregister(aFullName: String);
-    class method List(aDisplayName: String): sequence of String; 
+    class method List(aDisplayName: String): sequence of String;
   end;
 
 implementation
@@ -119,7 +119,7 @@ implementation
 class method MSWinGacUtil.&Register(aName: String);
 begin
   WithCache(aCache-> begin
-    var res :=  aCache.InstallAssembly(2, aName, 0);    
+    var res :=  aCache.InstallAssembly(2, aName, 0);
     if res <> 0 then Marshal.ThrowExceptionForHR(res);
   end);
 end;

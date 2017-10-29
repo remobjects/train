@@ -15,9 +15,9 @@ namespace System.IO.Compression
 		/// <summary>
 		/// Compression method enumeration
 		/// </summary>
-		public enum Compression : ushort { 
-			/// <summary>Uncompressed storage</summary> 
-			Store = 0, 
+		public enum Compression : ushort {
+			/// <summary>Uncompressed storage</summary>
+			Store = 0,
 			/// <summary>Deflate compression method</summary>
 			Deflate = 8 }
 
@@ -27,7 +27,7 @@ namespace System.IO.Compression
 		public class ZipFileEntry
 		{
 			/// <summary>Compression method</summary>
-			public Compression Method; 
+			public Compression Method;
 			/// <summary>Full path and filename as stored in Zip</summary>
 			public string FilenameInZip;
 			/// <summary>Original file size</summary>
@@ -181,7 +181,7 @@ namespace System.IO.Compression
 		/// <param name="_method">Compression method</param>
 		/// <param name="_pathname">Full path of file to add to Zip storage</param>
 		/// <param name="_filenameInZip">Filename and path as desired in Zip directory</param>
-		/// <param name="_comment">Comment for stored file</param>		
+		/// <param name="_comment">Comment for stored file</param>
 		public void AddFile(Compression _method, string _pathname, string _filenameInZip, string _comment, ushort access = 0x8100)
 		{
 			if (Access == FileAccess.Read)
@@ -276,7 +276,7 @@ namespace System.IO.Compression
 			}
 		}
 		/// <summary>
-		/// Read all the file records in the central directory 
+		/// Read all the file records in the central directory
 		/// </summary>
 		/// <returns>List of all entries in directory</returns>
 		public List<ZipFileEntry> ReadCentralDir()
@@ -350,7 +350,7 @@ namespace System.IO.Compression
 
 			File.SetCreationTime(_filename, _zfe.ModifyTime);
 			File.SetLastWriteTime(_filename, _zfe.ModifyTime);
-			
+
 			return result;
 		}
 		/// <summary>
@@ -476,17 +476,17 @@ namespace System.IO.Compression
 			return (uint)(30 + filenameSize + extraSize + _headerOffset);
 		}
 		/* Local file header:
-			local file header signature	 4 bytes  (0x04034b50)
-			version needed to extract	   2 bytes
-			general purpose bit flag		2 bytes
-			compression method			  2 bytes
-			last mod file time			  2 bytes
-			last mod file date			  2 bytes
-			crc-32						  4 bytes
-			compressed size				 4 bytes
-			uncompressed size			   4 bytes
-			filename length				 2 bytes
-			extra field length			  2 bytes
+			local file header signature     4 bytes  (0x04034b50)
+			version needed to extract       2 bytes
+			general purpose bit flag        2 bytes
+			compression method              2 bytes
+			last mod file time              2 bytes
+			last mod file date              2 bytes
+			crc-32                          4 bytes
+			compressed size                 4 bytes
+			uncompressed size               4 bytes
+			filename length                 2 bytes
+			extra field length              2 bytes
 
 			filename (variable size)
 			extra field (variable size)
@@ -498,7 +498,7 @@ namespace System.IO.Compression
 			byte[] encodedFilename = encoder.GetBytes(_zfe.FilenameInZip);
 
 			this.ZipFileStream.Write(new byte[] { 80, 75, 3, 4, 20, 0}, 0, 6); // No extra header
-			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)(_zfe.EncodeUTF8 ? 0x0800 : 0)), 0, 2); // filename and comment encoding 
+			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)(_zfe.EncodeUTF8 ? 0x0800 : 0)), 0, 2); // filename and comment encoding
 			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)_zfe.Method), 0, 2);  // zipping method
 			this.ZipFileStream.Write(BitConverter.GetBytes(DateTimeToDosTime(_zfe.ModifyTime)), 0, 4); // zipping date and time
 			this.ZipFileStream.Write(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 12); // unused CRC, un/compressed size, updated later
@@ -510,21 +510,21 @@ namespace System.IO.Compression
 		}
 		/* Central directory's File header:
 			central file header signature   4 bytes  (0x02014b50)
-			version made by				 2 bytes
-			version needed to extract	   2 bytes
-			general purpose bit flag		2 bytes
-			compression method			  2 bytes
-			last mod file time			  2 bytes
-			last mod file date			  2 bytes
-			crc-32						  4 bytes
-			compressed size				 4 bytes
-			uncompressed size			   4 bytes
-			filename length				 2 bytes
-			extra field length			  2 bytes
-			file comment length			 2 bytes
-			disk number start			   2 bytes
-			internal file attributes		2 bytes
-			external file attributes		4 bytes
+			version made by                 2 bytes
+			version needed to extract       2 bytes
+			general purpose bit flag        2 bytes
+			compression method              2 bytes
+			last mod file time              2 bytes
+			last mod file date              2 bytes
+			crc-32                          4 bytes
+			compressed size                 4 bytes
+			uncompressed size               4 bytes
+			filename length                 2 bytes
+			extra field length              2 bytes
+			file comment length             2 bytes
+			disk number start               2 bytes
+			internal file attributes        2 bytes
+			external file attributes        4 bytes
 			relative offset of local header 4 bytes
 
 			filename (variable size)
@@ -538,7 +538,7 @@ namespace System.IO.Compression
 			byte[] encodedComment = encoder.GetBytes(_zfe.Comment);
 
 			this.ZipFileStream.Write(new byte[] { 80, 75, 1, 2, 23, 0xB, 20, 0 }, 0, 8);
-			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)(_zfe.EncodeUTF8 ? 0x0800 : 0)), 0, 2); // filename and comment encoding 
+			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)(_zfe.EncodeUTF8 ? 0x0800 : 0)), 0, 2); // filename and comment encoding
 			this.ZipFileStream.Write(BitConverter.GetBytes((ushort)_zfe.Method), 0, 2);  // zipping method
 			this.ZipFileStream.Write(BitConverter.GetBytes(DateTimeToDosTime(_zfe.ModifyTime)), 0, 4);  // zipping date and time
 			this.ZipFileStream.Write(BitConverter.GetBytes(_zfe.Crc32), 0, 4); // file CRC
@@ -558,19 +558,19 @@ namespace System.IO.Compression
 			this.ZipFileStream.Write(encodedComment, 0, encodedComment.Length);
 		}
 		/* End of central dir record:
-			end of central dir signature	4 bytes  (0x06054b50)
-			number of this disk			 2 bytes
+			end of central dir signature    4 bytes  (0x06054b50)
+			number of this disk             2 bytes
 			number of the disk with the
 			start of the central directory  2 bytes
 			total number of entries in
-			the central dir on this disk	2 bytes
+			the central dir on this disk    2 bytes
 			total number of entries in
-			the central dir				 2 bytes
+			the central dir                 2 bytes
 			size of the central directory   4 bytes
 			offset of start of central
 			directory with respect to
-			the starting disk number		4 bytes
-			zipfile comment length		  2 bytes
+			the starting disk number        4 bytes
+			zipfile comment length          2 bytes
 			zipfile comment (variable size)
 		*/
 		private void WriteEndRecord(uint _size, uint _offset)
@@ -603,7 +603,7 @@ namespace System.IO.Compression
 				outStream = new DeflateStream(this.ZipFileStream, CompressionMode.Compress, true);
 
 			_zfe.Crc32 = 0 ^ 0xffffffff;
-			
+
 			do
 			{
 				bytesRead = _source.Read(buffer, 0, buffer.Length);
@@ -639,19 +639,19 @@ namespace System.IO.Compression
 			}
 		}
 		/* DOS Date and time:
-			MS-DOS date. The date is a packed value with the following format. Bits Description 
-				0-4 Day of the month (1ﾖ31) 
-				5-8 Month (1 = January, 2 = February, and so on) 
-				9-15 Year offset from 1980 (add 1980 to get actual year) 
-			MS-DOS time. The time is a packed value with the following format. Bits Description 
-				0-4 Second divided by 2 
-				5-10 Minute (0ﾖ59) 
-				11-15 Hour (0ﾖ23 on a 24-hour clock) 
+			MS-DOS date. The date is a packed value with the following format. Bits Description
+				0-4 Day of the month (1ﾖ31)
+				5-8 Month (1 = January, 2 = February, and so on)
+				9-15 Year offset from 1980 (add 1980 to get actual year)
+			MS-DOS time. The time is a packed value with the following format. Bits Description
+				0-4 Second divided by 2
+				5-10 Minute (0ﾖ59)
+				11-15 Hour (0ﾖ23 on a 24-hour clock)
 		*/
 		private uint DateTimeToDosTime(DateTime _dt)
 		{
 			return (uint)(
-				(_dt.Second / 2) | (_dt.Minute << 5) | (_dt.Hour << 11) | 
+				(_dt.Second / 2) | (_dt.Minute << 5) | (_dt.Hour << 11) |
 				(_dt.Day<<16) | (_dt.Month << 21) | ((_dt.Year - 1980) << 25));
 		}
 		private DateTime DosTimeToDateTime(uint _dt)
@@ -666,7 +666,7 @@ namespace System.IO.Compression
 		}
 
 		/* CRC32 algorithm
-		  The 'magic number' for the CRC is 0xdebb20e3.  
+		  The 'magic number' for the CRC is 0xdebb20e3.
 		  The proper CRC pre and post conditioning
 		  is used, meaning that the CRC register is
 		  pre-conditioned with all ones (a starting value

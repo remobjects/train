@@ -4,20 +4,20 @@ interface
 
 uses
   RemObjects.Train,
-  RemObjects.Script.EcmaScript, 
-  RemObjects.Script.EcmaScript.Internal, 
+  RemObjects.Script.EcmaScript,
+  RemObjects.Script.EcmaScript.Internal,
   System.Text,
   System.Net,
   System.IO;
 
 type
-  
+
   [PluginRegistration]
   FTPPlugIn = public class(IPluginRegistration)
   private
   protected
   public
-    method &Register(aServices: IApiRegistrationServices);  
+    method &Register(aServices: IApiRegistrationServices);
     [WrapAs('ftp.upload', SkipDryRun := true, SecretArguments := [1, 2])]
     class method FtpUpload(aServices: IApiRegistrationServices;ec: RemObjects.Script.EcmaScript.ExecutionContext; aServer, aUsername, aPassword, aFileName, aRemote: String);
   end;
@@ -36,7 +36,7 @@ begin
   using client := new WebClient() do
   begin
     client.Credentials := new NetworkCredential(aUsername, aPassword);
-    using sr := new System.IO.FileStream(aFileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read) do 
+    using sr := new System.IO.FileStream(aFileName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read) do
     begin
       var ba := new Byte[sr.Length];
       sr.Read(ba, 0, ba.Length - 1);

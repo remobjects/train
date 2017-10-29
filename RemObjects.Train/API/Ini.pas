@@ -2,11 +2,11 @@
 
 interface
 
-uses 
+uses
   RemObjects.Train,
-  RemObjects.Script.EcmaScript, 
+  RemObjects.Script.EcmaScript,
   System.Linq,
-  RemObjects.Script.EcmaScript.Internal, 
+  RemObjects.Script.EcmaScript.Internal,
   System.IO,
   System.Runtime.InteropServices;
 
@@ -62,25 +62,25 @@ begin
   lProto.AddValue('deleteSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteSection'));
   lProto.AddValue('deleteValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'DeleteValue'));
   lProto.AddValue('keysInSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(IniPlugin), 'KeysInSection'));
-  (*  
+  (*
   lProto.AddValue('keysInSection', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('keysInSection', args);
-    try 
+    try
       var lSelf := aSelf as IniFileWrapper;
       var lSec := lSelf.Ini.Item[Utilities.GetArgAsString(args, 0, ec)];
       if lSec = nil then exit Undefined.Instance;
       var lres := new EcmaScriptArrayObject(0,aServices .Globals);
-      for each el in lSec.KEys do 
+      for each el in lSec.KEys do
         lRes.AddValue(el);
       exit Undefined.Instance;
     finally
       aServices.Logger.Exit('keysInSection');
     end;
-  end)); 
-  end)); 
+  end));
+  end));
   lProto.AddValue('deleteValue', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, method(ec: ExecutionContext; aSelf: Object; args: array of Object): Object begin
     aServices.Logger.Enter('deleteValue', args);
-    try 
+    try
       var lSelf := aSelf as IniFileWrapper;
       var lSec := lSelf.Ini.Item[Utilities.GetArgAsString(args, 0, ec)];
       if lSec = nil then exit Utilities.GetArgAsString(args, 2, ec);

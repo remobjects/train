@@ -9,7 +9,7 @@ uses
   System.Collections.Generic,
   System.IO,
   System.Linq,
-  System.Text, 
+  System.Text,
   System.Threading.Tasks;
 
 type
@@ -78,7 +78,7 @@ begin
   finally
     lValue := nil;
   end;
-  
+
 end;
 
 method AsyncRegistration.&Register(aServices: IApiRegistrationServices);
@@ -87,23 +87,23 @@ begin
   aServices.AsyncWorker := lAsync;
   aServices.RegisterValue('include', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Include'));
   aServices.RegisterValue('sleep', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(Self), 'Sleep'));
-  aServices.RegisterValue('async', 
-    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
-    'async', @lAsync.CallAsync, 1, false, true));  
-  aServices.RegisterValue('run', 
-    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+  aServices.RegisterValue('async',
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals,
+    'async', @lAsync.CallAsync, 1, false, true));
+  aServices.RegisterValue('run',
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals,
     'run', @lAsync.run, 1, false, true));
-  aServices.RegisterValue('runAsync', 
-    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+  aServices.RegisterValue('runAsync',
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals,
     'runAsync', @lAsync.runAsync, 1, false, true));
-  aServices.RegisterValue('expand', 
-    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals, 
+  aServices.RegisterValue('expand',
+    new RemObjects.Script.EcmaScript.Internal.EcmaScriptFunctionObject(aServices.Globals,
     'expand', @lAsync.expand, 1, false, true));
-  aServices.RegisterValue('waitFor', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a,b,c) -> 
-    begin 
-      lAsync.WaitFor(a, Utilities.GetArgAsEcmaScriptObject(c, 0, a), 
-      Utilities.GetArgAsInteger(c, 1, a));  
-      exit Undefined.Instance; 
+  aServices.RegisterValue('waitFor', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, (a,b,c) ->
+    begin
+      lAsync.WaitFor(a, Utilities.GetArgAsEcmaScriptObject(c, 0, a),
+      Utilities.GetArgAsInteger(c, 1, a));
+      exit Undefined.Instance;
     end));
 end;
 
@@ -127,7 +127,7 @@ begin
   lEngine.Engine.Run; // should do nothing now.
   var lLogger := new DelayedLogger;
   lEngine.Logger := lLogger;
-  
+
   CloneScope(aScope.LexicalScope, lEngine.Engine.GlobalObject);
   for i: Integer := 1 to length(args) -1 do begin
     args[i] := MakeSafe(aScope.Global, args[i]);
@@ -140,7 +140,7 @@ begin
   lRun.FuncBody := EcmaScriptInternalFunctionObject(lFunc):OriginalBody;
   lRun.Args := args.Skip(1).ToArray;
   if (lRun.FuncName = nil) and (lRun.FuncBody = nil) then aScope.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'First parameter in async has to be function');
-  
+
   var lStart := new System.Threading.Tasks.Task(@lRun.Run);
   lStart.Start();
   fEngine.RegisterTask(lStart, String.Format('[{0}] async command', lStart.Id), lLogger);
@@ -157,11 +157,11 @@ begin
       var lItem := args.Get(ec, 0, i.ToString());
       if lItem is TaskWrapper then begin
       lTasks.Add(TaskWrapper(lItem).Task);
-      end else 
+      end else
         raise new Exception('Array element '+i+' in call to waitFor is not a task');
     end;
     if length(lTasks) = 0 then ec.Global.RaiseNativeError(NativeErrorType.ReferenceError, 'More than 0 items expected in the first parameter array');
-    
+
     if aTimeout <=0 then
       System.Threading.Tasks.Task.WaitAll(lTasks.ToArray)
     else
@@ -229,7 +229,7 @@ begin
   finally
     fEngine.Logger.Exit(true,'run', if lFail then FailMode.Yes else FailMode.No, lFail);
   end;
-  
+
 end;
 
 method AsyncWorker.runAsync(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
@@ -246,7 +246,7 @@ begin
   try
     var lTask := new Task(method begin
       if fEngine.DryRun then exit;
-    
+
       new Engine(fEngine.Environment, lPath, System.IO.File.ReadAllText(lPath), Logger := lLogger).Run();
     end);
     lTask.Start;
@@ -261,7 +261,7 @@ end;
 method AsyncWorker.expand(aScope: ExecutionContext; aSelf: Object; params args: array of Object): Object;
 begin
   var lArg := coalesce(Utilities.GetArgAsString(args, 0, aScope), '');
-  
+
 
   exit fEngine.Expand(aScope, lArg);
 end;

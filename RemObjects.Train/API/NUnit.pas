@@ -39,7 +39,7 @@ begin
   lPath := System.IO.Path.Combine(lPath, 'nunit-console.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath + ' could not be found');
   var args := iif(assigned(aParams), aFilename.Quote() + ' ' + aParams, aFilename.Quote());
-  var n:= Shell.ExecuteProcess(lPath, args, nil, false, 
+  var n:= Shell.ExecuteProcess(lPath, args, nil, false,
     a-> aServices.Logger.LogError(a),
     a-> aServices.Logger.LogMessage(a), nil, nil);
   if n <> 0 then raise new Exception('Units test(s) failed');

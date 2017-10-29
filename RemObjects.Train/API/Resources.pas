@@ -165,7 +165,7 @@ begin
       element.ResourceType := tmp.ToString()
     end;
     while sr.BaseStream.Position mod 4 <> 0 do begin
-      sr.ReadByte(); 
+      sr.ReadByte();
       inc(HeaderSoFar);
     end;
 
@@ -188,7 +188,7 @@ begin
       element.Name := tmp.ToString()
     end;
     while sr.BaseStream.Position mod 4 <> 0 do begin
-      sr.ReadByte(); 
+      sr.ReadByte();
       inc(HeaderSoFar);
     end;
 
@@ -241,11 +241,11 @@ begin
 
   for each el in self do begin
     while sr.BaseStream.Position mod 4 <> 0 do
-      sr.Write(Byte(0));    
+      sr.Write(Byte(0));
     sr.Write(Int32(length(el.Data)));
-    
+
     var lSize: Integer := 0;
-    if el.Name[0] = #0 then lSize := lSize + 4 else begin 
+    if el.Name[0] = #0 then lSize := lSize + 4 else begin
       lSize := lSize + Align4((1+el.Name.Length) * 2);
     end;
     if el.ResourceType[0] = #0 then lSize := lSize + 4 else begin
@@ -256,12 +256,12 @@ begin
       sr.Write(Int16($FFFF));
       sr.Write(Int16.Parse(el.ResourceType.Substring(1)));
       while sr.BaseStream.Position mod 4 <> 0 do
-        sr.Write(Byte(0));    
+        sr.Write(Byte(0));
     end else  begin
       sr.Write(Encoding.Unicode.GetBytes(el.ResourceType));
       sr.Write(Int16(0));
       while sr.BaseStream.Position mod 4 <> 0 do
-      sr.Write(Byte(0));   
+      sr.Write(Byte(0));
     end;
     if el.Name[0] = #0 then begin
       sr.Write(Int16($FFFF));
@@ -270,7 +270,7 @@ begin
       sr.Write(Encoding.Unicode.GetBytes(el.Name));
       sr.Write(Int16(0));
       while sr.BaseStream.Position mod 4 <> 0 do
-      sr.Write(Byte(0));   
+      sr.Write(Byte(0));
     end;
     sr.Write(el.DataVersion);
     sr.Write(el.Flags);
@@ -281,7 +281,7 @@ begin
     sr.Write(el.Data);
 
   end;
- 
+
 end;
 
 class method UnmanagedResourceFile.FromFile(s: String): UnmanagedResourceFile;
@@ -370,14 +370,14 @@ method Win32VersionInfoResource.Pad32Bits(wr: BinaryWriter);
 begin
   wr.Flush();
   var len: System.Int32 := 4 - (System.Int32(wr.BaseStream.Position) mod 4);
-  
+
   while (len <> 4) and (len > 0) do begin
     dec(len);
     wr.Write(0 as System.Byte)
   end;
 end;
 
-method Win32VersionInfoResource.GetData: array of System.Byte; 
+method Win32VersionInfoResource.GetData: array of System.Byte;
 begin
   if fData <> nil then    exit fData;
   var st: MemoryStream := new MemoryStream();

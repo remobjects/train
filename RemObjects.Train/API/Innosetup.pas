@@ -43,7 +43,7 @@ begin
   lPath := System.IO.Path.Combine(lPath, 'ISCC.exe');
   if not System.IO.File.Exists(lPath) then raise new Exception(lPath+' could not be found');
   if aServices.Engine.DryRun then exit;
-  
+
   var sb := new StringBuilder;
   sb.AppendFormat('"{0}"', aFilename);
   if not String.IsNullOrEmpty(aOptions:destinationFolder) then
@@ -53,7 +53,7 @@ begin
  if aOptions <> nil then begin
     for each el in aOptions.defines do
       sb.AppendFormat(' /d"{0}"', el);
-    
+
     sb.Append(aOptions.extraArgs);
  end;
 

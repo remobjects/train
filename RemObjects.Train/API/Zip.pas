@@ -51,13 +51,13 @@ end;
 
 class method ZipRegistration.ZipCompress(aServices: IApiRegistrationServices; ec: ExecutionContext; zip: String; aInputFolder: String; aFileMasks: String; aRecurse: Boolean);
 begin
-  
+
   zip := aServices.ResolveWithBase(ec,zip);
   if System.IO.File.Exists(zip) then System.IO.File.Delete(zip);
   if String.IsNullOrEmpty(aFileMasks) then aFileMasks := '*';
   aFileMasks := aFileMasks.Replace(',', ';');
   aInputFolder := aServices.ResolveWithBase(ec,aInputFolder);
-  if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
+  if not aInputFolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then
     aInputFolder := aInputFolder + System.IO.Path.DirectorySeparatorChar;
   using sz := ZipStorer.Create(zip, '') do begin
     for each mask in aFileMasks.Split([';'], StringSplitOptions.RemoveEmptyEntries) do begin
@@ -80,8 +80,8 @@ class method ZipRegistration.ZipList(aServices: IApiRegistrationServices; ec: Ex
 begin
   using zs := ZipStorer.Open(aServices.ResolveWithBase(ec,zip), FileAccess.Read) do begin
     exit zs.ReadCentralDir.Select(a->new ZipEntryData(
-      name := a.FilenameInZip, 
-      compressedSize := a.CompressedSize, 
+      name := a.FilenameInZip,
+      compressedSize := a.CompressedSize,
       size := a.FileSize)).ToArray;
   end;
 end;

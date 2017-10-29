@@ -33,12 +33,12 @@ class method ImagesPlugin.ImagesCreateISO(aServices: IApiRegistrationServices; e
 begin
   if String.IsNullOrEmpty(filemasklist) then filemasklist := '*';
   basefolder := aServices.ResolveWithBase(ec,basefolder);
-  if not basefolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
+  if not basefolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then
     basefolder := basefolder + System.IO.Path.DirectorySeparatorChar;
   var lDisk := new DiscUtils.Iso9660.CDBuilder();
   lDisk.VolumeIdentifier := aDiskName;
   lDisk.UseJoliet := true;
-  for each mask in filemasklist.Split([';'], StringSplitOptions.RemoveEmptyEntries) do 
+  for each mask in filemasklist.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
   for each el in System.IO.Directory.EnumerateFiles(basefolder, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
     var lFal := el;
     if lFal.StartsWith(basefolder) then
@@ -52,7 +52,7 @@ class method ImagesPlugin.ImagesCreateDMG(aServices: IApiRegistrationServices; e
 begin
   if String.IsNullOrEmpty(filemasklist) then filemasklist := '*';
   basefolder := aServices.ResolveWithBase(ec,basefolder);
-  if not basefolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then 
+  if not basefolder.EndsWith(System.IO.Path.DirectorySeparatorChar) then
     basefolder := basefolder + System.IO.Path.DirectorySeparatorChar;
 
   raise new NotImplementedException;

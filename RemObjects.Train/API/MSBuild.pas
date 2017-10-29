@@ -2,11 +2,11 @@
 
 interface
 
-uses 
+uses
   RemObjects.Train,
   System.Threading,
-  RemObjects.Script.EcmaScript, 
-  RemObjects.Script.EcmaScript.Internal, 
+  RemObjects.Script.EcmaScript,
+  RemObjects.Script.EcmaScript.Internal,
   System.Text,
   System.Text.RegularExpressions,
   System.Xml.Linq,
@@ -38,7 +38,7 @@ type
     [WrapAs('msbuild.updateAssemblyVersion', SkipDryRun := true)]
     class method MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; aFile: String; aNewVersion: String; aFileVersion: String := '');
   end;
-  
+
   [PluginRegistration]
   GacPlugin = public class(IPluginRegistration)
   public
@@ -264,7 +264,7 @@ begin
   if n <> 0 then raise new Exception('MSBuild failed');
 end;
 
-class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext; 
+class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext;
   aFile: String; aNewVersion: String; aFileVersion: String);
 begin
   for each el in aFile.Split([';', ','], StringSplitOptions.RemoveEmptyEntries).Select(a->aServices.ResolveWithBase(ec, a)) do begin
@@ -272,7 +272,7 @@ begin
     var lOrg := lFile;
     var lFoundAsmVer := false;
     var lFoundAsmFileVer := false;
-    
+
     if fVersionRegex = nil then begin
       fVersionRegex := new Regex('(?<=\:\s*AssemblyVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
       fFileVersionRegex := new Regex('(?<=\:\s*AssemblyFileVersion\(["''])(?<version>.*?)(?=["'']\))', RegexOptions.IgnoreCase);
@@ -286,7 +286,7 @@ begin
         if String.IsNullOrEmpty(aFileVersion) then exit aNewVersion;
         exit aFileVersion;
       end);
-      
+
     if not lFoundAsmVer then begin
       if Path.GetExtension(el).ToLower = '.swift' then
         lFile := lFile+#13#10'[assembly: AssemblyVersion("'+aNewVersion+'")]'#13#10
@@ -301,7 +301,7 @@ begin
         lFile := lFile+#13#10'[assembly: AssemblyVersion("'+aFileVersion+'")]'#13#10;
     end;
 
-    if lOrg <> lFile then 
+    if lOrg <> lFile then
       File.WriteAllText(el, lFile, Encoding.UTF8);
   end;
 end;
@@ -364,35 +364,35 @@ const
   msbuild35 = '$(windir)/Microsoft.NET/Framework/v3.5/MSBuild.exe';
   msbuild40 = '$(windir)/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe';
 
-begin  
+begin
   result := '';
   var lbuild: String;
 
-  case aVersion of 
+  case aVersion of
     '2','2.0': begin
       lbuild := coalesce(aServices.Environment['MSBuild20']:ToString, '');
-      if File.Exists(lbuild) then exit lbuild; 
+      if File.Exists(lbuild) then exit lbuild;
       lbuild := aServices.Expand(ec, msbuild20);
-      if File.Exists(lbuild) then exit lbuild; 
+      if File.Exists(lbuild) then exit lbuild;
       exit getDefaultMSBuild(aServices, ec,  '3.5', aRaiseException);
     end;
     '3.5': begin
       lbuild := coalesce(aServices.Environment['MSBuild35']:ToString, '');
-      if File.Exists(lbuild) then exit lbuild; 
+      if File.Exists(lbuild) then exit lbuild;
       lbuild := aServices.Expand(ec, msbuild35);
-      if File.Exists(lbuild) then exit lbuild; 
+      if File.Exists(lbuild) then exit lbuild;
       exit getDefaultMSBuild(aServices, ec,  '4.0', aRaiseException);
     end;
     '4','4.0': begin
       lbuild := coalesce(aServices.Environment['MSBuild40']:ToString, '');
-      if File.Exists(lbuild) then exit lbuild; 
+      if File.Exists(lbuild) then exit lbuild;
       lbuild := aServices.Expand(ec, msbuild40);
-      if File.Exists(lbuild) then exit lbuild; 
-    end; 
+      if File.Exists(lbuild) then exit lbuild;
+    end;
   else
     lbuild := coalesce(aServices.Environment['MSBuild']:ToString, '');
-    if File.Exists(lbuild) then exit lbuild; 
-    
+    if File.Exists(lbuild) then exit lbuild;
+
     lbuild :=  getDefaultMSBuild(aServices, ec,  '4.0', false);
     if not String.IsNullOrEmpty(lbuild) then exit lbuild;
     lbuild :=  getDefaultMSBuild(aServices, ec,  '3.5', false);
@@ -402,17 +402,17 @@ begin
   end;
 
   lbuild := "/usr/bin/xbuild";
-  if File.Exists(lbuild) then exit lbuild; 
+  if File.Exists(lbuild) then exit lbuild;
   lbuild := "/usr/local/bin/xbuild";
-  if File.Exists(lbuild) then exit lbuild; 
+  if File.Exists(lbuild) then exit lbuild;
   lbuild := "/Library/Frameworks/Mono.framework/Versions/Current/bin/xbuild";
-  if File.Exists(lbuild) then exit lbuild; 
+  if File.Exists(lbuild) then exit lbuild;
 
-  if aRaiseException then 
+  if aRaiseException then
     raise new Exception('MSBuild is not found!');
 end;
 
-class method MSBuildPlugin.DetectMSBuild(aServices: IApiRegistrationServices;ec: ExecutionContext;aOptions: MSBuildOptions): String;  
+class method MSBuildPlugin.DetectMSBuild(aServices: IApiRegistrationServices;ec: ExecutionContext;aOptions: MSBuildOptions): String;
 begin
   exit getDefaultMSBuild(aServices, ec, aOptions:toolsVersion, true);
 end;

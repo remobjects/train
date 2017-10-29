@@ -1,4 +1,4 @@
-{$HIDE  W27 }
+﻿{$HIDE  W27 }
 //
 // Options.Pas
 // Converted to Delphi Prism from original code by Anton Kasyanov
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -40,16 +40,16 @@
 // A Getopt::Long-inspired option parsing library for C#.
 //
 // NDesk.Options.OptionSet is built upon a key/value table, where the
-// key is a option format String and the value is a delegate that is 
+// key is a option format String and the value is a delegate that is
 // invoked when the format String is matched.
 //
 // Option format strings:
-//  Regex-like BNF Grammar: 
+//  Regex-like BNF Grammar:
 //    name: .+
 //    type: [=:]
 //    sep: ( [^{}]+ | '{' .+ '}' )?
 //    aliases: ( name type sep ) ( '|' name type sep )*
-// 
+//
 // Each '|'-delimited name is an alias for the associated action.  If the
 // format String ends in a '=', it has a required value.  If the format
 // String ends in a ':', it has an optional value.  If neither '=' or ':'
@@ -95,7 +95,7 @@
 //  p.Parse (new String[]{"-v", "--v", "/v", "-name=A", "/name", "B", "extra"});
 //
 // The above would parse the argument String array, and would invoke the
-// lambda expression three times, setting `verbose' to 3 when complete.  
+// lambda expression three times, setting `verbose' to 3 when complete.
 // It would also print out "A" and "B" to standard output.
 // The returned array would contain the String "extra".
 //
@@ -153,7 +153,7 @@ type
   private
     var fValues: List<String> := new List<String>();
     var fContext: OptionContext;
-   
+
     method get_Item(&index: Int32): String;
     method set_Item(&index: Int32; value: String);
   assembly
@@ -277,7 +277,7 @@ type
   OptionSet = public class(KeyedCollection<String, Option>)
   private
     const  OPTION_WIDTH: Int32 = 29;
-    
+
     var fValueOption: Regex := new Regex('^(?<flag>--|-|/)(?<name>[^:=]+)((?<sep>[:=])(?<value>.*))?$'); readonly;
 
     method AddImpl(option: Option);
@@ -294,7 +294,7 @@ type
 
   protected
     method GetKeyForItem(item: Option): String; override;
-    
+
     [Obsolete('Use KeyedCollection.this[String]')]
     method GetOptionForName(option: String): Option;
 
@@ -401,7 +401,7 @@ method OptionValueCollection.get_Item(&index: Int32): String;
 begin
   self.AssertValid(&index);
 
-	if  (&index < self.fValues.Count)  then
+  if  (&index < self.fValues.Count)  then
     exit  (self.fValues[&index])
   else
     exit  (nil);
@@ -574,14 +574,14 @@ begin
   self.Description := description;
   self.MaxValueCount := maxValueCount;
   self.OptionValueType := self.ParsePrototype();
-  
+
   if  ((self.MaxValueCount = 0) and (self.OptionValueType <> OptionValueType.None))  then
     raise new ArgumentException('Cannot provide maxValueCount of 0 for OptionValueType.Required or ' + 'OptionValueType.Optional.', 'maxValueCount');
-  
+
   if  ((self.OptionValueType = OptionValueType.None) and (maxValueCount > 1))  then
     raise new ArgumentException(String.Format('Cannot provide maxValueCount of {0} for OptionValueType.None.', maxValueCount), 'maxValueCount');
 
-  if  ((Array.IndexOf(self.Names, '<>') >= 0) and 
+  if  ((Array.IndexOf(self.Names, '<>') >= 0) and
         (((self.Names.Length = 1) and (self.OptionValueType <> OptionValueType.None))  or
           ((self.Names.Length > 1) and (self.MaxValueCount > 1))))  then
     raise new ArgumentException('The default option handler ''<>'' cannot require values.', 'prototype');
@@ -604,7 +604,7 @@ begin
       continue;
 
      lNames[i] := lName.Substring(0, lEnd);
-     
+
      if  ((lType = #00) or (lType = lName[lEnd]))  then
        lType := lName[lEnd]
      else
@@ -644,7 +644,7 @@ begin
 
         lStart := i + 1;
       end;
-      
+
       '}':  begin
         if  (lStart = -1)  then
           raise new ArgumentException(String.Format('Ill-formed name/value separator found in "{0}".', name), 'prototype');
@@ -652,14 +652,14 @@ begin
         separators.Add(name.Substring(lStart, i - lStart));
         lStart := -1;
       end;
-      
+
       else  begin
         if  (lStart = -1)  then
           separators.Add(name[i].ToString());
       end;
     end;
   end;
-  
+
   if  (lStart <> -1)  then
     raise new ArgumentException(String.Format('Ill-formed name/value separator found in "{0}".', name), 'prototype')
 end;
@@ -679,7 +679,7 @@ begin
                              optionContext.OptionName,
                              e);
   end;
-  
+
   exit  (lValue);
 end;
 
@@ -797,11 +797,11 @@ begin
     extra.Add(argument);
     exit  (false);
   end;
-  
+
   optionContext.OptionValues.Add(argument);
   optionContext.Option := definition;
   optionContext.Option.Invoke(optionContext);
-  
+
   exit  (false);
 end;
 
@@ -811,7 +811,7 @@ begin
   optionContext.OptionName := name;
   optionContext.Option := option;
   optionContext.OptionValues.Add(value);
-  
+
   option.Invoke(optionContext);
 end;
 
@@ -827,7 +827,7 @@ begin
     for each  lOptionValue: String  in  lOptionValues  do
       optionContext.OptionValues.Add(lOptionValue);
   end;
-  
+
   if  (optionContext.OptionValues.Count = optionContext.Option.MaxValueCount)   or
         (optionContext.Option.OptionValueType = OptionValueType.Optional)  then
     optionContext.Option.Invoke(optionContext)
@@ -855,7 +855,7 @@ begin
   optionContext.Option := lOption;
   optionContext.OptionValues.Add(lValue);
   lOption.Invoke(optionContext);
-  
+
   exit  (true);
 end;
 
@@ -868,7 +868,7 @@ begin
   for  i: Int32  :=  0 to  n.Length-1  do  begin
     var  lOpt: String := f + n[i].ToString();
     var  lRN: String := n[i].ToString();
-    
+
     if  (not  self.Contains(lRN))  then  begin
       if  (i = 0)  then
         exit  (false);
@@ -877,22 +877,22 @@ begin
     end;
 
     var  lOption: Option := self.Item[lRN];
-      
+
     case  lOption.OptionValueType  of
       OptionValueType.None:  begin
          OptionSet.Invoke(optionContext, lOpt, n, lOption);
       end;
-      
+
       OptionValueType.Optional,
       OptionValueType.Required:  begin
         var  v: String := n.Substring(i + 1);
         optionContext.Option := lOption;
         optionContext.OptionName := lOpt;
         self.ParseValue(iif(v.Length <> 0, v, nil), optionContext);
-        
+
         exit  (true);
       end;
-      
+
       else
         raise new InvalidOperationException('Unknown OptionValueType: ' + lOption.OptionValueType);
     end;
@@ -920,7 +920,7 @@ begin
       inc(j);
       lStart := description.IndexOf(lNameStart[i], j);
     until  (not  iif((lStart >= 0) and (j <> 0), description[j-1] = '{', false));
-    
+
     if  (lStart = -1)  then
       continue;
 
@@ -930,7 +930,7 @@ begin
 
     exit  (description.Substring(lStart + lNameStart[i].Length, lEnd - lStart - lNameStart[i].Length));
   end;
-  
+
   exit  (iif(maxIndex = 1, 'VALUE', 'VALUE' + (&index + 1)));
 end;
 
@@ -1002,13 +1002,13 @@ begin
 
   repeat
     lEnd := OptionSet.GetLineEnd(lStart, lLength, description);
-    
+
     var  lContinue: Boolean := false;
 
     if  (lEnd < lDescriptionLength)  then  begin
       var  lChar: Char := description[lEnd];
 
-      if  ((lChar = '-')  or 
+      if  ((lChar = '-')  or
             (Char.IsWhiteSpace(lChar) and (not (lChar in [ #10, #13 ]))))  then
         inc(lEnd)
       else
@@ -1019,16 +1019,16 @@ begin
     end;
 
     lLines.Add(description.Substring(lStart, lEnd-lStart));
-    
+
     if  (lContinue)  then
       lLines[lLines.Count-1] := lLines[lLines.Count-1] + '-';
 
     lStart := lEnd;
-    
+
     if  ((lStart < lDescriptionLength)  and  (description[lStart] in [ #10, #13 ]))  then
       inc(lStart);
   until  (not (lEnd < lDescriptionLength));
-  
+
   exit  (lLines);
 end;
 
@@ -1037,7 +1037,7 @@ class method OptionSet.GetLineEnd(start: Int32;  length: Int32;  description: St
 begin
   var  lEnd: Int32 := Math.Min(start + length, description.Length);
   var  lSeparator: Int32 := -1;
-  
+
   for  i: Int32  :=  start  to  lEnd-1  do
     case  description[i]  of
       ' ',
@@ -1086,7 +1086,7 @@ end;
 method OptionSet.InsertItem(&index: Int32;  item: Option);
 begin
   inherited  InsertItem(&index, item);
-  
+
   self.AddImpl(item);
 end;
 
@@ -1094,11 +1094,11 @@ end;
 method OptionSet.RemoveItem(&index: Int32);
 begin
   inherited  RemoveItem(&index);
-  
+
   var  lOption: Option := self.Items[&index];
   var  lDictionary := self.Dictionary;
 
-	for  i: Int32  :=  1  to  lOption.Names.Length  do
+  for  i: Int32  :=  1  to  lOption.Names.Length  do
     lDictionary.Remove(lOption.Names[i]);
 end;
 
@@ -1106,7 +1106,7 @@ end;
 method OptionSet.SetItem(&index: Int32;  item: Option);
 begin
   inherited SetItem(&index, item);
-  
+
   self.RemoveItem(&index);
   self.AddImpl(item);
 end;
@@ -1161,7 +1161,7 @@ begin
     var lOption: Option  :=  self.Item[lName];
     optionContext.OptionName := lFlag + lName;
     optionContext.Option := lOption;
-    
+
     case  lOption.OptionValueType  of
       OptionValueType.None: begin
         optionContext.OptionValues.Add(lName);
@@ -1213,7 +1213,7 @@ begin
                                                                           action(v[0]);
                                                                         end);
   inherited  &Add(lOption);
-  
+
   exit  (self);
 end;
 
@@ -1235,7 +1235,7 @@ begin
                                                                        end);
 
   inherited  &Add(lOption);
-  
+
   exit  (self);
 end;
 
@@ -1311,7 +1311,7 @@ method OptionSet.WriteOptionDescriptions(o: TextWriter);
 begin
   for each  lOption: Option  in  self.Items  do  begin
     var  lWritten: Int32 := 0;
-    
+
     if  (not self.WriteOptionPrototype(o, lOption, var lWritten))  then
       continue;
 
@@ -1324,7 +1324,7 @@ begin
 
     var  lLines: List<String> := OptionSet.GetLines(self.MessageLocalizer(OptionSet.GetDescription(lOption.Description)));
     o.WriteLine(lLines[0]);
-    
+
     var lPrefix: String := new String(' ', OptionSet.OPTION_WIDTH + 2);
 
     for  I: Int32  :=  1  to  lLines.Count-1  do  begin
@@ -1494,7 +1494,7 @@ begin
         OptionCommandLine.ParserState.QuotedTokenStart,
         OptionCommandLine.ParserState.Token:
           lResult.Add(ExtractItem(commandLine, lStartIndex, lParserPosition-1));
-        
+
         OptionCommandLine.ParserState.QuotedTokenEnd:
           lResult.Add(ExtractItem(commandLine, lStartIndex, lParserPosition-1));
 
@@ -1543,7 +1543,7 @@ begin
          case  lParserChar  of
            '"': lParserState := OptionCommandLine.ParserState.QuotedTokenEnd;
          end;
-      
+
       OptionCommandLine.ParserState.QuotedTokenStart:
          case  lParserChar  of
            '"': lParserState := OptionCommandLine.ParserState.QuotedTokenEnd;

@@ -2,18 +2,18 @@
 
 interface
 
-uses 
+uses
   RemObjects.Train,
   RemObjects.Script.EcmaScript;
 
 type
   IApiRegistrationServices = public interface
-    method RegisterValue(aName: String; aValue: Object); 
+    method RegisterValue(aName: String; aValue: Object);
     method RegisterObjectValue(aName: String): EcmaScriptObject;
     method RegisterProperty(aName: String; aGet: Func<Object>; aSet: Action<Object>);
     method RegisterTask(aTask: System.Threading.Tasks.Task; aSignature: String; aLogger: DelayedLogger);
     method UnregisterTask(aTask: System.Threading.Tasks.Task);
-    
+
     property WorkDir: String read;
     property Environment: Environment read;
     property Globals: GlobalObject read;

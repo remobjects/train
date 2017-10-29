@@ -2,10 +2,10 @@
 
 interface
 
-uses 
+uses
   RemObjects.Train,
-  RemObjects.Script.EcmaScript, 
-  RemObjects.Script.EcmaScript.Internal, 
+  RemObjects.Script.EcmaScript,
+  RemObjects.Script.EcmaScript.Internal,
   System.Text,
   System.Xml.Linq,
   System.IO,
@@ -37,7 +37,7 @@ type
     property destinationFolder: String;
     property sdk: String;
     property extraArgs: String;
-  end; 
+  end;
 
 implementation
 

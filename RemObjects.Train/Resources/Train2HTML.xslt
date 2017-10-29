@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
   <xsl:output method="html"/>
 
@@ -46,7 +46,7 @@
       </td>
     </tr>
   </xsl:template>
-  
+
   <xsl:template match="action">
     <tr class="action">
       <xsl:if test="@result='0'">
@@ -69,7 +69,7 @@
       <xsl:if test="@result='0'">
         <xsl:attribute name="style">visibility: visible; display: table-row;</xsl:attribute>
         <xsl:attribute name="class">output-failed</xsl:attribute>
-      </xsl:if>  
+      </xsl:if>
       <xsl:if test="@result='1'">
         <xsl:attribute name="class">output-succeeded</xsl:attribute>
       </xsl:if>
