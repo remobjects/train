@@ -33,37 +33,37 @@ type
     [WrapAs('file.list', SkipDryRun := true)]
     class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean := false): array of String;
     [WrapAs('file.remove', SkipDryRun := true)]
-    class method File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String);
+    class method File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
     [WrapAs('file.read', SkipDryRun := true)]
-    class method File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String): String;
+    class method File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('file.write', SkipDryRun := true)]
-    class method File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
+    class method File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN, aData: String);
     [WrapAs('file.append', SkipDryRun := true)]
-    class method File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
+    class method File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN, aData: String);
     [WrapAs('file.exists', Important := false)]
-    class method File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+    class method File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
     [WrapAs('folder.setAttributes', SkipDryRun := true)]
     class method Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('folder.list', SkipDryRun := true, Important := false)]
     class method Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
     [WrapAs('folder.exists', Important := false)]
-    class method Folder_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+    class method Folder_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
     [WrapAs('folder.create', SkipDryRun := true)]
-    class method Folder_Create(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String);
+    class method Folder_Create(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String);
     [WrapAs('folder.remove', SkipDryRun := true)]
-    class method Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String; aRecurse: Boolean := true);
+    class method Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
     [WrapAs('path.combine', SkipDryRun := true, Important := false)]
     class method Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext;params args: array of String): String;
     [WrapAs('path.resolve', SkipDryRun := true, Important := false)]
     class method Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext;aPath: String; aBase: String := nil): String;
     [WrapAs('path.getFileName', SkipDryRun := true, Important := false)]
-    class method Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+    class method Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('path.getFileNameWithoutExtension', SkipDryRun := true, Important := false)]
-    class method Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+    class method Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('path.getFileNameExtension', SkipDryRun := true, Important := false)]
-    class method Path_GetFilenameExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+    class method Path_GetFilenameExtension(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('path.getFolderName', SkipDryRun := true, Important := false)]
-    class method Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+    class method Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
   end;
 
   FileFlagsOptions = public class
@@ -218,22 +218,25 @@ begin
   //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
 end;
 
-class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String);
+class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
 begin
-  var lVal := aServices.ResolveWithBase(ec, AFN);
+  var lVal := aServices.ResolveWithBase(ec, aFN);
   if lVal = nil then exit;
   for each el in Find(lVal) do
     System.IO.File.Delete(el);
+  if aRecurse then
+    for each f in Directory.GetDirectories(Path.GetDirectoryName(aFN)) do
+      File_Delete(aServices, ec, Path.Combine(f, Path.GetFileName(aFN)), true);
 end;
 
-class method FilePlugin.File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext;AFN: String): String;
+class method FilePlugin.File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
 begin
-  var lVal := aServices.ResolveWithBase(ec, AFN);
+  var lVal := aServices.ResolveWithBase(ec, aFN);
   if lVal = nil then;
   exit System.IO.File.ReadAllText(lVal);
 end;
 
-class method FilePlugin.File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData: String);
+class method FilePlugin.File_Write(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN, aData: String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN, true);
   if not System.IO.Directory.Exists(Path.GetDirectoryName(lVal)) then
@@ -241,13 +244,13 @@ begin
   System.IO.File.WriteAllText(lVal, aData);
 end;
 
-class method FilePlugin.File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN, aData:String);
+class method FilePlugin.File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN, aData:String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN, true);
   System.IO.File.AppendAllText(lVal, aData);
 end;
 
-class method FilePlugin.File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+class method FilePlugin.File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   if lVal = nil then exit false;
@@ -255,7 +258,7 @@ begin
   exit System.IO.File.Exists(lVal);
 end;
 
-class method FilePlugin.Folder_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): Boolean;
+class method FilePlugin.Folder_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   if lVal = nil then exit false;
@@ -263,13 +266,13 @@ begin
   exit System.IO.Directory.Exists(lVal);
 end;
 
-class method FilePlugin.Folder_Create(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String);
+class method FilePlugin.Folder_Create(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   System.IO.Directory.CreateDirectory(lVal);
 end;
 
-class method FilePlugin.Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String; aRecurse: Boolean := true);
+class method FilePlugin.Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   if System.IO.Directory.Exists(lVal) then
@@ -297,22 +300,22 @@ begin
   exit System.IO.Path.GetFullPath(aPath);
 end;
 
-class method FilePlugin.Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+class method FilePlugin.Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
 begin
   exit System.IO.Path.GetFileName(aFN);
 end;
 
-class method FilePlugin.Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+class method FilePlugin.Path_GetFileWithoutExtension(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
 begin
   exit System.IO.Path.GetFileNameWithoutExtension(aFN);
 end;
 
-class method FilePlugin.Path_GetFilenameExtension(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+class method FilePlugin.Path_GetFilenameExtension(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
 begin
   exit System.IO.Path.GetExtension(aFN);
 end;
 
-class method FilePlugin.Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext;aFN: String): String;
+class method FilePlugin.Path_GetFoldername(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   exit System.IO.Path.GetDirectoryName(lVal);
