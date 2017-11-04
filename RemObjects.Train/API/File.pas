@@ -342,7 +342,7 @@ begin
   exit res.ToArray;
 end;
 
-class method FilePlugin.Find(aPath: String): sequence of  String;
+class method FilePlugin.Find(aPath: String): sequence of String;
 begin
   if aPath.IndexOfAny(['*', '?']) >= 0 then begin
     exit System.IO.Directory.EnumerateFiles(System.IO.Path.GetDirectoryName(aPath), System.IO.Path.GetFileName(aPath), System.IO.SearchOption.TopDirectoryOnly);

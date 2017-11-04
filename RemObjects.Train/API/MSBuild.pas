@@ -25,7 +25,7 @@ type
     method &Register(aServices: IApiRegistrationServices);
 
     class method DetectMSBuild(aServices: IApiRegistrationServices;ec: ExecutionContext; aOptions: MSBuildOptions): String;
-    class method getDefaultMSBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aVersion: String; aRaiseException: Boolean): String;
+    class method getDefaultMSBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aVersion: String; aRaiseException: Boolean := true): String;
 
     [WrapAs('msbuild.custom', SkipDryRun := false)]
     class method MSBuildCustom(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
