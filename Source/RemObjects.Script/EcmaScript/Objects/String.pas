@@ -1,8 +1,5 @@
-﻿{
-
-  Copyright (c) 2009-2011 RemObjects Software. See LICENSE.txt for more details.
-
-}
+﻿//  Copyright RemObjects Software 2002-2017. All rights reserved.
+//  See LICENSE.txt for more details.
 
 namespace RemObjects.Script.EcmaScript;
 
@@ -288,19 +285,7 @@ begin
   if  (lMax <= 0)  then
     lMax := Int32.MaxValue;
 
-{$IFDEF SILVERLIGHT}
-  var lValues := lSelf.Split([lNeedle], StringSplitOptions.None);
-  if lValues.length > lMax then begin
-    result := new EcmaScriptArrayObject(self, 0);
-    for i: Integer := 0 to lMax -1 do begin
-      EcmaScriptArrayObject(Result).AddValue(lValues[i]);
-    end;
-    exit;
-  end else
-    exit new EcmaScriptArrayObject(self, 0).AddValues(lValues);
-{$ELSE}
-  exit  (new EcmaScriptArrayObject(self, 0).AddValues(lSelf.Split([lNeedle], lMax, StringSplitOptions.None)));
-{$ENDIF}
+  exit new EcmaScriptArrayObject(self, 0).AddValues(lSelf.Split([ lNeedle ], lMax, StringSplitOptions.None));
 end;
 
 

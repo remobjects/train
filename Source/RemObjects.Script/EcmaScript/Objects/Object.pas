@@ -1,8 +1,6 @@
-﻿{
+﻿//  Copyright RemObjects Software 2002-2017. All rights reserved.
+//  See LICENSE.txt for more details.
 
-  Copyright (c) 2009-2010 RemObjects Software. See LICENSE.txt for more details.
-
-}
 namespace RemObjects.Script.EcmaScript;
 
 interface
@@ -41,6 +39,7 @@ type
   private
     fValues: Dictionary<String, PropertyValue> := new Dictionary<String,PropertyValue>;
     fGlobal: GlobalObject;
+    var fValue: Object; // Do NOT remove the field definition until the compiler issue is fixed
 
   public
     property Extensible: Boolean := true;
@@ -60,7 +59,7 @@ type
 
     property Prototype: EcmaScriptObject;
     property &Class: String := 'Object';
-    property Value: Object;
+    property Value: Object read fValue write fValue;
 
     method GetOwnProperty(name: String;  getPropertyValue: Boolean): PropertyValue; virtual;
     method GetOwnProperty(name: String): PropertyValue;

@@ -1,7 +1,5 @@
-﻿{
-  Copyright (c) 2009-2013 RemObjects Software, LLC.
-  See LICENSE.txt for more details.
-}
+﻿//  Copyright RemObjects Software 2002-2017. All rights reserved.
+//  See LICENSE.txt for more details.
 
 namespace RemObjects.Script.EcmaScript;
 
@@ -272,17 +270,10 @@ begin
     var lOldLocals := fLocals;
     fLocals := new List<LocalBuilder>;
     var lMethod: DynamicMethod;
-    {$IFDEF SILVERLIGHT} 
-    if aFunction <> nil then
-      lMethod := new System.Reflection.Emit.DynamicMethod(aSCopeName, typeOf(Object), [typeOf(ExecutionContext), typeOf(object), Typeof(array of Object), typeOf(EcmaScriptInternalFunctionObject)])
-    else
-      lMethod := new System.Reflection.Emit.DynamicMethod(aSCopeName, typeOf(Object), [typeOf(ExecutionContext), typeOf(object), Typeof(array of Object)]);
-    {$ELSE}
     if aFunction <> nil then
       lMethod := new System.Reflection.Emit.DynamicMethod(aScopeName, typeOf(Object), [typeOf(ExecutionContext), typeOf(Object), typeOf(array of Object), typeOf(EcmaScriptInternalFunctionObject)], typeOf(DynamicMethods), true)
     else
       lMethod := new System.Reflection.Emit.DynamicMethod(aScopeName, typeOf(Object), [typeOf(ExecutionContext), typeOf(Object), typeOf(array of Object)], typeOf(DynamicMethods), true);
-    {$ENDIF}
     var lOldBreak := fBreak;
     var lOldContinue := fContinue;
     fBreak := nil;
