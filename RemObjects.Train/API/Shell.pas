@@ -87,24 +87,28 @@ begin
     end;
     var sb := new System.Text.StringBuilder;
     var lExit := ExecuteProcess(lCMD, lArg, coalesce(LWD, fEngine.Engine.WorkDir),false , a-> begin
-                                                                                                locking sb do sb.AppendLine(a);
-                                                                                                if fEngine.Engine.LiveOutput then
-                                                                                                  fEngine.Engine.Logger.LogLive("(stderr) "+a);
-                                                                                                if assigned(lCaptureFunc) then begin
-                                                                                                  try
-                                                                                                    lCaptureFunc.Call(ec, a);
-                                                                                                  except
+                                                                                                if assigned(a) then begin
+                                                                                                  locking sb do sb.AppendLine(a);
+                                                                                                  if fEngine.Engine.LiveOutput then
+                                                                                                    fEngine.Engine.Logger.LogLive("(stderr) "+a);
+                                                                                                  if assigned(lCaptureFunc) then begin
+                                                                                                    try
+                                                                                                      lCaptureFunc.Call(ec, a);
+                                                                                                    except
+                                                                                                    end;
                                                                                                   end;
                                                                                                 end;
                                                                                               end,
                                                                                           a-> begin
                                                                                                 locking sb do sb.AppendLine(a);
-                                                                                                if fEngine.Engine.LiveOutput then
-                                                                                                  fEngine.Engine.Logger.LogLive(a);
-                                                                                                if assigned(lCaptureFunc) then begin
-                                                                                                  try
-                                                                                                    lCaptureFunc.Call(ec, a);
-                                                                                                  except
+                                                                                                if assigned(a) then begin
+                                                                                                  if fEngine.Engine.LiveOutput then
+                                                                                                    fEngine.Engine.Logger.LogLive(a);
+                                                                                                  if assigned(lCaptureFunc) then begin
+                                                                                                    try
+                                                                                                      lCaptureFunc.Call(ec, a);
+                                                                                                    except
+                                                                                                    end;
                                                                                                   end;
                                                                                                 end;
                                                                                               end, lEnv.ToArray, lTimeout);
