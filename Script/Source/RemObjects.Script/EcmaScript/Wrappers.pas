@@ -1,3 +1,6 @@
+//  Copyright RemObjects Software 2002-2017. All rights reserved.
+//  See LICENSE.txt for more details.
+
 namespace RemObjects.Script.EcmaScript;
 
 interface
@@ -486,11 +489,7 @@ begin
 
     // Throw away fraction part
     if value.GetType() = typeOf(Double) then
-{$IFNDEF SILVERLIGHT}
       exit Convert.ChangeType(Math.Truncate(Double(value)), &type, System.Globalization.CultureInfo.InvariantCulture);
-{$ELSE}
-      exit Convert.ChangeType(Math.Abs(Double(value))*Math.Floor(Math.Abs(Double(value))), &type, System.Globalization.CultureInfo.InvariantCulture);
-{$ENDIF}
   end;
 {$ENDREGION}
 
