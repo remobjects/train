@@ -133,6 +133,7 @@
     <EmbeddedResource Include="Resources\Train2HTML.xslt">
       <SubType>Content</SubType>
     </EmbeddedResource>
+    <Compile Include="API\EBuild.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <PropertyGroup>
