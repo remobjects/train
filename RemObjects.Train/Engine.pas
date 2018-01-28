@@ -103,7 +103,7 @@ begin
     end;
     if fTasks.Count > 0 then begin
       Logger.LogMessage('Waiting for unfinished tasks');
-      if not System.Threading.Tasks.Task.WaitAll(fTasks.Select(a->a.Item1).ToArray,  TimeSpan.FromSeconds(60)) then
+      if not System.Threading.Tasks.Task.WaitAll(fTasks.Select(a->a.Item1).ToArray, TimeSpan.FromSeconds(60)) then
         Logger.LogMessage('Unfinished tasks timed out');
     end;
   except
@@ -142,7 +142,7 @@ begin
   if e.Name.StartsWith('_') then exit;
   var lEnv := fEngine.CallStack.LastOrDefault():Frame;
   var n := if (lEnv = nil) or (not lEnv.HasBinding('arguments')) then nil else lEnv.GetBindingValue('arguments', false);
-  var ev :=  EcmaScriptObject(n);
+  var ev := EcmaScriptObject(n);
   var lArgs: List<Object> := new List<Object>;
   if ev <> nil then begin
     for i: Integer := 0 to RemObjects.Script.ecmascript.Utilities.GetObjAsInteger(ev.Get('length'), fEngine.GlobalObject.ExecutionContext) -1 do begin
@@ -241,7 +241,7 @@ method Engine.ResolveWithBase(ec: ExecutionContext; s: String; aExpand: Boolean 
 begin
   if s = nil then exit nil;
   if aExpand then
-    s := Expand(ec,s  );
+    s := Expand(ec,s);
   if s.StartsWith('~/') or s.StartsWith('~\') then
     s := Path.Combine(system.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), s.Substring(2));
   if System.IO.Path .DirectorySeparatorChar = '\' then
@@ -266,7 +266,7 @@ begin
       else
         Logger.Enter('Unfinished Task: '+el.Item2);
       el.Item3.Replay(Logger);
-      Logger.Exit('Finished Task: '+el.Item2, if  el.Item1.IsFaulted then FailMode.Yes else FailMode.No);
+      Logger.Exit('Finished Task: '+el.Item2, if el.Item1.IsFaulted then FailMode.Yes else FailMode.No);
 
       el.Item1.Dispose;
 
