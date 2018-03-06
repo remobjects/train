@@ -10,7 +10,8 @@ uses
   System.Xml.Linq,
   System.Linq,
   System.IO,
-  System.Runtime.InteropServices;
+  System.Runtime.InteropServices,
+  RemObjects.Elements.RTL;
 
 type
   [PluginRegistration]
@@ -20,13 +21,74 @@ type
     method Register(aServices: IApiRegistrationServices);
     begin
       //fServices := aServices;
-      aServices.RegisterObjectValue('ebuild').AddValue('runCustomEBuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'runCustomEBuild'));
+      var lEBuildObject := aServices.RegisterObjectValue('ebuild');
+      lEBuildObject.AddValue('runCustomEBuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'runCustomEBuild'));
+      lEBuildObject.AddValue('runEBuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'runEBuild'));
     end;
 
     [WrapAs('ebuild.runCustomEBuild', SkipDryRun := false)]
     class method runCustomEBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aEBuildExe: String; aProject: String; aOtherParameters: String): Boolean;
     begin
+      result := doRunCustomEBuild(aServices, ec, aEBuildExe, aProject, aOtherParameters);
+    end;
 
+    [WrapAs('ebuild.runEBuild', SkipDryRun := false)]
+    class method runEBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOtherParameters: String): Boolean;
+    begin
+      var lEBuildExe := FindEBuildExe();
+      if not assigned(lEBuildExe) then
+        raise new Exception("EBuild.exe culd not be located.");
+      result := doRunCustomEBuild(aServices, ec, lEBuildExe, aProject, aOtherParameters);
+    end;
+
+  private
+
+    // cloned from EBuild itself, which we don't want to reference in  Ttain
+    class method FindEBuildExe: nullable String;
+    begin
+
+      if (RemObjects.Elements.RTL.Environment.OS = OperatingSystem.macOS) /*or (Environment.OS = OperatingSystem.Linux)*/ then begin
+
+        var lPath := "/usr/local/bin/ebuild";
+        if lPath.FileExists then begin
+          var lEBuildScript := File.ReadText(lPath).Trim(); //mono "/Users/mh/Code/Elements/Bin/EBuild.exe" "$@"
+          if lEBuildScript.StartsWith('mono "') and lEBuildScript.EndsWith('" "$@"') then begin
+            lPath := lEBuildScript.Substring(6, length(lEBuildScript)-12);
+            if lPath.FileExists then
+              exit lPath;
+          end;
+        end;
+
+      end
+      else if defined("ECHOES") and (RemObjects.Elements.RTL.Environment.OS = OperatingSystem.Windows) then begin
+        var lKey := Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\Wow6432Node\RemObjects\Elements");
+        if assigned(lKey) then begin
+          if assigned(lKey.GetValue("InstallDir"):ToString) then begin
+            var lPath := Path.Combine(lKey.GetValue("InstallDir"):ToString, "Bin", "EBuild.exe");
+            if assigned(lPath) and File.Exists(lPath) then
+              exit lPath;
+          end;
+          var lPath := lKey.GetValue("EBuild"):ToString;
+          if assigned(lPath) and File.Exists(lPath) then
+            exit lPath;
+        end;
+        lKey := Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\RemObjects\Elements");
+        if (lKey <> nil) then begin
+          if assigned(lKey.GetValue("InstallDir"):ToString) then begin
+            var lPath := Path.Combine(lKey.GetValue("InstallDir"):ToString, "Bin", "EBuild.exe");
+            if assigned(lPath) and File.Exists(lPath) then
+              exit lPath;
+          end;
+          var lPath := lKey.GetValue("EBuild"):ToString;
+          if assigned(lPath) and File.Exists(lPath) then
+            exit lPath;
+        end;
+      end;
+
+    end;
+
+    class method doRunCustomEBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aEBuildExe: String; aProject: String; aOtherParameters: String): Boolean;
+    begin
       var lSuccess := true;
       var lLogger := new DelayedLogger();
       aServices.Engine.Logger.Enter(true,'ebuild', (aProject+" "+aOtherParameters).Trim);
