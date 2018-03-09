@@ -24,6 +24,10 @@ type
       var lEBuildObject := aServices.RegisterObjectValue('ebuild');
       lEBuildObject.AddValue('runCustomEBuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'runCustomEBuild'));
       lEBuildObject.AddValue('runEBuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'runEBuild'));
+
+      lEBuildObject.AddValue('build', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'build'));
+      lEBuildObject.AddValue('rebuild', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'rebuild'));
+      lEBuildObject.AddValue('clean', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(EBuildPlugin), 'clean'));
     end;
 
     [WrapAs('ebuild.runCustomEBuild', SkipDryRun := false)]
@@ -39,6 +43,24 @@ type
       if not assigned(lEBuildExe) then
         raise new Exception("EBuild.exe culd not be located.");
       result := doRunCustomEBuild(aServices, ec, lEBuildExe, aProject, aOtherParameters);
+    end;
+
+    [WrapAs('ebuild.build', SkipDryRun := false)]
+    class method build(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOtherParameters: String): Boolean;
+    begin
+      result := runEBuild(aServices, ec, aProject, ("--build "+coalesce(aOtherParameters, "")).Trim);
+    end;
+
+    [WrapAs('ebuild.rebuild', SkipDryRun := false)]
+    class method rebuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOtherParameters: String): Boolean;
+    begin
+      result := runEBuild(aServices, ec, aProject, ("--rebuild --no-cache "+coalesce(aOtherParameters, "")).Trim);
+    end;
+
+    [WrapAs('ebuild.clean', SkipDryRun := false)]
+    class method clean(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOtherParameters: String): Boolean;
+    begin
+      result := runEBuild(aServices, ec, aProject, ("--clean "+coalesce(aOtherParameters, "")).Trim);
     end;
 
   private
