@@ -89,7 +89,7 @@ type
   public
     constructor;
     method Dispose; virtual;
-    method Write; virtual;
+    method &Write; virtual;
     method LogError(s: String); locked;
     property InIgnore: Boolean;
     method LogMessage(s: String);locked;
@@ -324,7 +324,7 @@ end;
 method BaseXmlLogger.&Write;
 begin
   var lFailElement: XElement := nil;
-  FindFailNodes(var lFailElement, fXmlData.Document.Root.Elements);
+  FindFailNodes(var lFailElement, fXmlData:Document:Root:Elements);
 end;
 
 constructor MultiLogger;

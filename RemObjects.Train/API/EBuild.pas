@@ -10,8 +10,7 @@ uses
   System.Xml.Linq,
   System.Linq,
   System.IO,
-  System.Runtime.InteropServices,
-  RemObjects.Elements.RTL;
+  System.Runtime.InteropServices;
 
 type
   [PluginRegistration]
@@ -69,20 +68,20 @@ type
     class method FindEBuildExe: nullable String;
     begin
 
-      if (RemObjects.Elements.RTL.Environment.OS = OperatingSystem.macOS) /*or (Environment.OS = OperatingSystem.Linux)*/ then begin
+      if (RemObjects.Elements.RTL.Environment.OS = RemObjects.Elements.RTL.OperatingSystem.macOS) /*or (Environment.OS = OperatingSystem.Linux)*/ then begin
 
         var lPath := "/usr/local/bin/ebuild";
-        if lPath.FileExists then begin
-          var lEBuildScript := File.ReadText(lPath).Trim(); //mono "/Users/mh/Code/Elements/Bin/EBuild.exe" "$@"
+        if File.Exists(lPath) then begin
+          var lEBuildScript := File.ReadAllText(lPath).Trim(); //mono "/Users/mh/Code/Elements/Bin/EBuild.exe" "$@"
           if lEBuildScript.StartsWith('mono "') and lEBuildScript.EndsWith('" "$@"') then begin
             lPath := lEBuildScript.Substring(6, length(lEBuildScript)-12);
-            if lPath.FileExists then
+            if File.Exists(lPath) then
               exit lPath;
           end;
         end;
 
       end
-      else if defined("ECHOES") and (RemObjects.Elements.RTL.Environment.OS = OperatingSystem.Windows) then begin
+      else if defined("ECHOES") and (RemObjects.Elements.RTL.Environment.OS = RemObjects.Elements.RTL.OperatingSystem.Windows) then begin
         var lKey := Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\Wow6432Node\RemObjects\Elements");
         if assigned(lKey) then begin
           if assigned(lKey.GetValue("InstallDir"):ToString) then begin
