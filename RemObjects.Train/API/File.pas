@@ -25,13 +25,13 @@ type
     [WrapAs('file.setAttributes', SkipDryRun := true)]
     class method File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('file.copy', SkipDryRun := true)]
-    class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
+    class method File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
     [WrapAs('file.move', SkipDryRun := true)]
-    class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aDelete: Boolean := true);
+    class method File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aDelete: Boolean := true);
     [WrapAs('folder.move', SkipDryRun := true)]
-    class method Folder_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String);
+    class method Folder_Move(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String);
     [WrapAs('file.list', SkipDryRun := true)]
-    class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean := false): array of String;
+    class method File_List(aServices: IApiRegistrationServices; ec: ExecutionContext; aPathAndMask: String; aRecurse: Boolean := false): array of String;
     [WrapAs('file.remove', SkipDryRun := true)]
     class method File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
     [WrapAs('file.read', SkipDryRun := true)]
@@ -45,7 +45,7 @@ type
     [WrapAs('folder.setAttributes', SkipDryRun := true)]
     class method Folder_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String; aRecurse: Boolean; aFileFlagsOptions: FileFlagsOptions := nil);
     [WrapAs('folder.list', SkipDryRun := true, Important := false)]
-    class method Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
+    class method Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext; aPathAndMask: String; aRecurse: Boolean): array of String;
     [WrapAs('folder.exists', Important := false)]
     class method Folder_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
     [WrapAs('folder.create', SkipDryRun := true)]
@@ -53,9 +53,9 @@ type
     [WrapAs('folder.remove', SkipDryRun := true)]
     class method Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
     [WrapAs('path.combine', SkipDryRun := true, Important := false)]
-    class method Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext;params args: array of String): String;
+    class method Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext; params args: array of String): String;
     [WrapAs('path.resolve', SkipDryRun := true, Important := false)]
-    class method Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext;aPath: String; aBase: String := nil): String;
+    class method Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext; aPath: String; aBase: String := nil): String;
     [WrapAs('path.getFileName', SkipDryRun := true, Important := false)]
     class method Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
     [WrapAs('path.getFileNameWithoutExtension', SkipDryRun := true, Important := false)]
@@ -114,7 +114,7 @@ begin
   );
 end;
 
-class method FilePlugin.File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aDelete: Boolean := true);
+class method FilePlugin.File_Move(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aDelete: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
@@ -130,7 +130,7 @@ begin
 
     var lZero: Boolean := true;
     var lFiles:= new StringBuilder;
-    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
+    for each mask in lMask.Split(['; '], StringSplitOptions.RemoveEmptyEntries) do
     for each el in System.IO.Directory.GetFiles(lDir, mask, System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
       var lTargetFN := el.Substring(lDir.Length+1);
@@ -165,7 +165,7 @@ begin
   aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', lVal,  lVal2));
 end;
 
-class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext;aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
+class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
 begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
@@ -183,7 +183,7 @@ begin
 
     var lZero: Boolean := true;
     var lFiles := new System.Text.StringBuilder;
-    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
+    for each mask in lMask.Split(['; '], StringSplitOptions.RemoveEmptyEntries) do
     for each el in System.IO.Directory.GetFiles(lDir, mask,
       if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
@@ -221,12 +221,13 @@ end;
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
+  lVal := System.IO.Path.GetFullPath(lVal);
   if lVal = nil then exit;
   for each el in Find(lVal) do
     System.IO.File.Delete(el);
   if aRecurse then
-    for each f in Directory.GetDirectories(Path.GetDirectoryName(aFN)) do
-      File_Delete(aServices, ec, Path.Combine(f, Path.GetFileName(aFN)), true);
+    for each f in Directory.GetDirectories(Path.GetDirectoryName(lVal)) do
+      File_Delete(aServices, ec, Path.Combine(f, Path.GetFileName(lVal)), true);
 end;
 
 class method FilePlugin.File_Read(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
@@ -279,7 +280,7 @@ begin
   System.IO.Directory.Delete(lVal, aRecurse);
 end;
 
-class method FilePlugin.Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext;params args: array of String): String;
+class method FilePlugin.Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext; params args: array of String): String;
 begin
   if length(args) = 0 then exit nil;
   var lCurrent :=  args.FirstOrDefault;
@@ -288,16 +289,16 @@ begin
   exit lCurrent;
 end;
 
-class method FilePlugin.Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext;aPath: String; aBase: String := nil): String;
+class method FilePlugin.Path_Resolve(aServices: IApiRegistrationServices; ec: ExecutionContext; aPath: String; aBase: String := nil): String;
 begin
-
   if not String.IsNullOrEmpty(aBase) then begin
-
     aBase := aServices.ResolveWithBase(ec, aBase);
     aPath := System.IO.Path.Combine(aBase, aPath);
-  end else
+  end
+  else begin
     aPath := aServices.ResolveWithBase(ec, aPath);
-  exit System.IO.Path.GetFullPath(aPath);
+  end;
+  result := System.IO.Path.GetFullPath(aPath);
 end;
 
 class method FilePlugin.Path_GetFilename(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): String;
@@ -321,7 +322,7 @@ begin
   exit System.IO.Path.GetDirectoryName(lVal);
 end;
 
-class method FilePlugin.File_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
+class method FilePlugin.File_List(aServices: IApiRegistrationServices; ec: ExecutionContext; aPathAndMask: String; aRecurse: Boolean): array of String;
 begin
   var lVal := aServices.ResolveWithBase(ec, aPathAndMask);
   var res := new List<String>;
@@ -332,7 +333,7 @@ begin
 
 end;
 
-class method FilePlugin.Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext;aPathAndMask: String; aRecurse: Boolean): array of String;
+class method FilePlugin.Folder_List(aServices: IApiRegistrationServices; ec: ExecutionContext; aPathAndMask: String; aRecurse: Boolean): array of String;
 begin
   var lVal := aServices.ResolveWithBase(ec, aPathAndMask);
   var res := new List<String>;
