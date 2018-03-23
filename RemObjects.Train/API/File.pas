@@ -221,7 +221,11 @@ end;
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
-  lVal := System.IO.Path.GetFullPath(lVal);
+
+  var lPath := System.IO.Path.GetFullPath(Path.GetDirectoryName(lVal)); // GetFullPath fails on Windows with *
+  var lName := Path.GetFileName(lVal);
+  lVal := Path.Combine(lPath, lName);
+
   if lVal = nil then exit;
   for each el in Find(lVal) do
     System.IO.File.Delete(el);
