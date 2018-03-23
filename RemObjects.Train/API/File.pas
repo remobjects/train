@@ -183,7 +183,7 @@ begin
 
     var lZero: Boolean := true;
     var lFiles := new System.Text.StringBuilder;
-    for each mask in lMask.Split([';g'], StringSplitOptions.RemoveEmptyEntries) do
+    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do
     for each el in System.IO.Directory.GetFiles(lDir, mask,
       if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
       lZero := false;
