@@ -32,6 +32,7 @@ type
     [WrapAs('ebuild.runCustomEBuild', SkipDryRun := false)]
     class method runCustomEBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aEBuildExe: String; aProject: String; aOtherParameters: String): Boolean;
     begin
+      aEBuildExe := aServices.ResolveWithBase(ec, aEBuildExe);
       result := doRunCustomEBuild(aServices, ec, aEBuildExe, aProject, aOtherParameters);
     end;
 
@@ -121,6 +122,7 @@ type
         end;
 
         var sb := new System.Text.StringBuilder;
+        aProject := aServices.ResolveWithBase(ec, aProject);
         var lExitCode := Shell.ExecuteProcess(aEBuildExe, '"'+aProject+'" '+aOtherParameters, aServices.Engine.WorkDir, false , a-> begin
                                                                                                     if assigned(a) then begin
                                                                                                       locking sb do sb.AppendLine(a);
