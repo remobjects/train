@@ -23,6 +23,7 @@ type
     fWriteEnter: Boolean;
     fIndent: Integer;
     method CheckEnter;
+    method CleanedString(s: String): String;
   public
     method LogDebug(s: System.String);
     method LogWarning(s: System.String);
@@ -38,6 +39,18 @@ type
   end;
 
 implementation
+
+method Logger.CleanedString(s: String): String;
+begin
+  var p := s.IndexOf(#10);
+  if p > 0 then
+    s := s.Substring(p)+"...";
+  s := s.Trim();
+  for i: Int32 := 0 to length(s)-1 do
+    if s[i] < #32 then
+      s := (s as RemObjects.Elements.RTL.String).Replace(i, 1, ".");
+  result := s;
+end;
 
 method Logger.LogDebug(s: System.String);
  begin
@@ -126,7 +139,7 @@ begin
   var lArgs := '';
   if length(args) > 0 then
     for each a in args do begin
-      var s := coalesce(a:ToString, 'null');
+      var s := CleanedString(coalesce(a:ToString, 'null'));
       if length(lArgs) > 0 then lArgs := lArgs+', ';
       lArgs := lArgs+s;
       if length(lArgs) > lMaxWidth then begin
@@ -155,7 +168,7 @@ begin
   if fIndent > 0 then dec(fIndent);
   var lRet:= '';
   if (aReturn <> nil) and (aReturn <> Undefined.Instance) then begin
-    var s := aReturn.ToString;
+    var s := CleanedString(aReturn.ToString);
     if length(s) > 50 then s := s.Substring(0, 47)+'...';
     lRet := ': '+s;
   end
@@ -209,7 +222,7 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright 2013-2017 RemObjects Software, LLC. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2018 RemObjects Software, LLC. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();

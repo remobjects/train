@@ -92,6 +92,9 @@
       <Private>True</Private>
       <HintPath>..\Script\Bin\RemObjects.Script.dll</HintPath>
     </ProjectReference>
+    <Reference Include="Elements">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <PropertyGroup>

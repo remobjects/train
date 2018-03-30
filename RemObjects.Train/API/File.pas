@@ -183,18 +183,20 @@ begin
 
     var lZero: Boolean := true;
     var lFiles := new System.Text.StringBuilder;
-    for each mask in lMask.Split([';g'], StringSplitOptions.RemoveEmptyEntries) do
-    for each el in System.IO.Directory.GetFiles(lDir, mask,
-      if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
-      lZero := false;
-      var lTargetFN := el.Substring(lDir.Length+1);
-      lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
-      var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
-      if not System.IO.Directory.Exists(lTargetDir) then System.IO.Directory.CreateDirectory(lTargetDir);
-      if not aOverride and File.Exists(lTargetFN) then
-        raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
-      RemObjects.Elements.RTL.File.CopyTo(el, lTargetFN, true);
-      lFiles.AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
+    for each mask in lMask.Split([';'], StringSplitOptions.RemoveEmptyEntries) do begin
+      for each el in System.IO.Directory.GetFiles(lDir, mask, if aRecurse then System.IO.SearchOption.AllDirectories else System.IO.SearchOption.TopDirectoryOnly) do begin
+        lZero := false;
+        var lTargetFN := el.Substring(lDir.Length+1);
+        lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
+        var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
+        if not System.IO.Directory.Exists(lTargetDir) then
+          System.IO.Directory.CreateDirectory(lTargetDir);
+        if not aOverride and File.Exists(lTargetFN) then
+          raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
+        RemObjects.Elements.RTL.File.CopyTo(el, lTargetFN, true);
+        lFiles.AppendLine(String.Format('Copied {0} to {1}', el,  lTargetFN));
+      end;
+
     end;
 
     aServices.Logger.LogInfo(lFiles.ToString);
