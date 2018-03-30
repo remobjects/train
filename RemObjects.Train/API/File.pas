@@ -190,7 +190,7 @@ begin
         lTargetFN := System.IO.Path.Combine(lVal2,lTargetFN);
         var lTargetDir := System.IO.Path.GetDirectoryName(lTargetFN);
         if not System.IO.Directory.Exists(lTargetDir) then
-          System.IO.Directory.CreateDirectory(lTargetDir);
+         System.IO.Directory.CreateDirectory(lTargetDir);
         if not aOverride and File.Exists(lTargetFN) then
           raise new Exception(String.Format("Target file '{0}' already exists.", lTargetFN));
         RemObjects.Elements.RTL.File.CopyTo(el, lTargetFN, true);
