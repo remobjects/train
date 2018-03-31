@@ -46,6 +46,8 @@ begin
   if p > 0 then
     s := s.Substring(p)+"...";
   s := s.Trim();
+  if length(s) > 50 then
+    s := s.SubString(0, 50)+"...";
   for i: Int32 := 0 to length(s)-1 do
     if s[i] < #32 then
       s := (s as RemObjects.Elements.RTL.String).Replace(i, 1, ".");
