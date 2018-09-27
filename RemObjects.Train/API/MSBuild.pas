@@ -18,9 +18,8 @@ type
   [PluginRegistration]
   MSBuildPlugin = public class(IPluginRegistration)
   private
-    class var fVersionRegex,
-    fFileVersionRegex: Regex;
-    fServices: IApiRegistrationServices;
+    class var fVersionRegex, fFileVersionRegex: Regex;
+    class var fServices: IApiRegistrationServices;
   public
     method &Register(aServices: IApiRegistrationServices);
 
