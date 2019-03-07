@@ -253,7 +253,24 @@ begin
   if fTimeStack.Count > 0 then begin
     var lTimeStarted := fTimeStack[fTimeStack.Count-1];
     fTimeStack.RemoveAt(fTimeStack.Count-1);
-    fXmlData.Add(new XAttribute('took', DateTime.UtcNow.Subtract(lTimeStarted).TotalSeconds.ToString("0.####")+"s"));
+
+    var lPrettyTimeString := "";
+    var lSeconds := DateTime.UtcNow.Subtract(lTimeStarted).TotalSeconds;
+    if lSeconds > 3600 then begin
+      lPrettyTimeString := lPrettyTimeString+$"{Integer(lSeconds/3600)}h ";
+      lSeconds := lSeconds mod 3600;
+    end;
+    if lSeconds > 60 then begin
+      lPrettyTimeString := lPrettyTimeString+$"{Integer(lSeconds/60)}m ";
+      lSeconds := lSeconds mod 60;
+      if lSeconds > 0 then
+        lPrettyTimeString := lPrettyTimeString+$"{Integer(lSeconds)}s ";
+    end
+    else begin
+      lPrettyTimeString := lSeconds.ToString("0.###")+"s";
+    end;
+
+    fXmlData.Add(new XAttribute('took', lPrettyTimeString.Trim()));
   end;
 
   fXmlData := fXmlData.Parent;
