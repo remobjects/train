@@ -162,15 +162,15 @@ type
   Tokenizer = public class(ITokenizer)
   private
     class var FIdentifiers: array of KeywordMap;
-    class var FCharMap: Array[Byte] of Char;
+    class var FCharMap: array[Byte] of Char;
     var
-      FInput: array of Char;
-      FPos, FRow, FLastEnterPos, FLen: Integer;
-      FToken: TokenKind;
-      FTokenStr: array of Char;
-      FPosition: Position := new Position();
-      FEndPosition: Position := new Position();
-      FLastEndPosition: Position := new Position();
+    FInput: array of Char;
+    FPos, FRow, FLastEnterPos, FLen: Integer;
+    FToken: TokenKind;
+    FTokenStr: array of Char;
+    FPosition: Position := new Position();
+    FEndPosition: Position := new Position();
+    FLastEndPosition: Position := new Position();
 
     method IdentCompare(aPos: Integer; len: Integer; Data: array of Char): Integer;
     method IsIdentifier(aPos: Integer; len: Integer): TokenKind;
