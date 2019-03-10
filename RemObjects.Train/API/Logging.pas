@@ -267,7 +267,7 @@ begin
         lPrettyTimeString := lPrettyTimeString+$"{Integer(lSeconds)}s ";
     end
     else begin
-      lPrettyTimeString := lSeconds.ToString("0.###")+"s";
+      lPrettyTimeString := $"{Integer(lSeconds)}s";
     end;
 
     fXmlData.Add(new XAttribute('took', lPrettyTimeString.Trim()));
