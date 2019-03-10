@@ -36,6 +36,17 @@ type
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
     method &Write; empty;
+
+    property MaxWidth: Integer read begin
+      result := 80;
+      try
+        result := Console.WindowWidth-(2*fIndent)-1;
+      except
+        on E: IOException do;
+      end;
+      if result < 10 then result := 10;
+    end;
+
   end;
 
 implementation
@@ -56,19 +67,30 @@ end;
 
 method Logger.LogDebug(s: System.String);
  begin
-  if not LoggerSettings. ShowDebug then exit;
+  if not LoggerSettings.ShowDebug then
+    exit;
   CheckEnter;
+
+   if length(s) > MaxWidth then
+     s := s.Substring(0, MaxWidth-3)+'...';
+
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.DarkBlue;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
-  end else Console.WriteLine(s);
+  end
+  else
+    Console.WriteLine(s);
 end;
 
 method Logger.LogError(s: System.String);
 begin
   CheckEnter;
+
+  if length(s) > MaxWidth then
+    s := s.Substring(0, MaxWidth-3)+'...';
+
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
     if InIgnore then
@@ -77,43 +99,66 @@ begin
       Console.ForegroundColor := ConsoleColor.Red;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
-  end else Console.WriteLine(s);
+  end
+  else
+    Console.WriteLine(s);
 end;
 
 method Logger.LogHint(s: System.String);
 begin
-  if not LoggerSettings. ShowHint then exit;
+  if not LoggerSettings.ShowHint then
+    exit;
   CheckEnter;
+
+  if length(s) > MaxWidth then
+    s := s.Substring(0, MaxWidth-3)+'...';
+
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.Magenta;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
-  end else Console.WriteLine(s);
+  end
+  else
+    Console.WriteLine(s);
 end;
 
 method Logger.LogMessage(s: System.String);
 begin
-  if not LoggerSettings. ShowMessage then exit;
+  if not LoggerSettings.ShowMessage then
+    exit;
   CheckEnter;
+
+  if length(s) > MaxWidth then
+    s := s.Substring(0, MaxWidth-3)+'...';
+
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.Gray;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
-  end else Console.WriteLine(s);
+  end
+  else
+    Console.WriteLine(s);
 end;
 
 method Logger.LogWarning(s: System.String);
 begin
-  if not LoggerSettings. ShowWarning then exit;
+  if not LoggerSettings. ShowWarning then
+    exit;
+
+  if length(s) > MaxWidth then
+    s := s.Substring(0, MaxWidth-3)+'...';
+
   if ConsoleApp.ShowColors then begin
     CheckEnter;
     var lCol := Console.ForegroundColor;
     Console.ForegroundColor := ConsoleColor.Yellow;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
-  end else Console.WriteLine(s);
+  end
+  else
+    Console.WriteLine(s);
 end;
 
 method Logger.Enter(aImportant: Boolean := false; aScript: String; params args:  array of Object);
@@ -130,12 +175,7 @@ begin
     Console.ForegroundColor := ConsoleColor.White;
   end;
 
-  var lMaxWidth: Int32 := 80;
-  try
-    lMaxWidth := Console.WindowWidth-aScript.Length-(2*fIndent)-11;
-  except
-    on E: IOException do;
-  end;
+  var lMaxWidth := MaxWidth-aScript.Length-10;
   if lMaxWidth < 10 then lMaxWidth := 10;
 
   var lArgs := '';
