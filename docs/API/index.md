@@ -28,6 +28,7 @@ index: SSH.md
 index: InnoSetup.md
 index: Mail.md
 index: MD5.md
+index: Windows.md
 ---
 
 All scripts have access to the environment variables via an indexer variable called called `env`. The environment is linked inherited from the parent environment.
