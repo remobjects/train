@@ -41,6 +41,7 @@ type
         lPath := Path.Combine(lPath, aSubFolder);
       if length(aName) = 0 then
         aName := Path.GetFileNameWithoutExtension(aDestinationPath);
+      Directory.CreateDirectory(lPath);
       file.Save(Path.Combine(lPath, aName+".lnk"), false);
     end;
 
