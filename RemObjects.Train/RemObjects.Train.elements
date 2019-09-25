@@ -69,6 +69,15 @@
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <ProjectReference Include="..\Script\Source\RemObjects.Script\RemObjects.Script.oxygene">
+      <Name>RemObjects.Script</Name>
+      <Project>{caf9c919-d826-4452-910e-d8ba4861cd72}</Project>
+      <Private>True</Private>
+      <HintPath>..\Script\Source\RemObjects.Script\..\..\Bin\RemObjects.Script.dll</HintPath>
+    </ProjectReference>
+    <Reference Include="Elements">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Async.pas" />
@@ -112,28 +121,16 @@
       <Generator>SettingsSingleFileGenerator</Generator>
     </None>
     <Compile Include="Properties\Settings.Designer.pas" />
+    <EmbeddedResource Include="Resources\Train2HTML.xslt">
+      <SubType>Content</SubType>
+    </EmbeddedResource>
+    <Compile Include="API\EBuild.pas" />
+    <Compile Include="API\Windows.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="API" />
     <Folder Include="Properties\" />
     <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Script\Source\RemObjects.Script\RemObjects.Script.oxygene">
-      <Name>RemObjects.Script</Name>
-      <Project>{caf9c919-d826-4452-910e-d8ba4861cd72}</Project>
-      <Private>True</Private>
-      <HintPath>..\Script\Source\RemObjects.Script\..\..\Bin\RemObjects.Script.dll</HintPath>
-    </ProjectReference>
-    <Reference Include="Elements">
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Train2HTML.xslt">
-      <SubType>Content</SubType>
-    </EmbeddedResource>
-    <Compile Include="API\EBuild.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <PropertyGroup>
