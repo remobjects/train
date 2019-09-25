@@ -37,8 +37,10 @@ type
       // save it
       var file := System.Runtime.InteropServices.ComTypes.IPersistFile(link);
       var lPath := System.Environment.GetFolderPath(System.Environment.SpecialFolder.StartMenu);
-      if assigned(aSubFolder) then
+      if assigned(aSubFolder) then begin
         lPath := Path.Combine(lPath, aSubFolder);
+        Directory.CreateDirectory(lPath);
+      end;
       if length(aName) = 0 then
         aName := Path.GetFileNameWithoutExtension(aDestinationPath);
       file.Save(Path.Combine(lPath, aName+".lnk"), false);
