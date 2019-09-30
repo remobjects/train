@@ -22,6 +22,8 @@ type
       if System.Environment.OSVersion.Platform = PlatformID.Win32NT  then begin
         var lWindowsObject := aServices.RegisterObjectValue('windows');
         lWindowsObject.AddValue('createStartMenuShortcut', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(WindowsPlugin), 'createStartMenuShortcut'));
+        lWindowsObject.AddValue('createShortcut', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(WindowsPlugin), 'createShortcut'));
+        lWindowsObject.AddValue('getSpecialFolder', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(WindowsPlugin), 'getSpecialFolder'));
       end;
     end;
 
@@ -44,6 +46,37 @@ type
       if length(aName) = 0 then
         aName := Path.GetFileNameWithoutExtension(aDestinationPath);
       file.Save(Path.Combine(lPath, aName+".lnk"), false);
+    end;
+
+    [WrapAs('windows.createShortcut', SkipDryRun := false)]
+    class method createShortcut(aServices: IApiRegistrationServices; ec: ExecutionContext; aDestinationPath: String; aName: String; aFolder: String; aDescription: String := nil): Boolean;
+    begin
+      var link := new ShellLink() as IShellLink;
+
+      // setup shortcut information
+      link.SetDescription(aDescription);
+      link.SetPath(aDestinationPath);
+
+      // save it
+      var file := System.Runtime.InteropServices.ComTypes.IPersistFile(link);
+      var lPath: String;
+      if assigned(aFolder) then begin
+        lPath := aFolder;
+        Directory.CreateDirectory(lPath);
+      end
+      else begin
+        lPath := Path.GetDirectoryName(aDestinationPath);
+      end;
+      if length(aName) = 0 then
+        aName := Path.GetFileNameWithoutExtension(aDestinationPath);
+      file.Save(Path.Combine(lPath, aName+".lnk"), false);
+    end;
+
+    [WrapAs('windows.getSpecialFolder', SkipDryRun := false)]
+    class method getSpecialFolder(aServices: IApiRegistrationServices; ec: ExecutionContext; aFolderName: String): String;
+    begin
+      var value := System.Environment.SpecialFolder(Enum.Parse(typeOf(System.Environment.SpecialFolder), aFolderName));
+      exit System.Environment.GetFolderPath(value);
     end;
 
   end;
