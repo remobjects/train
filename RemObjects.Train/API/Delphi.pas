@@ -7,6 +7,7 @@ uses
   RemObjects.Script.EcmaScript,
   RemObjects.Script.EcmaScript.Internal,
   System.Collections.Generic,
+  System.Linq,
   System.Text,
   System.Text.RegularExpressions,
   System.Xml.Linq,
@@ -121,6 +122,8 @@ begin
 
     if aOptions:platform:ToLower in ['android', 'aarm'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccaarm.exe')
+    else if aOptions:platform:ToLower in ['android64', 'aarm64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccaarm64.exe')
     else if aOptions:platform:ToLower in ['ios32', 'iossimulator'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccios32.exe')
     else if aOptions:platform:ToLower in ['iosarm', 'iosdevice', 'iosdevice32'] then
@@ -131,12 +134,14 @@ begin
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcclinux64.exe')
     else if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx.exe')
+    else if aOptions:platform:ToLower in ['macosx64', 'osx64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx64.exe')
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe')
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "iossimulator","iosdevice32","iosdevice64","linux64","android" )');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32","osx64", "iossimulator","iosdevice32","iosdevice64","linux64","android","android64" )');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
@@ -188,6 +193,12 @@ begin
   var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
   aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
+
+  var lenvironment := new Environment();
+  lenvironment.LoadSystem;
+  lenvironment.Item['Path'] := lDelphi+';'+lenvironment.Item['Path'];
+  var lenv: array of KeyValuePair<String,String> := lenvironment.Select(a->new KeyValuePair<String,String>(a.Key,a.Value.ToString)).ToArray;
+
   var n := Shell.ExecuteProcess(lRootPath, sb.ToString, lPath,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
@@ -200,7 +211,7 @@ begin
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
     end;
-   end, nil, nil);
+   end, lenv, nil);
 
   if n <> 0 then
     lTmp.LogMessage(lOutput.ToString)
