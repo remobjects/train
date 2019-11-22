@@ -324,12 +324,21 @@ begin
     if not String.IsNullOrEmpty(lXMLOut) or not String.IsNullOrEmpty(lHtmlOut) then begin
       lMulti.Loggers.Add(new XmlLogger(lXMLOut, lHtmlOut, lXSLT));
     end;
+
     var lRoot := new RemObjects.Train.API.Environment();
     lRoot.LoadSystem;
     if File.Exists(lGlobalSettings) then
       lRoot.LoadIni(lGlobalSettings);
-     lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
-    for each el in lGlobalVars do lRoot[el.Key] := el.Value;
+    for each el in lArgs.Where(a -> a.Contains('=') and not a:ToLower:EndsWith('.train') and not a:ToLower:EndsWith(".js")) do begin
+      var p := el.IndexOf("=");
+      var k := el.Substring(0, p);
+      var v := el.Substring(p+1);
+      lGlobalVars.Add(k, StripQuotes(v));
+    end;
+    lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
+    for each el in lGlobalVars do
+      lRoot[el.Key] := el.Value;
+
     if LoggerSettings.ShowDebug then
       lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
 
@@ -343,13 +352,6 @@ begin
           PluginSystem.Load(file);
         end;
       end;
-    end;
-
-    for each el in lArgs.Where(a -> a.Contains('=') and not a:ToLower:EndsWith('.train') and not a:ToLower:EndsWith(".js")) do begin
-      var p := el.IndexOf("=");
-      var k := el.Substring(0, p);
-      var v := el.Substring(p+1);
-      lGlobalVars.Add(k, StripQuotes(v));
     end;
 
     for each el in lArgs.Where(a -> a:ToLower:EndsWith('.train') or a:ToLower:EndsWith(".js")) do begin
