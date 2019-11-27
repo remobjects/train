@@ -308,12 +308,13 @@ begin
     on  Exception  do
       lShowHelp := true;
   end;
-  if  lShowHelp then begin
-    Console.WriteLine('Train.exe <script.js> [options]');
+  if lShowHelp then begin
+    Console.WriteLine('Train.exe <script.train> [options] [variable=value]');
     lOptions.WriteOptionDescriptions(Console.Out);
     exit 1;
-  end else if lArgs.Count = 0 then begin
-    lLogger.LogError('No files specified');
+  end
+  else if not lArgs.Any(a -> a:ToLower:EndsWith(".train") or a:ToLower:EndsWith(".js")) then begin
+    lLogger.LogError('No .train files specified');
     exit 1;
   end;
   var lMulti: MultiLogger := new MultiLogger;
@@ -323,12 +324,21 @@ begin
     if not String.IsNullOrEmpty(lXMLOut) or not String.IsNullOrEmpty(lHtmlOut) then begin
       lMulti.Loggers.Add(new XmlLogger(lXMLOut, lHtmlOut, lXSLT));
     end;
+
     var lRoot := new RemObjects.Train.API.Environment();
     lRoot.LoadSystem;
     if File.Exists(lGlobalSettings) then
       lRoot.LoadIni(lGlobalSettings);
-     lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
-    for each el in lGlobalVars do lRoot[el.Key] := el.Value;
+    for each el in lArgs.Where(a -> a.Contains('=') and not a:ToLower:EndsWith('.train') and not a:ToLower:EndsWith(".js")) do begin
+      var p := el.IndexOf("=");
+      var k := el.Substring(0, p);
+      var v := el.Substring(p+1);
+      lGlobalVars.Add(k, StripQuotes(v));
+    end;
+    lRoot['Train'] := Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location);
+    for each el in lGlobalVars do
+      lRoot[el.Key] := el.Value;
+
     if LoggerSettings.ShowDebug then
       lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
 
@@ -344,9 +354,9 @@ begin
       end;
     end;
 
-    for each el in lArgs do begin
+    for each el in lArgs.Where(a -> a:ToLower:EndsWith('.train') or a:ToLower:EndsWith(".js")) do begin
       if not File.Exists(el) then begin
-        lLogger.LogError('File not found {0}', el);
+        lLogger.LogError("File '{0}' not found.", el);
         exit 1;
       end;
       var lEngine := new Engine(lRoot, el);
