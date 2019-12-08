@@ -7,3 +7,4 @@ Bin
 bin
 obj
 
+*.cache
