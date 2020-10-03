@@ -120,7 +120,7 @@ begin
     lRootPath := DelphiGetBaseBath(iver);
     if lRootPath = nil then raise new Exception('Cannot find Delphi registry key for '+sver);
 
-    if aOptions:platform:ToLower in ['android', 'aarm'] then
+    if aOptions:platform:ToLower in ['android','android32', 'aarm'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccaarm.exe')
     else if aOptions:platform:ToLower in ['android64', 'aarm64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccaarm64.exe')
