@@ -58,7 +58,7 @@ begin
     s := s.Substring(p)+"...";
   s := s.Trim();
   if length(s) > 50 then
-    s := s.SubString(0, 50)+"...";
+    s := s.Substring(0, 50)+"...";
   for i: Int32 := 0 to length(s)-1 do
     if s[i] < #32 then
       s := (s as RemObjects.Elements.RTL.String).Replace(i, 1, ".");
@@ -264,7 +264,7 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright 2013-2018 RemObjects Software, LLC. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2020 RemObjects Software, LLC. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
@@ -277,7 +277,7 @@ begin
   var lPluginFolder: String := nil;
   var lWait := false;
   var lLiveOutput := false;
-  var lGlobalSettings: String := Path.Combine(Path.GetDirectoryName(typeOf(ConsoleApp).Assembly.Location), 'Train.ini');
+  var lGlobalSettings: String := SharedSettings.Default.Filename;
   var lIncludes: List<String> := new List<String>;
   lOptions.Add('o|options=', 'Override the ini file with the global options', v-> begin lGlobalSettings := coalesce(lGlobalSettings, v); end);
   lOptions.Add('c|colors', 'Use colors', v-> begin ShowColors := assigned(v); end);
@@ -340,7 +340,7 @@ begin
       lRoot[el.Key] := el.Value;
 
     if LoggerSettings.ShowDebug then
-      lLogger.LogDebug('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray));
+      lLogger.LogDebug(String.Format('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray)));
 
     if not String.IsNullOrEmpty(lPluginFolder) then
     begin
@@ -356,7 +356,7 @@ begin
 
     for each el in lArgs.Where(a -> a:ToLower:EndsWith('.train') or a:ToLower:EndsWith(".js")) do begin
       if not File.Exists(el) then begin
-        lLogger.LogError("File '{0}' not found.", el);
+        lLogger.LogError(String.Format("File '{0}' not found.", el));
         exit 1;
       end;
       var lEngine := new Engine(lRoot, el);
@@ -372,7 +372,7 @@ begin
   except
     on e: Exception do begin
       if e is not AbortException then
-        lLogger.LogDebug('Exception: {0}', e.ToString);
+        lLogger.LogDebug(String.Format('Exception: {0}', e.ToString));
 
       exit 1;
     end;
