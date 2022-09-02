@@ -130,6 +130,8 @@ begin
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciosarm.exe')
     else if aOptions:platform:ToLower in ['iosarm64', 'iosdevice64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciosarm64.exe')
+    else if aOptions:platform:ToLower in ['iossimarm64'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcciossimarm64.exe')
     else if aOptions:platform:ToLower in ['linux', 'linux64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcclinux64.exe')
     else if aOptions:platform:ToLower in ['macosx', 'osx', 'osx32'] then
@@ -143,7 +145,9 @@ begin
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
-      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "osx64", "iossimulator", "iosdevice32", "iosdevice64", "linux64", "android", "android64", "osxarm64")');
+      raise new Exception('Unsupported platform ("win32", "win64", "osx32", "osx64", '+
+                                                '"iossimulator", "iosdevice32", "iosdevice64", "iossimarm64", '+
+                                                '"linux64", "android", "android64", "osxarm64")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
