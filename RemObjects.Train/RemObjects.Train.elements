@@ -13,7 +13,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>RemObjects.Train</Name>
-    <ProjectGuid>{7e8ca883-87a3-4c65-9fef-c46b1c763bcb}</ProjectGuid>
+    <ProjectGuid>{7E8CA883-87A3-4C65-9FEF-C46B1C763BCB}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
@@ -47,9 +47,6 @@
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AWSSDK">
-      <HintPath>Libraries\AWSSDK.dll</HintPath>
-    </Reference>
     <Reference Include="DiscUtils">
       <HintPath>Libraries\DiscUtils.dll</HintPath>
     </Reference>
@@ -79,6 +76,12 @@
     <Reference Include="Elements">
       <Private>True</Private>
     </Reference>
+    <NuGetReference Include="AWSSDK.S3:*">
+      <Private>True</Private>
+    </NuGetReference>
+    <NuGetReference Include="AWSSDK.Core:*">
+      <Private>True</Private>
+    </NuGetReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Async.pas" />
