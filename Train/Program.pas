@@ -280,7 +280,7 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright 2013-2020 RemObjects Software, LLC. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2025 RemObjects Software, LLC. All rights reserved.');
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
