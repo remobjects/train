@@ -82,6 +82,9 @@
     <NuGetReference Include="AWSSDK.Core:*">
       <Private>True</Private>
     </NuGetReference>
+    <Reference Include="Echoes">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Async.pas" />

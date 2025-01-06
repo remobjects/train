@@ -76,6 +76,9 @@
     <Reference Include="Elements">
       <Private>True</Private>
     </Reference>
+    <Reference Include="Echoes">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Options.pas" />
