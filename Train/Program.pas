@@ -25,6 +25,9 @@ type
     method CheckEnter;
     method CleanedString(s: String): String;
   public
+
+    FixedConsoleWidth: nullable Integer;
+
     method LogDebug(s: System.String);
     method LogWarning(s: System.String);
     method LogMessage(s: System.String);
@@ -38,14 +41,27 @@ type
     method &Write; empty;
 
     property MaxWidth: Integer read begin
+      if FixedConsoleWidth > 10 then
+        exit FixedConsoleWidth;
       result := 80;
       try
         result := Console.WindowWidth-(2*fIndent)-1;
       except
         on E: IOException do;
       end;
-      if result < 10 then result := 10;
+      if result < 10 then result := 80;
     end;
+
+    //constructor;
+    //begin
+      //try
+        //var lResult := Console.WindowWidth-(2*fIndent)-1;
+        //writeLn($"Console.WindowWidth {Console.WindowWidth}, fIndent {fIndent} -> result {lResult}");
+      //except
+        //on E: IOException do
+          //writeLn($"Error getting console width: {E.Message}");
+      //end;
+    //end;
 
   end;
 
@@ -297,10 +313,13 @@ begin
   lOptions.Add('dryrun', 'Do a script dry run (skips file/exec actions)', v->begin lDryRun := assigned(v); end);
   lOptions.Add('e|enterexit', 'Enable/Disable function enter/exit logging', v->begin lLogFNEnter := assigned(v); end);
   lOptions.Add('l|live', 'Enable live output from exeucted tasks', v->begin lLiveOutput := assigned(v); end);
+  lOptions.Add('width=', 'Set a fixed console width', (v) -> begin
+    writeLn($"width received: {v}");
+    (lLogger as Logger).FixedConsoleWidth := RemObjects.Elements.RTL.Convert.TryToInt32(v);
+    end);
   var lArgs: List<String>;
   try
     var lCmdArgs := OptionCommandLine.Parse(Environment.CommandLine);
-
     //lLogger.LogMessage('Invoked as: '+String.Join(' ',lCmdArgs.Select(a->'"'+a+'"').ToArray));
     //lLogger.LogMessage('Invoked as: '+String.Join(' ',args.Select(a->'"'+a+'"').ToArray));
     lArgs := lOptions.Parse(lCmdArgs.Skip(1));
@@ -317,13 +336,13 @@ begin
     lLogger.LogError('No .train files specified');
     exit 1;
   end;
+
   var lMulti: MultiLogger := new MultiLogger;
   try
     lMulti.Loggers.Add(lLogger);
     lLogger := lMulti;
-    if not String.IsNullOrEmpty(lXMLOut) or not String.IsNullOrEmpty(lHtmlOut) then begin
+    if not String.IsNullOrEmpty(lXMLOut) or not String.IsNullOrEmpty(lHtmlOut) then
       lMulti.Loggers.Add(new XmlLogger(lXMLOut, lHtmlOut, lXSLT));
-    end;
 
     var lRoot := new RemObjects.Train.API.Environment();
     lRoot.LoadSystem;
