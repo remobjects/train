@@ -59,10 +59,12 @@ type
       if FixedConsoleWidth > 10 then
         exit FixedConsoleWidth;
       result := 80;
-      try
-        result := Console.WindowWidth-(2*fIndent)-1;
-      except
-        on E: IOException do;
+      if not Console.IsOutputRedirected then begin // occurs under debugger (console redirected)
+        try
+          result := Console.WindowWidth-(2*fIndent)-1;
+        except
+          on E: IOException do; // No handle, under debugger?
+        end;
       end;
       if result < 10 then result := 80;
     end;
