@@ -76,10 +76,10 @@
     <Reference Include="Elements">
       <Private>True</Private>
     </Reference>
-    <NuGetReference Include="AWSSDK.S3:*">
+    <NuGetReference Include="AWSSDK.S3:[3.7.402.12]">
       <Private>True</Private>
     </NuGetReference>
-    <NuGetReference Include="AWSSDK.Core:*">
+    <NuGetReference Include="AWSSDK.Core:[3.7.402.71]">
       <Private>True</Private>
     </NuGetReference>
     <Reference Include="Echoes">

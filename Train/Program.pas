@@ -24,6 +24,21 @@ type
     fIndent: Integer;
     method CheckEnter;
     method CleanedString(s: String): String;
+    method CutString(s: String): String;
+    begin
+      var sep: String := #13#10;
+      case RemObjects.Elements.RTL.Environment.OS of
+        //RemObjects.Elements.RTL.OperatingSystem.Windows: sep := #13#10;
+        RemObjects.Elements.RTL.OperatingSystem.macOS: sep := #13;
+        RemObjects.Elements.RTL.OperatingSystem.Linux: sep := #10;
+      end;
+
+      var ar := s.Split([sep],StringSplitOptions.None);
+      for i: Integer := 0 to ar.Count - 1 do
+        if length(ar[i]) > MaxWidth then ar[i] := ar[i].Substring(0, MaxWidth - 3) + '...';
+
+      exit String.Join(sep, ar);
+    end;
   public
 
     FixedConsoleWidth: nullable Integer;
@@ -44,10 +59,12 @@ type
       if FixedConsoleWidth > 10 then
         exit FixedConsoleWidth;
       result := 80;
-      try
-        result := Console.WindowWidth-(2*fIndent)-1;
-      except
-        on E: IOException do;
+      if not Console.IsOutputRedirected then begin // occurs under debugger (console redirected)
+        try
+          result := Console.WindowWidth-(2*fIndent)-1;
+        except
+          on E: IOException do; // No handle, under debugger?
+        end;
       end;
       if result < 10 then result := 80;
     end;
@@ -87,8 +104,7 @@ method Logger.LogDebug(s: System.String);
     exit;
   CheckEnter;
 
-   if length(s) > MaxWidth then
-     s := s.Substring(0, MaxWidth-3)+'...';
+  s := CutString(s);
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -104,8 +120,7 @@ method Logger.LogError(s: System.String);
 begin
   CheckEnter;
 
-  if length(s) > MaxWidth then
-    s := s.Substring(0, MaxWidth-3)+'...';
+  s := CutString(s);
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -126,8 +141,7 @@ begin
     exit;
   CheckEnter;
 
-  if length(s) > MaxWidth then
-    s := s.Substring(0, MaxWidth-3)+'...';
+  s := CutString(s);
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -145,8 +159,7 @@ begin
     exit;
   CheckEnter;
 
-  if length(s) > MaxWidth then
-    s := s.Substring(0, MaxWidth-3)+'...';
+  s := CutString(s);
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -163,8 +176,7 @@ begin
   if not LoggerSettings. ShowWarning then
     exit;
 
-  if length(s) > MaxWidth then
-    s := s.Substring(0, MaxWidth-3)+'...';
+  s := CutString(s);
 
   if ConsoleApp.ShowColors then begin
     CheckEnter;
@@ -191,7 +203,7 @@ begin
     Console.ForegroundColor := ConsoleColor.White;
   end;
 
-  var lMaxWidth := MaxWidth-aScript.Length-10;
+  var lMaxWidth := MaxWidth - aScript.Length - 10;
   if lMaxWidth < 10 then lMaxWidth := 10;
 
   var lArgs := '';
@@ -391,7 +403,7 @@ begin
   except
     on e: Exception do begin
       if e is not AbortException then
-        lLogger.LogDebug(String.Format('Exception: {0}', e.ToString));
+        lLogger.LogError(String.Format('Exception: {0}', e.ToString));
 
       exit 1;
     end;
