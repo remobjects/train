@@ -6,5 +6,5 @@ Documentation/
 Bin
 bin
 obj
-
+.vs/
 *.cache
