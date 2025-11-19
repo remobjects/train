@@ -242,7 +242,8 @@ begin
         a.ToString()
       else
         'null';
-      if length(result) > 250 then
+      // Don't truncate in debug mode - users need full info when debugging
+      if (not LoggerSettings.ShowDebug) and (length(result) > 250) then
         result := result.Substring(0, 100)+"...";
     end).ToArray);
   var lNode := new XElement('action', new XAttribute('name', Filter(aScript)), new XAttribute('args', Filter(lArgsString)));

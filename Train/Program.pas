@@ -24,7 +24,7 @@ type
     fIndent: Integer;
     method CheckEnter;
     method CleanedString(s: String): String;
-    method CutString(s: String): String;
+    method CutString(s: String; aForceNoTruncate: Boolean := false): String;
     begin
       var sep: String := #13#10;
       case RemObjects.Elements.RTL.Environment.OS of
@@ -34,8 +34,10 @@ type
       end;
 
       var ar := s.Split([sep],StringSplitOptions.None);
-      for i: Integer := 0 to ar.Count - 1 do
-        if length(ar[i]) > MaxWidth then ar[i] := ar[i].Substring(0, MaxWidth - 3) + '...';
+      // Don't truncate in debug mode or when explicitly requested (errors)
+      if not aForceNoTruncate and not LoggerSettings.ShowDebug then
+        for i: Integer := 0 to ar.Count - 1 do
+          if length(ar[i]) > MaxWidth then ar[i] := ar[i].Substring(0, MaxWidth - 3) + '...';
 
       exit String.Join(sep, ar);
     end;
@@ -90,7 +92,8 @@ begin
   if p > 0 then
     s := s.Substring(p)+"...";
   s := s.Trim();
-  if length(s) > 50 then
+  // Don't truncate in debug mode - users need full paths and info when debugging
+  if (not LoggerSettings.ShowDebug) and (length(s) > 50) then
     s := s.Substring(0, 50)+"...";
   for i: Int32 := 0 to length(s)-1 do
     if s[i] < #32 then
@@ -120,7 +123,7 @@ method Logger.LogError(s: System.String);
 begin
   CheckEnter;
 
-  s := CutString(s);
+  s := CutString(s, true); // Never truncate errors
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -212,7 +215,8 @@ begin
       var s := CleanedString(coalesce(a:ToString, 'null'));
       if length(lArgs) > 0 then lArgs := lArgs+', ';
       lArgs := lArgs+s;
-      if length(lArgs) > lMaxWidth then begin
+      // Don't truncate args in debug mode
+      if (not LoggerSettings.ShowDebug) and (length(lArgs) > lMaxWidth) then begin
         lArgs := lArgs.Substring(0, lMaxWidth-3)+'...';
         break;
       end;
@@ -239,7 +243,8 @@ begin
   var lRet:= '';
   if (aReturn <> nil) and (aReturn <> Undefined.Instance) then begin
     var s := CleanedString(aReturn.ToString);
-    if length(s) > 50 then s := s.Substring(0, 47)+'...';
+    // Don't truncate return values in debug mode
+    if (not LoggerSettings.ShowDebug) and (length(s) > 50) then s := s.Substring(0, 47)+'...';
     lRet := ': '+s;
   end
   else begin
