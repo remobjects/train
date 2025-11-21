@@ -242,9 +242,9 @@ begin
    end, lenv, nil);
 
   if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
+    lTmp.LogOutputDump(lOutput.ToString, false)
   else
-    lTmp.LogInfo(lOutput.ToString);
+    lTmp.LogOutputDump(lOutput.ToString, true);
 
   lTmp.Replay(aServices.Logger);
 

@@ -52,6 +52,11 @@ type
     method LogInfo(s: String);
     method LogError(s: System.String);
     method LogLive(s: String);
+    method Log(aKind: LogMessageKind; s: String);
+    method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommandOutput(s: String);
+    method LogCommandOutputError(s: String);
+    method LogOutputDump(s: String; aSuccess: Boolean);
     property InIgnore: Boolean;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aReturn: Object);
@@ -111,7 +116,7 @@ method Logger.LogDebug(s: System.String);
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.DarkBlue;
+    Console.ForegroundColor := LogColors.Debug;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end
@@ -128,9 +133,9 @@ begin
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
     if InIgnore then
-      Console.ForegroundColor := ConsoleColor.DarkRed
+      Console.ForegroundColor := LogColors.ErrorIgnored
     else
-      Console.ForegroundColor := ConsoleColor.Red;
+      Console.ForegroundColor := LogColors.Error;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end
@@ -148,7 +153,7 @@ begin
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.Magenta;
+    Console.ForegroundColor := LogColors.Hint;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end
@@ -166,7 +171,7 @@ begin
 
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.Gray;
+    Console.ForegroundColor := LogColors.Message;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end
@@ -184,7 +189,7 @@ begin
   if ConsoleApp.ShowColors then begin
     CheckEnter;
     var lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.Yellow;
+    Console.ForegroundColor := LogColors.Warning;
     Console.WriteLine(s);
     Console.ForegroundColor := lCol;
   end
@@ -203,7 +208,7 @@ begin
   var lCol: ConsoleColor;
   if ConsoleApp.ShowColors then begin
     lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.White;
+    Console.ForegroundColor := LogColors.FunctionTrace;
   end;
 
   var lMaxWidth := MaxWidth - aScript.Length - 10;
@@ -221,7 +226,18 @@ begin
         break;
       end;
     end;
-  Console.Write(aScript+'('+lArgs+') { ... ');
+
+  // Special handling for shell.exec - colorize command in cyan
+  if ConsoleApp.ShowColors and (aScript = 'shell.exec') then begin
+    Console.ForegroundColor := LogColors.FunctionTrace;  // White
+    Console.Write(aScript + '(');
+    Console.ForegroundColor := LogColors.Command;  // Cyan
+    Console.Write(lArgs);
+    Console.ForegroundColor := LogColors.FunctionTrace;  // White
+    Console.Write(') { ... ');
+  end else begin
+    Console.Write(aScript+'('+lArgs+') { ... ');
+  end;
   Console.Out.Flush();
 
   if ConsoleApp.ShowColors then begin
@@ -237,7 +253,7 @@ begin
   var lCol: ConsoleColor;
   if ConsoleApp.ShowColors then begin
     lCol := Console.ForegroundColor;
-    Console.ForegroundColor := ConsoleColor.White;
+    Console.ForegroundColor := LogColors.FunctionTrace;
   end;
   if fIndent > 0 then dec(fIndent);
   var lRet:= '';
@@ -279,7 +295,94 @@ end;
 
 method Logger.LogLive(s: String);
 begin
-  LogMessage(s);
+  LogCommandOutput(s);
+end;
+
+method Logger.Log(aKind: LogMessageKind; s: String);
+begin
+  case aKind of
+    LogMessageKind.Debug: LogDebug(s);
+    LogMessageKind.Message: LogMessage(s);
+    LogMessageKind.Warning: LogWarning(s);
+    LogMessageKind.Hint: LogHint(s);
+    LogMessageKind.Error: LogError(s);
+    LogMessageKind.CommandOutput: LogCommandOutput(s);
+    LogMessageKind.CommandOutputError: LogCommandOutputError(s);
+    LogMessageKind.OutputDumpSuccess: LogOutputDump(s, true);
+    LogMessageKind.OutputDumpError: LogOutputDump(s, false);
+  end;
+end;
+
+method Logger.LogCommand(aExecutable: String; aArguments: String);
+begin
+  CheckEnter;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := LogColors.Command;
+    Console.Write(aExecutable);
+    if not String.IsNullOrEmpty(aArguments) then begin
+      Console.ForegroundColor := LogColors.Message;
+      Console.Write(' ');
+      Console.Write(aArguments);
+    end;
+    Console.WriteLine();
+    Console.ForegroundColor := lCol;
+  end else begin
+    Console.WriteLine(aExecutable + if not String.IsNullOrEmpty(aArguments) then ' ' + aArguments else '');
+  end;
+end;
+
+method Logger.LogCommandOutput(s: String);
+begin
+  CheckEnter;
+  s := CutString(s);
+
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := LogColors.CommandOutput;  // White
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else
+    Console.WriteLine(s);
+end;
+
+method Logger.LogCommandOutputError(s: String);
+begin
+  CheckEnter;
+  s := CutString(s);
+
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    // "(stderr)" prefix in red
+    Console.ForegroundColor := LogColors.StderrPrefix;
+    Console.Write("(stderr) ");
+    // Actual message in white (same as stdout)
+    Console.ForegroundColor := LogColors.CommandOutput;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else
+    Console.WriteLine("(stderr) " + s);
+end;
+
+method Logger.LogOutputDump(s: String; aSuccess: Boolean);
+begin
+  CheckEnter;
+  s := CutString(s, true);  // Never truncate dumps
+
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    // "Output:" prefix in gray
+    Console.ForegroundColor := LogColors.Message;
+    Console.Write("Output:");
+    Console.WriteLine();
+    // Actual output in white
+    Console.ForegroundColor := LogColors.CommandOutput;
+    Console.WriteLine(s);
+    Console.ForegroundColor := lCol;
+  end else begin
+    Console.WriteLine("Output:");
+    Console.WriteLine(s);
+  end;
 end;
 
 method Logger.CheckEnter;

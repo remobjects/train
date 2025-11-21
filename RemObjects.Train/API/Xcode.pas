@@ -96,11 +96,11 @@ begin
    end, nil, nil);
 
   if n <> 0 then begin
-    aServices.Logger.LogMessage(lOutput.ToString);
+    aServices.Logger.LogOutputDump(lOutput.ToString, false);
     for each el in lErrors do
       aServices.Logger.LogError(el);
   end else
-    aServices.Logger.LogDebug(lOutput.ToString);
+    aServices.Logger.LogOutputDump(lOutput.ToString, true);
 
 
   if n <> 0 then raise new Exception('Xcode failed');
