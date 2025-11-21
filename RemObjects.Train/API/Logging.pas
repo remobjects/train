@@ -376,6 +376,37 @@ begin
   LogMessage(s);
 end;
 
+method BaseXmlLogger.Log(aKind: LogMessageKind; s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', aKind.ToString.ToLowerInvariant), Filter(s)));
+end;
+
+method BaseXmlLogger.LogCommand(aExecutable: String; aArguments: String);
+begin
+  var lMessage := Filter(aExecutable);
+  if not String.IsNullOrEmpty(aArguments) then
+    lMessage := lMessage + ' ' + Filter(aArguments);
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'command'), lMessage));
+end;
+
+method BaseXmlLogger.LogCommandOutput(s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), Filter(s)));
+end;
+
+method BaseXmlLogger.LogCommandOutputError(s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), new XAttribute('stream', 'stderr'), Filter(s)));
+end;
+
+method BaseXmlLogger.LogOutputDump(s: String; aSuccess: Boolean);
+begin
+  fXmlData.Add(new XElement('message',
+    new XAttribute('kind', 'output'),
+    new XAttribute('success', if aSuccess then 'true' else 'false'),
+    Filter(s)));
+end;
+
 class method BaseXmlLogger.Filter(s: String): String;
 begin
   if s = nil then exit '';
