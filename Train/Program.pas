@@ -93,11 +93,13 @@ implementation
 
 method Logger.CleanedString(s: String): String;
 begin
-  var p := s.IndexOf(#10);
-  if p > 0 then
-    s := s.Substring(p)+"...";
-  s := s.Trim();
   // Don't truncate in debug mode - users need full paths and info when debugging
+  if not LoggerSettings.ShowDebug then begin
+    var p := s.IndexOf(#10);
+    if p > 0 then
+      s := s.Substring(p)+"...";
+  end;
+  s := s.Trim();
   if (not LoggerSettings.ShowDebug) and (length(s) > 50) then
     s := s.Substring(0, 50)+"...";
   for i: Int32 := 0 to length(s)-1 do
