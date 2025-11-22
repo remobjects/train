@@ -12,7 +12,7 @@
     <AllowUnsafeCode>False</AllowUnsafeCode>
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Train</Name>
     <ProjectGuid>{BD3C0F3C-4943-488F-9886-4BC65FFE4DC4}</ProjectGuid>
   </PropertyGroup>

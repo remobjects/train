@@ -90,7 +90,7 @@ begin
                                                                                                 if assigned(a) then begin
                                                                                                   locking sb do sb.AppendLine(a);
                                                                                                   if fEngine.Engine.LiveOutput then
-                                                                                                    fEngine.Engine.Logger.LogLive("(stderr) "+a);
+                                                                                                    fEngine.Engine.Logger.LogCommandOutputError(a);
                                                                                                   if assigned(lCaptureFunc) then begin
                                                                                                     try
                                                                                                       lCaptureFunc.Call(ec, a);
@@ -103,7 +103,7 @@ begin
                                                                                                 locking sb do sb.AppendLine(a);
                                                                                                 if assigned(a) then begin
                                                                                                   if fEngine.Engine.LiveOutput then
-                                                                                                    fEngine.Engine.Logger.LogLive(a);
+                                                                                                    fEngine.Engine.Logger.LogCommandOutput(a);
                                                                                                   if assigned(lCaptureFunc) then begin
                                                                                                     try
                                                                                                       lCaptureFunc.Call(ec, a);
@@ -124,11 +124,11 @@ begin
       if not errorOK then begin
         var lErr := 'Failed with error code: '+lExit;
         fEngine.Engine.Logger.LogError(lErr);
-        locking sb do fEngine.Engine.Logger.LogMessage('Output: '#13#10+sb.ToString);
+        locking sb do fEngine.Engine.Logger.LogOutputDump(sb.ToString, false);
         raise new Exception(lErr);
       end;
     end;
-    locking sb do fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
+    locking sb do fEngine.Engine.Logger.LogOutputDump(sb.ToString, true);
     lFail := false;
     if lCaptureMode then  begin
       locking sb do exit sb.ToString()
@@ -187,7 +187,7 @@ begin
                                                                                             a-> begin
                                                                                                   locking sb do sb.AppendLine(a);
                                                                                                 end, lEnv.ToArray, lTimeout, lProc);
-      locking sb do lLogger.LogInfo('Output: '#13#10+sb.ToString);
+      locking sb do lLogger.LogOutputDump(sb.ToString, lExit = 0);
       if lProc.Killed then exit;
       if 0 <> lExit then begin
         var lErr := 'Failed with error code: '+lExit;
@@ -242,7 +242,7 @@ begin
     end, a-> begin
       locking sb do sb.AppendLine(a)
     end, nil, nil);
-    locking sb do fEngine.Engine.Logger.LogInfo('Output: '#13#10+sb.ToString);
+    locking sb do fEngine.Engine.Logger.LogOutputDump(sb.ToString, lExit = 0);
     if 0 <> lExit then begin
       var lErr := 'Failed with error code: '+lExit;
       fEngine.Engine.Logger.LogError(lErr);

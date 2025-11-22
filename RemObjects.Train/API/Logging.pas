@@ -18,6 +18,44 @@ uses
   DiscUtils.Iscsi;
 
 type
+  // Message type classification for semantic logging
+  LogMessageKind = public enum (
+    // Basic logging
+    Debug,              // DarkBlue - debug diagnostics
+    Message,            // Gray - normal Train messages
+    Warning,            // Yellow - warnings
+    Hint,               // Magenta - hints
+    Error,              // Red/DarkRed - errors
+
+    // Command execution
+    CommandOutput,      // White - stdout from command
+    CommandOutputError, // White with Red "(stderr)" prefix - stderr from command
+
+    // Output dumping
+    OutputDumpSuccess,  // White with "Output:" prefix - successful command output
+    OutputDumpError     // White with "Output:" prefix - failed command output
+  );
+
+  // Centralized color definitions
+  LogColors = public static class
+  public
+    // Core message types
+    class property Debug: ConsoleColor := ConsoleColor.DarkBlue;
+    class property Message: ConsoleColor := ConsoleColor.Gray;
+    class property Warning: ConsoleColor := ConsoleColor.Yellow;
+    class property Hint: ConsoleColor := ConsoleColor.Cyan;
+    class property Error: ConsoleColor := ConsoleColor.Red;
+    class property ErrorIgnored: ConsoleColor := ConsoleColor.DarkRed;
+
+    // Command execution
+    class property Command: ConsoleColor := ConsoleColor.Magenta;
+    class property CommandOutput: ConsoleColor := ConsoleColor.White;
+    class property StderrPrefix: ConsoleColor := ConsoleColor.Red;
+
+    // Function tracing
+    class property FunctionTrace: ConsoleColor := ConsoleColor.White;
+  end;
+
   [PluginRegistration]
   LoggingRegistration = public class(IPluginRegistration)
   private
@@ -45,6 +83,7 @@ type
 
   FailMode = public (No, Yes, Recovered, Unknown);
   ILogger = public interface
+    // Existing methods (for backwards compatibility)
     method LogError(s: String);
     method LogMessage(s: String);
     method LogWarning(s: String);
@@ -52,6 +91,16 @@ type
     method LogDebug(s: String);
     method LogInfo(s: String);
     method LogLive(s: String);
+
+    // New unified method
+    method Log(aKind: LogMessageKind; s: String);
+
+    // Specialized command logging
+    method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommandOutput(s: String);
+    method LogCommandOutputError(s: String);
+    method LogOutputDump(s: String; aSuccess: Boolean);
+
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object := nil);
     method &Write;
@@ -74,6 +123,11 @@ type
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
     method LogLive(s: String); locked;
+    method Log(aKind: LogMessageKind; s: String); locked;
+    method LogCommand(aExecutable: String; aArguments: String); locked;
+    method LogCommandOutput(s: String); locked;
+    method LogCommandOutputError(s: String); locked;
+    method LogOutputDump(s: String; aSuccess: Boolean); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
     property InIgnore: Boolean read get_InIgnore    write set_InIgnore;
@@ -98,6 +152,11 @@ type
     method LogDebug(s: String);locked;
     method LogInfo(s: String); locked;
     method LogLive(s: String); empty;
+    method Log(aKind: LogMessageKind; s: String); locked;
+    method LogCommand(aExecutable: String; aArguments: String); locked;
+    method LogCommandOutput(s: String); locked;
+    method LogCommandOutputError(s: String); locked;
+    method LogOutputDump(s: String; aSuccess: Boolean); locked;
     method Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);locked;
     method &Exit(aImportant: Boolean := false; aScript: String; aFailMode: FailMode; aResult: Object);locked;
     class method MyToString(s: Object): String;
@@ -242,7 +301,8 @@ begin
         a.ToString()
       else
         'null';
-      if length(result) > 250 then
+      // Don't truncate in debug mode - users need full info when debugging
+      if (not LoggerSettings.ShowDebug) and (length(result) > 250) then
         result := result.Substring(0, 100)+"...";
     end).ToArray);
   var lNode := new XElement('action', new XAttribute('name', Filter(aScript)), new XAttribute('args', Filter(lArgsString)));
@@ -314,6 +374,37 @@ end;
 method BaseXmlLogger.LogInfo(s: String);
 begin
   LogMessage(s);
+end;
+
+method BaseXmlLogger.Log(aKind: LogMessageKind; s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', aKind.ToString.ToLowerInvariant), Filter(s)));
+end;
+
+method BaseXmlLogger.LogCommand(aExecutable: String; aArguments: String);
+begin
+  var lMessage := Filter(aExecutable);
+  if not String.IsNullOrEmpty(aArguments) then
+    lMessage := lMessage + ' ' + Filter(aArguments);
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'command'), lMessage));
+end;
+
+method BaseXmlLogger.LogCommandOutput(s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), Filter(s)));
+end;
+
+method BaseXmlLogger.LogCommandOutputError(s: String);
+begin
+  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), new XAttribute('stream', 'stderr'), Filter(s)));
+end;
+
+method BaseXmlLogger.LogOutputDump(s: String; aSuccess: Boolean);
+begin
+  fXmlData.Add(new XElement('message',
+    new XAttribute('kind', 'output'),
+    new XAttribute('success', if aSuccess then 'true' else 'false'),
+    Filter(s)));
 end;
 
 class method BaseXmlLogger.Filter(s: String): String;
@@ -389,6 +480,31 @@ end;
 method MultiLogger.LogLive(s: String);
 begin
   Loggers.ForEach(a -> a.LogLive(s) );
+end;
+
+method MultiLogger.Log(aKind: LogMessageKind; s: String);
+begin
+  Loggers.ForEach(a -> a.Log(aKind, s));
+end;
+
+method MultiLogger.LogCommand(aExecutable: String; aArguments: String);
+begin
+  Loggers.ForEach(a -> a.LogCommand(aExecutable, aArguments));
+end;
+
+method MultiLogger.LogCommandOutput(s: String);
+begin
+  Loggers.ForEach(a -> a.LogCommandOutput(s));
+end;
+
+method MultiLogger.LogCommandOutputError(s: String);
+begin
+  Loggers.ForEach(a -> a.LogCommandOutputError(s));
+end;
+
+method MultiLogger.LogOutputDump(s: String; aSuccess: Boolean);
+begin
+  Loggers.ForEach(a -> a.LogOutputDump(s, aSuccess));
 end;
 
 method MultiLogger.Enter(aImportant: Boolean := false; aScript: String; params args: array of Object);

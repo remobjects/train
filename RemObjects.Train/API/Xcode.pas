@@ -74,12 +74,11 @@ begin
       sb.Append(' SYMROOT="'+aServices.ResolveWithBase(ec,aOptions.destinationFolder)+'"');
     sb.Append(' '+aOptions.extraArgs);
   end;
-  //aServices.Logger.LogMessage(sb.ToString);
-
+  aServices.Logger.LogCommand('/usr/bin/xcodebuild', sb.ToString);
 
   var lOutput := new StringBuilder;
   var lErrors := new System.Collections.Generic.List<String>;
-  var n := Shell.ExecuteProcess('/usr/bin/xcodebuild', sb.ToString, nil,false ,
+  var lExitCode := Shell.ExecuteProcess('/usr/bin/xcodebuild', sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       locking lErrors do lErrors.Add(a);
@@ -95,15 +94,15 @@ begin
     end;
    end, nil, nil);
 
-  if n <> 0 then begin
-    aServices.Logger.LogMessage(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  aServices.Logger.LogOutputDump(lOutput.ToString, lSuccess);
+  if not lSuccess then begin
     for each el in lErrors do
       aServices.Logger.LogError(el);
-  end else
-    aServices.Logger.LogDebug(lOutput.ToString);
+  end;
 
 
-  if n <> 0 then raise new Exception('Xcode failed');
+  if not lSuccess then raise new Exception('Xcode failed');
 
 end;
 
