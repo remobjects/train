@@ -162,7 +162,7 @@ begin
 
     System.IO.File.Move(lVal, lVal2);
   end;
-  aServices.Logger.LogCommand('file.move', String.Format('{0} to {1}', lVal,  lVal2));
+  aServices.Logger.LogCommand('file.move', lVal, lVal2);
 end;
 
 class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
@@ -217,7 +217,7 @@ begin
       raise new Exception(String.Format("Target file '{0}' already exists.", lVal2));
     RemObjects.Elements.RTL.File.CopyTo(lVal, lVal2, true);
   end;
-  aServices.Logger.LogCommand('file.copy', String.Format('{0} to {1}', lVal,  lVal2));
+  aServices.Logger.LogCommand('file.copy', lVal, lVal2);
 end;
 
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
@@ -367,7 +367,7 @@ begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
   System.IO.Directory.Move(lVal, lVal2);
-  aServices.Logger.LogCommand('folder.move', String.Format('{0} to {1}', lVal, lVal2));
+  aServices.Logger.LogCommand('folder.move', lVal, lVal2);
 end;
 
 class method FilePlugin.File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);

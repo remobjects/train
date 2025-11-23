@@ -23,6 +23,7 @@ type
     method LogLive(s: String); empty;
     method Log(aKind: LogMessageKind; s: String);
     method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommand(aOperation: String; aSource: String; aDestination: String);
     method LogCommandOutput(s: String);
     method LogCommandOutputError(s: String);
     method LogOutputDump(s: String; aSuccess: Boolean);
@@ -100,6 +101,7 @@ begin
       12: aTarget.LogCommandOutput(lItem.Value.Item2);
       13: aTarget.LogCommandOutputError(lItem.Value.Item2);
       14: aTarget.LogOutputDump(lItem.Value.Item2, lItem.Value.Item3 = 1);
+      15: aTarget.LogCommand(lItem.Value.Item2, String(lItem.Value.Item4[0]), String(lItem.Value.Item4[1]));
     end;
     lItem := lItem.Next;
   end;
@@ -128,6 +130,12 @@ method DelayedLogger.LogCommand(aExecutable: String; aArguments: String);
 begin
   locking fDelayStore do
   fDelayStore.AddLast(Tuple.Create(11, aExecutable, 0, array of Object([aArguments])));
+end;
+
+method DelayedLogger.LogCommand(aOperation: String; aSource: String; aDestination: String);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(15, aOperation, 0, array of Object([aSource, aDestination])));
 end;
 
 method DelayedLogger.LogCommandOutput(s: String);

@@ -54,6 +54,7 @@ type
     method LogLive(s: String);
     method Log(aKind: LogMessageKind; s: String);
     method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommand(aOperation: String; aSource: String; aDestination: String);
     method LogCommandOutput(s: String);
     method LogCommandOutputError(s: String);
     method LogOutputDump(s: String; aSuccess: Boolean);
@@ -323,7 +324,7 @@ begin
     Console.ForegroundColor := LogColors.Command;
     Console.Write(aExecutable);
     if not String.IsNullOrEmpty(aArguments) then begin
-      Console.ForegroundColor := LogColors.Message;
+      Console.ForegroundColor := LogColors.CommandArguments;
       Console.Write(' ');
       Console.Write(aArguments);
     end;
@@ -331,6 +332,27 @@ begin
     Console.ForegroundColor := lCol;
   end else begin
     Console.WriteLine(aExecutable + if not String.IsNullOrEmpty(aArguments) then ' ' + aArguments else '');
+  end;
+end;
+
+method Logger.LogCommand(aOperation: String; aSource: String; aDestination: String);
+begin
+  CheckEnter;
+  if ConsoleApp.ShowColors then begin
+    var lCol := Console.ForegroundColor;
+    Console.ForegroundColor := LogColors.Command;
+    Console.Write(aOperation);
+    Console.Write(' ');
+    Console.ForegroundColor := LogColors.CommandArguments;
+    Console.Write(aSource);
+    Console.ForegroundColor := LogColors.Message;
+    Console.Write(' to ');
+    Console.ForegroundColor := LogColors.CommandArguments;
+    Console.Write(aDestination);
+    Console.WriteLine();
+    Console.ForegroundColor := lCol;
+  end else begin
+    Console.WriteLine(aOperation + ' ' + aSource + ' to ' + aDestination);
   end;
 end;
 

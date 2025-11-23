@@ -40,7 +40,7 @@ type
   LogColors = public static class
   public
     // Core message types
-    class property Debug: ConsoleColor := ConsoleColor.DarkBlue;
+    class property Debug: ConsoleColor := ConsoleColor.DarkGreen;
     class property Message: ConsoleColor := ConsoleColor.Gray;
     class property Warning: ConsoleColor := ConsoleColor.Yellow;
     class property Hint: ConsoleColor := ConsoleColor.Cyan;
@@ -48,7 +48,8 @@ type
     class property ErrorIgnored: ConsoleColor := ConsoleColor.DarkRed;
 
     // Command execution
-    class property Command: ConsoleColor := ConsoleColor.Magenta;
+    class property Command: ConsoleColor := ConsoleColor.Blue;
+    class property CommandArguments: ConsoleColor := ConsoleColor.DarkBlue;
     class property CommandOutput: ConsoleColor := ConsoleColor.White;
     class property StderrPrefix: ConsoleColor := ConsoleColor.Red;
 
@@ -97,6 +98,7 @@ type
 
     // Specialized command logging
     method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommand(aOperation: String; aSource: String; aDestination: String); // For copy/move operations
     method LogCommandOutput(s: String);
     method LogCommandOutputError(s: String);
     method LogOutputDump(s: String; aSuccess: Boolean);
@@ -125,6 +127,7 @@ type
     method LogLive(s: String); locked;
     method Log(aKind: LogMessageKind; s: String); locked;
     method LogCommand(aExecutable: String; aArguments: String); locked;
+    method LogCommand(aOperation: String; aSource: String; aDestination: String); locked;
     method LogCommandOutput(s: String); locked;
     method LogCommandOutputError(s: String); locked;
     method LogOutputDump(s: String; aSuccess: Boolean); locked;
@@ -154,6 +157,7 @@ type
     method LogLive(s: String); empty;
     method Log(aKind: LogMessageKind; s: String); locked;
     method LogCommand(aExecutable: String; aArguments: String); locked;
+    method LogCommand(aOperation: String; aSource: String; aDestination: String); locked;
     method LogCommandOutput(s: String); locked;
     method LogCommandOutputError(s: String); locked;
     method LogOutputDump(s: String; aSuccess: Boolean); locked;
@@ -383,10 +387,26 @@ end;
 
 method BaseXmlLogger.LogCommand(aExecutable: String; aArguments: String);
 begin
+  var lElement := new XElement('message',
+    new XAttribute('kind', 'command'),
+    new XAttribute('executable', Filter(aExecutable)));
+  if not String.IsNullOrEmpty(aArguments) then
+    lElement.Add(new XAttribute('arguments', Filter(aArguments)));
+
+  // Also include combined text content for backwards compatibility
   var lMessage := Filter(aExecutable);
   if not String.IsNullOrEmpty(aArguments) then
     lMessage := lMessage + ' ' + Filter(aArguments);
-  fXmlData.Add(new XElement('message', new XAttribute('kind', 'command'), lMessage));
+  lElement.Add(lMessage);
+
+  fXmlData.Add(lElement);
+end;
+
+method BaseXmlLogger.LogCommand(aOperation: String; aSource: String; aDestination: String);
+begin
+  // Format as "operation source to destination" and use the existing two-parameter method
+  // This keeps the XML format identical
+  LogCommand(aOperation, aSource + ' to ' + aDestination);
 end;
 
 method BaseXmlLogger.LogCommandOutput(s: String);
@@ -490,6 +510,11 @@ end;
 method MultiLogger.LogCommand(aExecutable: String; aArguments: String);
 begin
   Loggers.ForEach(a -> a.LogCommand(aExecutable, aArguments));
+end;
+
+method MultiLogger.LogCommand(aOperation: String; aSource: String; aDestination: String);
+begin
+  Loggers.ForEach(a -> a.LogCommand(aOperation, aSource, aDestination));
 end;
 
 method MultiLogger.LogCommandOutput(s: String);
