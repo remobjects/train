@@ -30,6 +30,7 @@ type
       environment: array of KeyValuePair<String, String>;
       aTimeout: nullable TimeSpan;
       aUseProcess: Process := nil): Integer;
+    class method ResolveCommand(aCommand: String; aWorkDir: String; aLogger: ILogger): String;
     constructor(aItem: IApiRegistrationServices);
     method Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
     method ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
@@ -41,7 +42,7 @@ implementation
 
 method Shell.Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec), true);
+  var lCMD := Utilities.GetArgAsString(args, 0, ec);
   var lFail := true;
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
@@ -50,10 +51,14 @@ begin
   var lCaptureMode: Boolean := false;
   var lCaptureFunc: EcmaScriptBaseFunctionObject := nil;
   var LWD: String := nil;
+  var lSearchPath: Boolean := true;  // Default to true (enable PATH search)
   var lAllowedErrorCodes := new Dictionary<String, RemObjects.Script.EcmaScript.PropertyValue>;
   if lOpt <> nil then
   begin
-    var lVal := lOpt.Get('capture');
+    var lVal := lOpt.Get('searchPath');
+    if (lVal <> nil) and (lVal <> Undefined.Instance) then
+      lSearchPath := Utilities.GetObjAsBoolean(lVal, ec);
+    lVal := lOpt.Get('capture');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then begin
       lCaptureFunc := EcmaScriptBaseFunctionObject(lVal);
       if (lCaptureFunc = nil) and (Utilities.GetObjAsBoolean(lVal, ec)) then begin
@@ -79,7 +84,26 @@ begin
     end;
   end;
 
-  fEngine.Engine.Logger.Enter(true,'shell.exec', lCMD+if not String.IsNullOrEmpty(lArg) then ' '+ lArg else '');
+  // Resolve command: either via PATH search OR via base path resolution
+  if lSearchPath and (lCMD.IndexOf('/') < 0) and (lCMD.IndexOf('\') < 0) then begin
+    // No path separators - search PATH
+    var lOriginal := lCMD;
+    lCMD := ResolveCommand(lCMD, coalesce(LWD, fEngine.Engine.WorkDir), fEngine.Engine.Logger);
+    if lCMD <> lOriginal then
+      fEngine.Engine.Logger.LogInfo(String.Format('Resolved "{0}" to "{1}" (via PATH)', lOriginal, lCMD));
+  end else begin
+    // Has path separators or searchPath disabled - use ResolveWithBase for ~/ and relative paths
+    var lOriginal := lCMD;
+    lCMD := fEngine.ResolveWithBase(ec, lCMD, true);
+    if lCMD <> lOriginal then
+      fEngine.Engine.Logger.LogDebug(String.Format('Resolved "{0}" to "{1}" (via base path)', lOriginal, lCMD));
+  end;
+
+  // Log the command being executed
+  fEngine.Engine.Logger.LogCommand(lCMD, lArg);
+
+  // Function tracing (debug mode only since we already logged with LogCommand)
+  fEngine.Engine.Logger.Enter(false,'shell.exec', lCMD+if not String.IsNullOrEmpty(lArg) then ' '+ lArg else '');
   try
     if fEngine.Engine.DryRun then begin
       fEngine.Engine.Logger.LogMessage('Dry run.');
@@ -143,21 +167,25 @@ begin
       raise new AbortException;
     end;
   finally
-    fEngine.Engine.Logger.Exit(true,String.Format('shell.exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
+    fEngine.Engine.Logger.Exit(false,String.Format('shell.exec({0})', lCMD), if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
 end;
 
 method Shell.ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
 begin
-  var lCMD := fEngine.ResolveWithBase(ec, Utilities.GetArgAsString(args, 0, ec), true);
+  var lCMD := Utilities.GetArgAsString(args, 0, ec);
   var lArg := fEngine.Expand(ec, Utilities.GetArgAsString(args, 1, ec));
   var lFail := true;
   var lOpt := Utilities.GetArgAsEcmaScriptObject(args, 2, ec);
   var lEnv := new List<KeyValuePair<String, String>>;
   var lTimeout: nullable TimeSpan := nil;
   var lWD: String;
+  var lSearchPath: Boolean := true;  // Default to true (enable PATH search)
   if lOpt <> nil then begin
-    var lVal := lOpt.Get('timeout');
+    var lVal := lOpt.Get('searchPath');
+    if (lVal <> nil) and (lVal <> Undefined.Instance) then
+      lSearchPath := Utilities.GetObjAsBoolean(lVal, ec);
+    lVal := lOpt.Get('timeout');
     if (lVal <> nil) and (lVal <> Undefined.Instance) then
       lTimeout := TimeSpan.FromSeconds(Utilities.GetObjAsInteger(lVal, ec));
     lVal := lOpt.Get('workdir');
@@ -171,10 +199,30 @@ begin
       end;
     end;
   end;
+
+  // Resolve command: either via PATH search OR via base path resolution
+  if lSearchPath and (lCMD.IndexOf('/') < 0) and (lCMD.IndexOf('\') < 0) then begin
+    // No path separators - search PATH
+    var lOriginal := lCMD;
+    lCMD := ResolveCommand(lCMD, coalesce(lWD, fEngine.Engine.WorkDir), fEngine.Engine.Logger);
+    if lCMD <> lOriginal then
+      fEngine.Engine.Logger.LogInfo(String.Format('Resolved "{0}" to "{1}" (via PATH)', lOriginal, lCMD));
+  end else begin
+    // Has path separators or searchPath disabled - use ResolveWithBase for ~/ and relative paths
+    var lOriginal := lCMD;
+    lCMD := fEngine.ResolveWithBase(ec, lCMD, true);
+    if lCMD <> lOriginal then
+      fEngine.Engine.Logger.LogDebug(String.Format('Resolved "{0}" to "{1}" (via base path)', lOriginal, lCMD));
+  end;
+
+  // Log the command being executed
+  fEngine.Engine.Logger.LogCommand(lCMD, lArg);
+
   var lLogger := new RemObjects.Train.DelayedLogger;
   var lProc := new MyProcess;
   var lTask := new System.Threading.Tasks.Task(method begin
-    lLogger.Enter(true,String.Format('shell.execAsync({0})', lCMD), lArg);
+    // Function tracing (debug mode only since we already logged with LogCommand)
+    lLogger.Enter(false,String.Format('shell.execAsync({0})', lCMD), lArg);
     try
       if fEngine.Engine.DryRun then begin
         lLogger.LogMessage('Dry run.');
@@ -253,6 +301,50 @@ begin
   finally
     fEngine.Engine.Logger.Exit(true,'shell.system()', if lFail then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
   end;
+end;
+
+class method Shell.ResolveCommand(aCommand: String; aWorkDir: String; aLogger: ILogger): String;
+begin
+  // If command has path separators, it's a file path - not a command to search in PATH
+  if (aCommand.IndexOf('/') >= 0) or (aCommand.IndexOf('\') >= 0) then
+    exit aCommand;
+
+  // No path separators - search CWD first, then PATH
+  var lExtensions := new List<String>;
+  if MUtilities.Windows then begin
+    // On Windows, try common executable extensions
+    lExtensions.Add('.exe');
+    lExtensions.Add('.bat');
+    lExtensions.Add('.cmd');
+    lExtensions.Add(''); // Also try without extension
+  end else begin
+    lExtensions.Add(''); // Unix: no extension needed
+  end;
+
+  // 1. Check current working directory first
+  for each ext in lExtensions do begin
+    var lCwdPath := System.IO.Path.Combine(aWorkDir, aCommand + ext);
+    if System.IO.File.Exists(lCwdPath) then
+      exit lCwdPath;
+  end;
+
+  // 2. Search PATH environment variable
+  var lPathVar := System.Environment.GetEnvironmentVariable('PATH');
+  if not String.IsNullOrEmpty(lPathVar) then begin
+    var lSeparator := if MUtilities.Windows then ';' else ':';
+    var lPaths := lPathVar.Split(lSeparator);
+    for each lPath in lPaths do begin
+      if String.IsNullOrWhiteSpace(lPath) then continue;
+      for each ext in lExtensions do begin
+        var lFullPath := System.IO.Path.Combine(lPath.Trim, aCommand + ext);
+        if System.IO.File.Exists(lFullPath) then
+          exit lFullPath;
+      end;
+    end;
+  end;
+
+  // Not found - return original command and let it fail with a clear error
+  exit aCommand;
 end;
 
 constructor Shell(aItem: IApiRegistrationServices);
