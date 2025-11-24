@@ -31,6 +31,7 @@ type
       aTimeout: nullable TimeSpan;
       aUseProcess: Process := nil): Integer;
     class method ResolveCommand(aCommand: String; aWorkDir: String; aLogger: ILogger): String;
+    class method GetExecutableExtensions(aLogger: ILogger): List<String>;
     constructor(aItem: IApiRegistrationServices);
     method Exec(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
     method ExecAsync(ec: RemObjects.Script.EcmaScript.ExecutionContext; aSelf: Object; args: array of Object): Object;
@@ -309,42 +310,55 @@ begin
   if (aCommand.IndexOf('/') >= 0) or (aCommand.IndexOf('\') >= 0) then
     exit aCommand;
 
-  // No path separators - search CWD first, then PATH
-  var lExtensions := new List<String>;
-  if MUtilities.Windows then begin
-    // On Windows, try common executable extensions
-    lExtensions.Add('.exe');
-    lExtensions.Add('.bat');
-    lExtensions.Add('.cmd');
-    lExtensions.Add(''); // Also try without extension
-  end else begin
-    lExtensions.Add(''); // Unix: no extension needed
-  end;
+  // Get executable extensions to try (e.g., ['.exe', '.bat', ''] on Windows; [''] on Unix)
+  var lExtensionsToTry := GetExecutableExtensions(aLogger);
 
-  // 1. Check current working directory first
-  for each ext in lExtensions do begin
-    var lCwdPath := System.IO.Path.Combine(aWorkDir, aCommand + ext);
-    if System.IO.File.Exists(lCwdPath) then
-      exit lCwdPath;
-  end;
-
-  // 2. Search PATH environment variable
+  // Search PATH environment variable only (not CWD - use ./foo for CWD)
   var lPathVar := System.Environment.GetEnvironmentVariable('PATH');
   if not String.IsNullOrEmpty(lPathVar) then begin
     var lSeparator := if MUtilities.Windows then ';' else ':';
-    var lPaths := lPathVar.Split(lSeparator);
-    for each lPath in lPaths do begin
-      if String.IsNullOrWhiteSpace(lPath) then continue;
-      for each ext in lExtensions do begin
-        var lFullPath := System.IO.Path.Combine(lPath.Trim, aCommand + ext);
-        if System.IO.File.Exists(lFullPath) then
-          exit lFullPath;
+    var lPathDirs := lPathVar.Split(lSeparator);
+    for each lPathDir in lPathDirs do begin
+      if String.IsNullOrWhiteSpace(lPathDir) then continue;
+      // Try each extension (including empty string for no extension)
+      for each lExtension in lExtensionsToTry do begin
+        var lCandidatePath := System.IO.Path.Combine(lPathDir.Trim, aCommand + lExtension);
+        if System.IO.File.Exists(lCandidatePath) then
+          exit lCandidatePath;
       end;
     end;
   end;
 
   // Not found - return original command and let it fail with a clear error
   exit aCommand;
+end;
+
+class method Shell.GetExecutableExtensions(aLogger: ILogger): List<String>;
+begin
+  result := new List<String>;
+
+  if MUtilities.Windows then begin
+    // On Windows, get extensions from PATHEXT environment variable
+    // PATHEXT contains semicolon-separated extensions WITH dots (e.g., ".COM;.EXE;.BAT;.CMD")
+    var lPathExtValue := System.Environment.GetEnvironmentVariable('PATHEXT');
+    if String.IsNullOrEmpty(lPathExtValue) then begin
+      if assigned(aLogger) then
+        aLogger.LogWarning('PATHEXT environment variable not set');
+      exit;
+    end;
+
+    // Split semicolon-separated list and add each extension (already includes the dot)
+    for each lExtWithDot in lPathExtValue.Split(';') do begin
+      if not String.IsNullOrWhiteSpace(lExtWithDot) then
+        result.Add(lExtWithDot.Trim.ToLowerInvariant); // e.g., '.exe', '.bat'
+    end;
+
+    // Also try without any extension
+    result.Add('');
+  end else begin
+    // On Unix, no extension needed
+    result.Add('');
+  end;
 end;
 
 constructor Shell(aItem: IApiRegistrationServices);
