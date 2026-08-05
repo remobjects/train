@@ -7,29 +7,32 @@ This page guides you though what is needed to build Train yourself, from the sou
 
 ## Before compiling
 
-* Get Oxygene [here](http://www.elementscompiler.com/elements/download). <br />The command line compiler is free, and there's a trial version integrated in Visual Studio or [Fire](http://remobjects.com/fire).
-* Clone the Train repository: `git clone https://github.com/remobjects/train.git`
-* Run `git submodule update --init` to get the "script" repository.
-* **Script\Source\RemObjects.Script\Properties\AssemblyInfo.pas** has a line reading `[assembly: AssemblyKeyName('RemObjectsSoftware')]`, comment that out (or create & install a "RemObjectsSoftware" key using the `sn` tool).
+* Install [Elements](https://www.elementscompiler.com/elements/download) with EBuild.
+* Install the .NET 10 runtime for each machine on which Train will run.
+* Clone the Train repository: `git clone https://github.com/remobjects/train.git`.
 
-## Compiling in Fire or Visual Studio
+## Compiling
 
-Compile in Visual Studio by opening **RemObjects.Train.sln** and building it. The resulting output files are in **Train/Bin/Debug**. The compiled binary is **Train.exe**.
+Open `Train.sln` in Fire or build it from the command line:
 
-You will need [Mono](http://www.go-mono.com) to run Train on Mac (and Linux).
+```shell
+ebuild Train.sln --configuration:Release
+```
 
-## Compiling from the Command Line on Windows
+Train is a .NET 10 application; there is no separate Classic/Mono target or target-selection setting. Build products are written to `Bin/Build/<Configuration>/Core`.
 
-Use msbuild: `msbuild RemObjects.Train.sln /p:Configuration=Release`
+## Running
 
-(Note: if msbuild isn't in your path, it's probably located at `C:\Windows\Microsoft.NET\Framework\V4.0.30319\msbuild.exe`)
+The build emits a managed entry point, `Train.dll`, plus framework-dependent launchers for every supported platform architecture:
 
-Your resulting output files are in **Train\bin\Release**.
+* Windows: `Train-win-x64.exe`, `Train-win-x86.exe`, and `Train-win-arm64.exe`
+* macOS: `Train-osx-x64` and `Train-osx-arm64`
+* Linux: `Train-linux-x64` and `Train-linux-arm64`
 
-## Compiling from the Command Line on Mac or Linux
+Use the launcher matching the destination machine, for example:
 
-You will need to install [Mono](http://www.go-mono.com) to build (and use) Train on Mac and Linux.
+```shell
+Bin/Build/Release/Core/Train-osx-arm64 path/to/script.train
+```
 
-Once done, use xbuild: `xbuild RemObjects.Train.sln /p:Configuration=Release`
-
-Your resulting output files are in **Train/bin/Release**.
+You can also use `dotnet Bin/Build/Release/Core/Train.dll path/to/script.train`. The output is framework-dependent, so the matching .NET 10 runtime must be installed; Mono is not used.

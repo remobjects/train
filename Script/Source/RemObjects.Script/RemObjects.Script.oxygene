@@ -1,58 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
   <PropertyGroup>
-    <ProductVersion>3.5</ProductVersion>
     <OutputType>Library</OutputType>
     <AssemblyName>RemObjects.Script</AssemblyName>
     <AllowGlobals>False</AllowGlobals>
     <AllowLegacyOutParams>False</AllowLegacyOutParams>
     <AllowLegacyCreate>False</AllowLegacyCreate>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectGuid>{CAF9C919-D826-4452-910E-D8BA4861CD72}</ProjectGuid>
     <RootNamespace>RemObjects.Script</RootNamespace>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <Company>RemObjects Software, Inc.</Company>
-    <TargetFramework>.NETFramework4.0</TargetFramework>
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETCore10.0</TargetFramework>
+    <OutputPath>..\..\..\Bin\Build\$(Configuration)\Core</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>DESIGN;DEBUG;TRACE;</DefineConstants>
-    <OutputPath>..\..\Bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <Optimize>False</Optimize>
     <GeneratePDB>True</GeneratePDB>
-    <GenerateMDB>True</GenerateMDB>
-    <CpuType>anycpu</CpuType>
-    <XmlDocWarningLevel>WarningOnPublicMembers</XmlDocWarningLevel>
-    <EnableUnmanagedDebugging>True</EnableUnmanagedDebugging>
     <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>DESIGN</DefineConstants>
-    <OutputPath>..\..\Bin</OutputPath>
-    <EnableAsserts>False</EnableAsserts>
-    <CodeFlowAnalysis>True</CodeFlowAnalysis>
-    <CpuType>anycpu</CpuType>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <RegisterForComInterop>False</RegisterForComInterop>
-    <UseXmlDoc>False</UseXmlDoc>
-    <XmlDocWarningLevel>WarningOnPublicMembers</XmlDocWarningLevel>
-    <XmlDocAllMembers>False</XmlDocAllMembers>
     <Optimize>True</Optimize>
     <GeneratePDB>True</GeneratePDB>
-    <GenerateMDB>True</GenerateMDB>
-    <WarnOnCaseMismatch>False</WarnOnCaseMismatch>
-    <RunCodeAnalysis>False</RunCodeAnalysis>
-    <RequireExplicitLocalInitialization>False</RequireExplicitLocalInitialization>
+    <WarnOnCaseMismatch>True</WarnOnCaseMismatch>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.pas" />
     <Compile Include="EcmaScript\Bindings\AdditiveOperators.pas" />
@@ -93,10 +65,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.pas" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-    </None>
-    <Compile Include="Properties\Settings.Designer.pas" />
     <Compile Include="ScriptComponent.pas">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
@@ -105,20 +73,8 @@
     <Folder Include="EcmaScript\" />
     <Folder Include="EcmaScript\Bindings\" />
     <Folder Include="EcmaScript\Objects\" />
-    <Folder Include="Glyphs\" />
     <Folder Include="PascalScript\" />
     <Folder Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="EcmaScript\EcmaScriptComponent.png">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Glyphs\EcmaScriptComponent.png">
-      <SubType>Content</SubType>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
-  <PropertyGroup>
-    <PreBuildEvent />
-  </PropertyGroup>
 </Project>

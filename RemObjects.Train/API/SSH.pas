@@ -46,8 +46,8 @@ begin
   var lProto := new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals);
   lProto.AddValue('listFiles', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFiles'));
   lProto.AddValue('listFolders', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpListFolders'));
-  lProto.AddValue('download', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpUpload'));
-  lProto.AddValue('upload', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpDownload'));
+  lProto.AddValue('download', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpDownload'));
+  lProto.AddValue('upload', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpUpload'));
   lProto.AddValue('close', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpClose'));
   aServices.RegisterValue('sftp', new RemObjects.Script.EcmaScript.EcmaScriptObject(aServices.Globals)
   .AddValue('connect', RemObjects.Train.MUtilities.SimpleFunction(aServices.Engine, typeOf(SSHReg), 'SftpConnect', lProto)));
@@ -103,6 +103,4 @@ begin
   using sr := new System.IO.FileStream(aServices.ResolveWithBase(ec,aLocal), System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read) do
     aSelf.UploadFile(sr,aRemote);
 end;
-
-
 end.

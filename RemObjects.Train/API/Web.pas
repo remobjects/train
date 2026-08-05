@@ -3,13 +3,15 @@
 interface
 
 uses
-  System.Collections.Generic,
-  System.Text;
+  System,
+  System.IO,
+  System.Net.Http;
 
 type
   [PluginRegistration]
   WebRegister = public class(IPluginRegistration)
   private
+    class var fHttpClient := new HttpClient(); readonly;
   protected
   public
     method &Register(aServices: IApiRegistrationServices);
@@ -30,27 +32,33 @@ end;
 
 class method WebRegister.HttpGetUrl(aServices: IApiRegistrationServices; aUrl: String): String;
 begin
-  var lReq := System.Net.HttpWebRequest.Create(aUrl);
-  using res := lReq.GetResponse() do begin
-    using srrs := new System.IO.StreamReader(res.GetResponseStream) do
-      exit srrs.ReadToEnd;
-  end;
+  exit fHttpClient.GetStringAsync(aUrl).GetAwaiter().GetResult();
 end;
 
 class method WebRegister.HttpDownloadUrl(aServices: IApiRegistrationServices; ec: RemObjects.Script.EcmaScript.ExecutionContext; aUrl: String; aTarget: String := nil): String;
 begin
-  var lReq := System.Net.HttpWebRequest.Create(aUrl);
-  aTarget := aServices.ResolveWithBase(ec,aTarget);
-  using res := lReq.GetResponse() do begin
-    var lfn := res.Headers["Content-Disposition"];
-    if not String.IsNullOrEmpty(lfn) then begin
-      if lReq.RequestUri.AbsolutePath.Contains('/') then
-        lfn := lReq.RequestUri.AbsolutePath.Substring(lReq.RequestUri.AbsolutePath.IndexOf('/')+1);
+  aTarget := aServices.ResolveWithBase(ec, aTarget);
+  using lResponse := fHttpClient.GetAsync(aUrl).GetAwaiter().GetResult() do begin
+    lResponse.EnsureSuccessStatusCode();
+
+    var lFileName: String;
+    if assigned(lResponse.Content.Headers.ContentDisposition) then begin
+      lFileName := lResponse.Content.Headers.ContentDisposition.FileNameStar;
+      if String.IsNullOrWhiteSpace(lFileName) then
+        lFileName := lResponse.Content.Headers.ContentDisposition.FileName;
     end;
-    if String.IsNullOrWhiteSpace(lfn) then lfn := 'download.bin';
-    aTarget := System.IO.Path.Combine(aTarget, lfn);
-    using fs := new System.IO.FileStream(aTarget, System.IO.FileMode.Create, System.IO.FileAccess.Write) do
-      using fs2 := res.GetResponseStream() do fs2.CopyTo(fs);
+
+    if String.IsNullOrWhiteSpace(lFileName) then
+      lFileName := Path.GetFileName(lResponse.RequestMessage.RequestUri.LocalPath);
+    if String.IsNullOrWhiteSpace(lFileName) then
+      lFileName := 'download.bin'
+    else
+      lFileName := lFileName.Replace('"', '').Replace('''', '');
+
+    aTarget := Path.Combine(aTarget, lFileName);
+    using lTargetStream := new FileStream(aTarget, FileMode.Create, FileAccess.Write) do
+      using lSourceStream := lResponse.Content.ReadAsStream() do
+        lSourceStream.CopyTo(lTargetStream);
   end;
   exit aTarget;
 end;

@@ -9,7 +9,7 @@ Welcome to Train
 
 RemObjects Train is a JavaScript based build engine for build automation and other scripting tasks.
 
-You write your scripts as JavaScript code (we recommend to the `.train` file extension, but they are plain `.js` files), with access to all common JavaScript APIs, and a handful of powerful additional [APIs](API) that Train adds, targeted at common scripting tasks. You can then run these scripts using the `Train.exe` engine, on Windows, Mac and Linux.
+You write your scripts as JavaScript code (we recommend the `.train` file extension, but they are plain `.js` files), with access to all common JavaScript APIs and a handful of powerful additional [APIs](API) for common scripting tasks. Train runs on .NET 10 and provides native launchers for Windows, macOS and Linux on x64 and ARM64, plus Windows x86.
 
 Train is fully open source under the BSD license, written in [Oxygene](http://www.elementscompiler.com/oxygene) and build upon our (also open source) [Script for .NET](http://www.remobjects.com/script) JavaScrip/ECMAScript engine as runtime.
 
@@ -25,4 +25,3 @@ beyond the things you know<br />
 everybody got a destination<br />
 everybody got a place to go ♫
 </div>
-

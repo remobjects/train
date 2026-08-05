@@ -135,7 +135,7 @@ begin
     preLastKey := lastKey;
 
     var lRequest := new ListObjectsRequest(BucketName := aSelf.Bucket, Prefix := aPrefix, Marker := lastKey);
-    var newObjects := aSelf.S3Client.ListObjects(lRequest):S3Objects:Select(o -> o.Key);
+    var newObjects := aSelf.S3Client.ListObjectsAsync(lRequest).Result:S3Objects:Select(o -> o.Key);
     for each o in newObjects do begin
       lList.Add(o);
       lastKey := o;
@@ -179,7 +179,7 @@ begin
   try
     using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do begin
 
-      using lResult := aSelf.S3Client.GetObject(lRequest) do begin
+      using lResult := aSelf.S3Client.GetObjectAsync(lRequest).Result do begin
         //aServices.Logger.LogMessage("File.Exists?: {0}", File.Exists(lDownloadTarget));
         //aServices.Logger.LogMessage("lResult.LastModified: {0}", lResult.LastModified);
         //if File.Exists(lDownloadTarget) then begin
@@ -219,7 +219,7 @@ begin
   aKey := aServices.Expand(ec, aKey);
 
   using lRequest := new GetObjectRequest(BucketName := aSelf.Bucket, Key := aKey) do
-    using lResult := aSelf.S3Client.GetObject(lRequest) do
+    using lResult := aSelf.S3Client.GetObjectAsync(lRequest).Result do
       using s := lResult.ResponseStream do
         using r := new StreamReader(s) do
           result := r.ReadToEnd();
@@ -261,8 +261,8 @@ begin
 
   aServices.Logger.LogMessage('Uploading file {0} to {1} on S3', aLocalFile, aKey);
   using lStream := new FileStream(aLocalFile, FileMode.Open, FileAccess.Read, FileShare.Delete) do
-    using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, InputStream := lStream, Timeout := aSelf.Timeout) do
-      using lResponse := aSelf.S3Client.PutObject(lRequest) do;
+    using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, InputStream := lStream) do
+      using lResponse := aSelf.S3Client.PutObjectAsync(lRequest).Result do
 end;
 
 class method S3PlugIn.WriteFile(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aString: String; aKey: String);
@@ -270,7 +270,7 @@ begin
   aKey := aServices.Expand(ec, aKey);
 
   using lRequest := new PutObjectRequest(BucketName := aSelf.Bucket, Key := aKey, ContentBody := aString) do
-    using lResponse := aSelf.S3Client.PutObject(lRequest) do;
+    using lResponse := aSelf.S3Client.PutObjectAsync(lRequest).Result do;
 end;
 
 class method S3PlugIn.UploadFiles(aServices: IApiRegistrationServices; ec: ExecutionContext; aSelf: S3Engine; aLocalFolderAndFilters: String; aPrefix: String; aRecurse: Boolean);

@@ -14,8 +14,7 @@ uses
   System.Xml.XPath,
   System.Xml.Xsl,
   RemObjects.Script.EcmaScript,
-  RemObjects.Train.API,
-  DiscUtils.Iscsi;
+  RemObjects.Train.API;
 
 type
   [PluginRegistration]

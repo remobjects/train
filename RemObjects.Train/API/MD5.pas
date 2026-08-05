@@ -34,14 +34,14 @@ begin
   aFilename := aServices.ResolveWithBase(ec, aFilename);
   using file := new FileStream(aFilename, FileMode.Open) do
   begin
-    var md := new MD5CryptoServiceProvider();
-    var retVal := md.ComputeHash(file);
-    var sb := new StringBuilder();
-    for i: Int32 := 0 to retVal.Length - 1 do
-    begin
-      sb.Append(retVal[i].ToString('x2'))
+    using lMD5 := MD5.Create() do begin
+      var lHash := lMD5.ComputeHash(file);
+      var lResult := new StringBuilder();
+      for i: Int32 := 0 to lHash.Length - 1 do begin
+        lResult.Append(lHash[i].ToString('x2'));
+      end;
+      exit lResult.ToString();
     end;
-    exit sb.ToString();
   end;
 end;
 

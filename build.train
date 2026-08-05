@@ -1,14 +1,11 @@
 /*
-  Run this with the following command line to build it:
-    Train.exe build.train
+  Run this with a previously installed Train:
+    Train build.train
 
-    use SET docsgen=c:\path\to\docsgen.exe to build documentation too.
+    Set docsgen to the path of the docsgen executable to build documentation too.
 */
 
-log.info("Syncing git submodules");
-
-shell.system("git submodule update --init", ".");
-msbuild.rebuild("remObjects.Train.sln", { configuration: "Release", destinationFolder: "Bin" });
+ebuild.runEBuild("Train.sln", "--configuration:Release --no-cache");
 
 var dg = env["docsgen"];
 

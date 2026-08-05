@@ -73,9 +73,16 @@ type
 
         var lPath := "/usr/local/bin/ebuild";
         if File.Exists(lPath) then begin
-          var lEBuildScript := File.ReadAllText(lPath).Trim(); //mono "/Users/mh/Code/Elements/Bin/EBuild.exe" "$@"
+          var lEBuildScript := File.ReadAllText(lPath).Trim();
+          // mono "/Users/mh/Code/Elements/Bin/EBuild.exe" "$@"
           if lEBuildScript.StartsWith('mono "') and lEBuildScript.EndsWith('" "$@"') then begin
             lPath := lEBuildScript.Substring(6, length(lEBuildScript)-12);
+            if File.Exists(lPath) then
+              exit lPath;
+          end
+          // dotnet exec "/Users/mh/Code/Elements/Bin/Core/EBuild.dll" "$@"
+          else if lEBuildScript.StartsWith('dotnet exec "') and lEBuildScript.EndsWith('" "$@"') then begin
+            lPath := lEBuildScript.Substring(13, length(lEBuildScript)-19);
             if File.Exists(lPath) then
               exit lPath;
           end;
@@ -123,7 +130,17 @@ type
 
         var sb := new System.Text.StringBuilder;
         aProject := aServices.ResolveWithBase(ec, aProject);
-        var lExitCode := Shell.ExecuteProcess(aEBuildExe, '"'+aProject+'" '+aOtherParameters, aServices.Engine.WorkDir, false , a-> begin
+        var lExe := aEBuildExe;
+        var lArgs := '"'+aProject+'" '+aOtherParameters;
+        if aEBuildExe.EndsWith('.dll') then begin
+          lExe := 'dotnet';
+          lArgs := 'exec "'+aEBuildExe+'" '+lArgs;
+        end
+        else if aEBuildExe.EndsWith('.exe') and (RemObjects.Elements.RTL.Environment.OS ≠ RemObjects.Elements.RTL.OperatingSystem.Windows) then begin
+          lExe := 'mono';
+          lArgs := '"'+aEBuildExe+'" '+lArgs;
+        end;
+        var lExitCode := Shell.ExecuteProcess(lExe, lArgs, aServices.Engine.WorkDir, false , a-> begin
                                                                                                     if assigned(a) then begin
                                                                                                       locking sb do sb.AppendLine(a);
                                                                                                       lLogger.LogError(a);
@@ -168,6 +185,8 @@ type
         lLogger.Replay(aServices.Logger);
         aServices.Engine.Logger.Exit(true,String.Format('ebuild({0})', aProject), if not lSuccess then RemObjects.Train.FailMode.Yes else RemObjects.Train.FailMode.No);
       end;
+
+      result := lSuccess;
 
     end;
 

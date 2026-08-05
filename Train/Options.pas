@@ -136,8 +136,6 @@ uses
   System.ComponentModel,
   System.Globalization,
   System.IO,
-  System.Runtime.Serialization,
-  System.Security.Permissions,
   System.Text,
   System.Text.RegularExpressions;
 
@@ -253,11 +251,7 @@ type
   end;
 
 
-  [Serializable()]
   OptionException = public class(Exception)
-  protected
-    constructor (info: SerializationInfo; context: StreamingContext);
-
   public
     property OptionName: String read private write;
 
@@ -265,8 +259,6 @@ type
     constructor(message: String; optionName: String);
     constructor(message: String; optionName: String; innerException: Exception);
 
-    [SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter := true)]
-    method GetObjectData(info: SerializationInfo; context: StreamingContext); override;
   end;
 
 
@@ -718,13 +710,6 @@ begin
 end;
 
 
-constructor OptionException(info: SerializationInfo; context: StreamingContext);
-begin
-  inherited constructor(info, context);
-  self.OptionName := info.GetString('OptionName');
-end;
-
-
 constructor OptionException(message: String; optionName: String);
 begin
   inherited constructor(message);
@@ -739,11 +724,6 @@ begin
 end;
 
 
-method OptionException.GetObjectData(info: SerializationInfo; context: StreamingContext);
-begin
-  inherited GetObjectData(info, context);
-  info.AddValue('OptionName', self.OptionName);
-end;
 {$ENDREGION}
 
 

@@ -5,9 +5,9 @@ RemObjects Train has a simple command command line and expects the main script a
 
 ```plain
 RemObjects Train - JavaScript-based build automation
-Copyright (c) RemObjects Software, 2013-2015. All rights reserved.
+Copyright 2013-2026 RemObjects Software, LLC. All rights reserved.
 
-Train.exe <script.train> [options]
+Train <script.train> [options]
 
   -o, --options=VALUE        Override the ini file with the global options
   -c, --colors               Use colors
@@ -35,7 +35,7 @@ train MyScript.train -vSomeVariable=foo -t=MyScript.html
 
 ## Train.ini
 
-An optional `Train.ini` file van be placed next to the `Train.exe` executable, in order to let Train know about paths to some well-known tools that Train provides APIs for. The following values are supported:
+An optional `Train.ini` file can be placed next to the Train executable to provide paths to well-known tools used by Train APIs. The following values are supported:
 
 ```
 [Globals]

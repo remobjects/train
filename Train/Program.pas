@@ -24,18 +24,15 @@ type
     fIndent: Integer;
     method CheckEnter;
     method CleanedString(s: String): String;
+
     method CutString(s: String): String;
     begin
-      var sep: String := #13#10;
-      case RemObjects.Elements.RTL.Environment.OS of
-        //RemObjects.Elements.RTL.OperatingSystem.Windows: sep := #13#10;
-        RemObjects.Elements.RTL.OperatingSystem.macOS: sep := #13;
-        RemObjects.Elements.RTL.OperatingSystem.Linux: sep := #10;
-      end;
+      var sep := RemObjects.Elements.RTL.Environment.LineBreak;
 
       var ar := s.Split([sep],StringSplitOptions.None);
       for i: Integer := 0 to ar.Count - 1 do
-        if length(ar[i]) > MaxWidth then ar[i] := ar[i].Substring(0, MaxWidth - 3) + '...';
+        if length(ar[i]) > MaxWidth then
+          ar[i] := ar[i].Substring(0, MaxWidth - 3) + '...';
 
       exit String.Join(sep, ar);
     end;
@@ -58,8 +55,9 @@ type
     property MaxWidth: Integer read begin
       if FixedConsoleWidth > 10 then
         exit FixedConsoleWidth;
+
       result := 80;
-      if not Console.IsOutputRedirected then begin // occurs under debugger (console redirected)
+      if not System.Console.IsOutputRedirected then begin // occurs under debugger (console redirected)
         try
           result := Console.WindowWidth-(2*fIndent)-1;
         except
@@ -256,6 +254,8 @@ begin
     except
       on E: IOException do
         Console.WriteLine('} '+lRet);
+      on E: ArgumentOutOfRangeException do
+        Console.WriteLine('} '+lRet);
     end;
 
   end else begin
@@ -292,7 +292,13 @@ end;
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
-  Console.WriteLine('Copyright 2013-2025 RemObjects Software, LLC. All rights reserved.');
+  Console.WriteLine('Copyright 2013-2026 RemObjects Software, LLC. All rights reserved.');
+  if RemObjects.Elements.RTL.Environment.ProcessArchitecture ≠ RemObjects.Elements.RTL.Environment.OSArchitecture then begin
+    Console.WriteLine($"Running as {RemObjects.Elements.RTL.Environment.ProcessArchitecture} on {RemObjects.Elements.RTL.Environment.OSName} {RemObjects.Elements.RTL.Environment.OSArchitecture}.");
+  end
+  else begin
+    Console.WriteLine($"Running natively on {RemObjects.Elements.RTL.Environment.OSName} {RemObjects.Elements.RTL.Environment.OSArchitecture}.");
+  end;
   var lLogger: ILogger := new Logger;
   var lGlobalVars := new Dictionary<String, String>;
   var lOptions := new OptionSet();
@@ -340,7 +346,7 @@ begin
       lShowHelp := true;
   end;
   if lShowHelp then begin
-    Console.WriteLine('Train.exe <script.train> [options] [variable=value]');
+    Console.WriteLine('Train <script.train> [options] [variable=value]');
     lOptions.WriteOptionDescriptions(Console.Out);
     exit 1;
   end

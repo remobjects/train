@@ -86,13 +86,16 @@ namespace System.IO.Compression
 		// Static CRC32 Table
 		private static UInt32[] CrcTable = null;
 		// Default filename encoder
-		private static Encoding DefaultEncoding = Encoding.GetEncoding(437);
+		private static Encoding DefaultEncoding;
 		#endregion
 
 		#region Public methods
 		// Static constructor. Just invoked once in order to create the CRC32 lookup table.
 		static ZipStorer()
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			DefaultEncoding = Encoding.GetEncoding(437);
+
 			// Generate CRC32 table
 			CrcTable = new UInt32[256];
 			for (int i = 0; i < CrcTable.Length; i++)
@@ -656,13 +659,15 @@ namespace System.IO.Compression
 		}
 		private DateTime DosTimeToDateTime(uint _dt)
 		{
-			return new DateTime(
-				(int)(_dt >> 25) + 1980,
-				(int)(_dt >> 21) & 15,
-				(int)(_dt >> 16) & 31,
-				(int)(_dt >> 11) & 31,
-				(int)(_dt >> 5) & 63,
-				(int)(_dt & 31) * 2);
+			// Some ZIP producers emit zero or out-of-range DOS date fields; normalize them instead of rejecting the archive.
+			int year = (int)(_dt >> 25) + 1980;
+			int month = Math.Min(Math.Max((int)(_dt >> 21) & 15, 1), 12);
+			int day = Math.Min(Math.Max((int)(_dt >> 16) & 31, 1), DateTime.DaysInMonth(year, month));
+			int hour = Math.Min((int)(_dt >> 11) & 31, 23);
+			int minute = Math.Min((int)(_dt >> 5) & 63, 59);
+			int second = Math.Min((int)(_dt & 31), 29) * 2;
+
+			return new DateTime(year, month, day, hour, minute, second);
 		}
 
 		/* CRC32 algorithm

@@ -41,7 +41,7 @@ type
 
   ScriptStatus = public enum(
     Stopped,
-    StepInto, 
+    StepInto,
     StepOver,
     StepOut,
     Running,
@@ -76,12 +76,12 @@ type
     fStackItems: System.Collections.ObjectModel.ReadOnlyCollection<ScriptStackFrame>;
     fDebugLastPos: PositionPair;
     fWaitEvent: System.Threading.ManualResetEvent := new System.Threading.ManualResetEvent(true);
-    method DebugLine(aFilename: String; aStartRow, aStartCol, aEndRow, aEndCol: Integer); 
+    method DebugLine(aFilename: String; aStartRow, aStartCol, aEndRow, aEndCol: Integer);
     method EnterScope(aName: String; athis: Object; aContext: ExecutionContext); // enter method
     method ExitScope(aName: String; aContext: ExecutionContext; aResult: Object; aExcept: Boolean); // exit method
     method CaughtException(e: Exception); // triggers on a CATCH before the js code itself
     method UncaughtException(e: Exception); // triggers when an exception escapes the main method
-    method Debugger; 
+    method Debugger;
     method Idle;
     method set_Status(value: ScriptStatus);
     method set_RunInThread(value: Boolean);
@@ -104,7 +104,7 @@ type
     [Category('Script')]
     property Source: String;
     [Category('Script')]
-    property RunInThread: Boolean read fRunInThread write set_RunInThread;    
+    property RunInThread: Boolean read fRunInThread write set_RunInThread;
     [Browsable(false)]
     property CallStack: ReadOnlyCollection<ScriptStackFrame> read fStackItems;
     [Browsable(false)]
@@ -121,7 +121,7 @@ type
     /// <summary>starts the script,
     ///   this should be ran from another thread
     ///   if you want to use the debugger</summary>
-    method Run; 
+    method Run;
     property RunResult: Object read fRunResult;
     property RunException: Exception read protected write;
     property DebugLastPos: PositionPair read fDebugLastPos;
@@ -133,7 +133,7 @@ type
     /// <summary>Executes the given function by name. After calling Run the global object
     ///   will contain a list of all functions, these can be called
     ///   by name. Note this only works after calling Run fihrst.</summary>
-    method RunFunction(name: String;  params args: array of Object): Object; 
+    method RunFunction(name: String;  params args: array of Object): Object;
     method RunFunction(initialStatus: ScriptStatus;  name: String;  params args: array of Object): Object; abstract;
 
     property Status: ScriptStatus read fStatus protected write set_Status;
@@ -159,9 +159,6 @@ type
   end;
 
 
-{$IFDEF DESIGN}
-  [System.Drawing.ToolboxBitmap(typeOf(RemObjects.Script.EcmaScriptComponent), 'Glyphs.EcmaScriptComponent.png')]
-{$ENDIF}
   EcmaScriptComponent = public class(ScriptComponent)
   private
   protected
@@ -175,7 +172,7 @@ type
     method SetDebug(b: Boolean); override;
     method IntRun: Object; override;
   public
-    property RootContext: ExecutionContext; 
+    property RootContext: ExecutionContext;
     property JustFunctions: Boolean read fJustFunctions write set_JustFunctions;
     method Clear(aGlobals: Boolean := false); override;
     method Include(aFileName, aData: String);
@@ -189,10 +186,10 @@ type
 
   SyntaxErrorException = public class(Exception)
   public
-    constructor(aSource: String; aMessage: String; aSpan: PositionPair; anErrorCode: Int32); 
+    constructor(aSource: String; aMessage: String; aSpan: PositionPair; anErrorCode: Int32);
     property Message: String; readonly; reintroduce;
     property Source: String; readonly; reintroduce;
-    property SourceFilename: String read Span:File; 
+    property SourceFilename: String read Span:File;
     property Span: PositionPair; readonly;
     property ErrorCode: Int32; readonly;
 
@@ -249,7 +246,7 @@ begin
       if Status = ScriptStatus.Paused then begin
         Status := ScriptStatus.StepInto;
         fWaitEvent.Set();
-      end else 
+      end else
         Status := ScriptStatus.StepInto;
       fLastFrame := fStackList.Count;
     end;
@@ -269,7 +266,7 @@ begin
       if Status = ScriptStatus.Paused then begin
         Status := ScriptStatus.StepOver;
         fWaitEvent.Set();
-      end else 
+      end else
       Status := ScriptStatus.StepOver;
       fLastFrame := fStackList.Count;
     end;
@@ -289,7 +286,7 @@ begin
       if Status = ScriptStatus.Paused then begin
         Status := ScriptStatus.StepOut;
         fWaitEvent.Set();
-      end else 
+      end else
         Status := ScriptStatus.StepOut;
       fLastFrame := fStackList.Count;
     end;
@@ -302,10 +299,10 @@ begin
     case Status of
       ScriptStatus.Paused: begin Status := ScriptStatus.Stopping; fWaitEvent.Set(); end;
       ScriptStatus.Stopping,
-      ScriptStatus.Pausing, 
-      ScriptStatus.Running, 
+      ScriptStatus.Pausing,
+      ScriptStatus.Running,
       ScriptStatus.StepInto,
-      ScriptStatus.StepOut, 
+      ScriptStatus.StepOut,
       ScriptStatus.StepOver:  Status := ScriptStatus.Stopping;
       ScriptStatus.Stopped: ;
     end; // case
@@ -314,8 +311,8 @@ end;
 
 method ScriptComponent.set_RunInThread(value: Boolean);
 begin
-  if Status = ScriptStatus.Stopped then 
-    fRunInThread := value 
+  if Status = ScriptStatus.Stopped then
+    fRunInThread := value
   else
     raise new ScriptComponentException(Properties.Resources.eRunInThreadCannotBeModifiedWhenScriptIsRunning);
 end;
@@ -393,7 +390,7 @@ begin
   fTracing := true;
   try
     if DebugTracePoint <> nil then DebugTracePoint(self, new ScriptDebugEventArgs(fStackList[fStackItems.Count-1].Method, new PositionPair(0, aStartRow, aStartCol, 0, aEndRow, aEndCol, aFilename)));
-    if (Status = ScriptStatus.StepInto) or 
+    if (Status = ScriptStatus.StepInto) or
           ((Status = ScriptStatus.StepOver) and (fLastFrame = fStackList.Count)) then Status := ScriptStatus.Pausing;
     CheckShouldPause;
   finally
@@ -542,7 +539,7 @@ end;
 
 method EcmaScriptComponent.IntRun(): Object;
 begin
-  Status := fEntryStatus; 
+  Status := fEntryStatus;
   fEntryStatus := ScriptStatus.Running;
   try
     if String.IsNullOrEmpty(SourceFileName) then SourceFileName := 'main.js';
@@ -645,4 +642,3 @@ end;
 
 
 end.
-
