@@ -21,6 +21,11 @@ type
     method LogDebug(s: String);
     method LogInfo(s: String);
     method LogLive(s: String); empty;
+    method Log(aKind: LogMessageKind; s: String);
+    method LogCommand(aExecutable: String; aArguments: String);
+    method LogCommandOutput(s: String);
+    method LogCommandOutputError(s: String);
+    method LogOutputDump(s: String; aSuccess: Boolean);
     method &Write; empty;
     property InIgnore: Boolean read fInIgnore write  set_InIgnore;
 
@@ -90,6 +95,11 @@ begin
       7: aTarget.Exit(true,lItem.Value.Item2, FailMode(lItem.Value.Item3), lItem.Value.Item4[0]);
       8: aTarget.LogInfo(lItem.Value.Item2);
       9: aTarget.InIgnore := Boolean(lItem.Value.Item3);
+      10: aTarget.Log(LogMessageKind(lItem.Value.Item3), lItem.Value.Item2);
+      11: aTarget.LogCommand(lItem.Value.Item2, String(lItem.Value.Item4[0]));
+      12: aTarget.LogCommandOutput(lItem.Value.Item2);
+      13: aTarget.LogCommandOutputError(lItem.Value.Item2);
+      14: aTarget.LogOutputDump(lItem.Value.Item2, lItem.Value.Item3 = 1);
     end;
     lItem := lItem.Next;
   end;
@@ -106,6 +116,36 @@ begin
   fInIgnore := value;
 
   fDelayStore.AddLast(Tuple.Create(9, '', if value then 1 else 0,array of Object(nil)));
+end;
+
+method DelayedLogger.Log(aKind: LogMessageKind; s: String);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(10, s, Integer(aKind), array of Object(nil)));
+end;
+
+method DelayedLogger.LogCommand(aExecutable: String; aArguments: String);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(11, aExecutable, 0, array of Object([aArguments])));
+end;
+
+method DelayedLogger.LogCommandOutput(s: String);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(12, s, 0, array of Object(nil)));
+end;
+
+method DelayedLogger.LogCommandOutputError(s: String);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(13, s, 0, array of Object(nil)));
+end;
+
+method DelayedLogger.LogOutputDump(s: String; aSuccess: Boolean);
+begin
+  locking fDelayStore do
+  fDelayStore.AddLast(Tuple.Create(14, s, if aSuccess then 1 else 0, array of Object(nil)));
 end;
 
 end.

@@ -41,7 +41,7 @@ type
     begin
       var lEBuildExe := FindEBuildExe();
       if not assigned(lEBuildExe) then
-        raise new Exception("EBuild.exe culd not be located.");
+        raise new Exception("EBuild.exe could not be located.");
       result := doRunCustomEBuild(aServices, ec, lEBuildExe, aProject, aOtherParameters);
     end;
 
@@ -130,6 +130,7 @@ type
 
         var sb := new System.Text.StringBuilder;
         aProject := aServices.ResolveWithBase(ec, aProject);
+        // For .dll (dotnet) vs .exe (mono/windows), adjust executable and arguments
         var lExe := aEBuildExe;
         var lArgs := '"'+aProject+'" '+aOtherParameters;
         if aEBuildExe.EndsWith('.dll') then begin
@@ -145,7 +146,7 @@ type
                                                                                                       locking sb do sb.AppendLine(a);
                                                                                                       lLogger.LogError(a);
                                                                                                       if aServices.Engine.LiveOutput then
-                                                                                                        aServices.Engine.Logger.LogLive("(stderr) "+a);
+                                                                                                        aServices.Engine.Logger.LogCommandOutputError(a);
                                                                                                     end;
                                                                                                   end,
                                                                                               a-> begin
@@ -154,11 +155,11 @@ type
                                                                                                       if a:StartsWith("E:") then
                                                                                                         lLogger.LogError("Error: "+a);
                                                                                                       if aServices.Engine.LiveOutput then
-                                                                                                        aServices.Engine.Logger.LogLive(a);
+                                                                                                        aServices.Engine.Logger.LogCommandOutput(a);
                                                                                                     end;
                                                                                                   end, [], nil);
 
-        lLogger.LogInfo(sb.ToString);
+        lLogger.LogOutputDump(sb.ToString, lExitCode = 0);
         if lExitCode ≠ 0 then begin
 
           //var lErrors := new System.Text.StringBuilder;

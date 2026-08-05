@@ -143,7 +143,7 @@ begin
       System.IO.File.Move(el, lTargetFN);
       lFiles .AppendLine(String.Format('Moved {0} to {1}', el,  lTargetFN));
     end;
-    aServices.Logger.LogInfo(lFiles.ToString);
+    aServices.Logger.LogCommand('file.move', lFiles.ToString);
     if lZero then raise new Exception('Zero files moved!');
     exit;
   end;
@@ -162,7 +162,7 @@ begin
 
     System.IO.File.Move(lVal, lVal2);
   end;
-  aServices.Logger.LogInfo(String.Format('Moved {0} to {1}', lVal,  lVal2));
+  aServices.Logger.LogCommand('file.move', String.Format('{0} to {1}', lVal,  lVal2));
 end;
 
 class method FilePlugin.File_Copy(aServices: IApiRegistrationServices; ec: ExecutionContext; aLeft, aRight: String; aRecurse: Boolean := false; aOverride: Boolean := true);
@@ -199,7 +199,7 @@ begin
 
     end;
 
-    aServices.Logger.LogInfo(lFiles.ToString);
+    aServices.Logger.LogCommand('file.copy', lFiles.ToString);
     if lZero then raise new Exception('Zero files copied!');
     exit;
   end;
@@ -217,7 +217,7 @@ begin
       raise new Exception(String.Format("Target file '{0}' already exists.", lVal2));
     RemObjects.Elements.RTL.File.CopyTo(lVal, lVal2, true);
   end;
-  //aServices.Logger.LogInfo(String.Format('Copied {0} to {1}', lVal,  lVal2));
+  aServices.Logger.LogCommand('file.copy', String.Format('{0} to {1}', lVal,  lVal2));
 end;
 
 class method FilePlugin.File_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := false);
@@ -229,8 +229,10 @@ begin
   lVal := Path.Combine(lPath, lName);
 
   if lVal = nil then exit;
-  for each el in Find(lVal) do
+  for each el in Find(lVal) do begin
     System.IO.File.Delete(el);
+    aServices.Logger.LogCommand('file.remove', el);
+  end;
   if aRecurse then
     for each f in Directory.GetDirectories(Path.GetDirectoryName(lVal)) do
       File_Delete(aServices, ec, Path.Combine(f, Path.GetFileName(lVal)), true);
@@ -249,12 +251,14 @@ begin
   if not System.IO.Directory.Exists(Path.GetDirectoryName(lVal)) then
     Directory.CreateDirectory(Path.GetDirectoryName(lVal));
   System.IO.File.WriteAllText(lVal, aData);
+  aServices.Logger.LogCommand('file.write', lVal);
 end;
 
 class method FilePlugin.File_Append(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN, aData:String);
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN, true);
   System.IO.File.AppendAllText(lVal, aData);
+  aServices.Logger.LogCommand('file.append', lVal);
 end;
 
 class method FilePlugin.File_Exists(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String): Boolean;
@@ -277,6 +281,7 @@ class method FilePlugin.Folder_Create(aServices: IApiRegistrationServices; ec: E
 begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   System.IO.Directory.CreateDirectory(lVal);
+  aServices.Logger.LogCommand('folder.create', lVal);
 end;
 
 class method FilePlugin.Folder_Delete(aServices: IApiRegistrationServices; ec: ExecutionContext; aFN: String; aRecurse: Boolean := true);
@@ -284,6 +289,7 @@ begin
   var lVal := aServices.ResolveWithBase(ec, aFN);
   if System.IO.Directory.Exists(lVal) then
   System.IO.Directory.Delete(lVal, aRecurse);
+  aServices.Logger.LogCommand('folder.remove', lVal);
 end;
 
 class method FilePlugin.Path_Combine(aServices: IApiRegistrationServices; ec: ExecutionContext; params args: array of String): String;
@@ -361,7 +367,7 @@ begin
   var lVal := aServices.ResolveWithBase(ec, aLeft);
   var lVal2 := aServices.ResolveWithBase(ec, aRight);
   System.IO.Directory.Move(lVal, lVal2);
-  aServices.Logger.LogMessage('Moved {0} to {1}', lVal, lVal2);
+  aServices.Logger.LogCommand('folder.move', String.Format('{0} to {1}', lVal, lVal2));
 end;
 
 class method FilePlugin.File_SetAttributes(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName: String; aFileFlagsOptions: FileFlagsOptions := nil);

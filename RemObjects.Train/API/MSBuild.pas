@@ -133,15 +133,15 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
+  aServices.Logger.LogCommand(lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
+  var lExitCode := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive("(stderr) "+a);
+        fServices.Engine.Logger.LogCommandOutputError(a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
@@ -149,18 +149,16 @@ begin
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive(a);
+        fServices.Engine.Logger.LogCommandOutput(a);
     end;
    end, nil, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  lTmp.LogOutputDump(lOutput.ToString, lSuccess);
 
   lTmp.Replay(aServices.Logger);
 
-  if n <> 0 then raise new Exception('MSBuild failed');
+  if not lSuccess then raise new Exception('MSBuild failed');
 end;
 
 class method MSBuildPlugin.MSBuildBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -182,15 +180,15 @@ begin
     sb.Append(' '+aOptions.extraArgs);
   end;
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
+  aServices.Logger.LogCommand(lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
+  var lExitCode := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive("(stderr) "+a);
+        fServices.Engine.Logger.LogCommandOutputError(a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
@@ -198,18 +196,16 @@ begin
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive(a);
+        fServices.Engine.Logger.LogCommandOutput(a);
     end;
    end, nil, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  lTmp.LogOutputDump(lOutput.ToString, lSuccess);
 
   lTmp.Replay(aServices.Logger);
 
-  if n <> 0 then raise new Exception('MSBuild failed');
+  if not lSuccess then raise new Exception('MSBuild failed');
 end;
 
 class method MSBuildPlugin.MSBuildRebuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aProject: String; aOptions: MSBuildOptions);
@@ -233,15 +229,15 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
+  aServices.Logger.LogCommand(lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
+  var lExitCode := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive("(stderr) "+a);
+        fServices.Engine.Logger.LogCommandOutputError(a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
@@ -249,18 +245,16 @@ begin
         lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive(a);
+        fServices.Engine.Logger.LogCommandOutput(a);
     end;
    end, nil, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  lTmp.LogOutputDump(lOutput.ToString, lSuccess);
 
   lTmp.Replay(aServices.Logger);
 
-  if n <> 0 then raise new Exception('MSBuild failed');
+  if not lSuccess then raise new Exception('MSBuild failed');
 end;
 
 class method MSBuildPlugin.MSBuildUpdateAssemblyVersion(aServices: IApiRegistrationServices; ec: ExecutionContext;
@@ -325,15 +319,15 @@ begin
   end;
 
   var lTmp := new DelayedLogger();
-  aServices.Logger.LogMessage('Running: {0} {1}', lbuild, sb.ToString);
+  aServices.Logger.LogCommand(lbuild, sb.ToString);
   var lOutput := new StringBuilder;
-  var n := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
+  var lExitCode := Shell.ExecuteProcess(lbuild, sb.ToString, nil,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
       locking lOutput do lOutput.AppendLine(a);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive("(stderr) "+a);
+        fServices.Engine.Logger.LogCommandOutputError(a);
     end;
    end ,a-> begin
     if not String.IsNullOrEmpty(a) then begin
@@ -342,18 +336,16 @@ begin
       locking lOutput do lOutput.AppendLine(a);
       writeLn(fServices.Engine.Logger);
       if fServices.Engine.LiveOutput then
-        fServices.Engine.Logger.LogLive(a);
+        fServices.Engine.Logger.LogCommandOutput(a);
     end;
    end, nil, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  lTmp.LogOutputDump(lOutput.ToString, lSuccess);
 
   lTmp.Replay(aServices.Logger);
 
-  if n <> 0 then raise new Exception('MSBuild failed');
+  if not lSuccess then raise new Exception('MSBuild failed');
 
 end;
 

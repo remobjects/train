@@ -27,7 +27,7 @@ windows.createShortcut("C:/readme.txt");
 will create `C:\readme.lnk` referenced to `C:\readme.txt`
 
 
-* **windows.getSpecialFolder(path): string** returns path to special folder. possible values:
+* **windows.getSpecialFolder(path): string** returns the path to a special folder. Possible values:
 
   * AdminTools
   * ApplicationData

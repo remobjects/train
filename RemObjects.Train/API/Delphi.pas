@@ -162,6 +162,8 @@ begin
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosx64.exe')
     else if aOptions:platform:ToLower in ['osxarm64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosxarm64.exe')
+    else if aOptions:platform:ToLower in ['winarm64ec', 'arm64ec'] then
+      lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin64'), 'dccarm64ec.exe')
     else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe')
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then
@@ -169,7 +171,7 @@ begin
     else
       raise new Exception('Unsupported platform ("win32", "win64", "osx32", "osx64", '+
                                                 '"iossimulator", "iosdevice32", "iosdevice64", "iossimarm64", '+
-                                                '"linux64", "android", "android64", "osxarm64")');
+                                                '"linux64", "android", "android64", "osxarm64", "winarm64ec")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
@@ -220,14 +222,14 @@ begin
 
   var lTmp := new DelayedLogger();
   var lOutput := new StringBuilder;
-  aServices.Logger.LogMessage('Running: {0} {1}', lRootPath, sb.ToString);
+  aServices.Logger.LogCommand(lRootPath, sb.ToString);
 
   var lenvironment := new Environment();
   lenvironment.LoadSystem;
   lenvironment.Item['Path'] := lDelphi+';'+lenvironment.Item['Path'];
   var lenv: array of KeyValuePair<String,String> := lenvironment.Select(a->new KeyValuePair<String,String>(a.Key,a.Value.ToString)).ToArray;
 
-  var n := Shell.ExecuteProcess(lRootPath, sb.ToString, lPath,false ,
+  var lExitCode := Shell.ExecuteProcess(lRootPath, sb.ToString, lPath,false ,
   a-> begin
     if not String.IsNullOrEmpty(a) then begin
       lTmp.LogError(a);
@@ -241,14 +243,12 @@ begin
     end;
    end, lenv, nil);
 
-  if n <> 0 then
-    lTmp.LogMessage(lOutput.ToString)
-  else
-    lTmp.LogInfo(lOutput.ToString);
+  var lSuccess := (lExitCode = 0);
+  lTmp.LogOutputDump(lOutput.ToString, lSuccess);
 
   lTmp.Replay(aServices.Logger);
 
-  if n <> 0 then raise new Exception('Delphi failed');
+  if not lSuccess then raise new Exception('Delphi failed');
 end;
 
 class method DelphiPlugin.RebuildMultiPath(aServices: IApiRegistrationServices; ec: ExecutionContext; aDelphi, aInput, aPlatform: String): String;
