@@ -318,6 +318,8 @@ end;
 
 method Logger.LogCommand(aExecutable: String; aArguments: String);
 begin
+  if not LoggerSettings.ShowDebug then
+    exit;
   CheckEnter;
   if ConsoleApp.ShowColors then begin
     var lCol := Console.ForegroundColor;
@@ -369,6 +371,8 @@ end;
 
 method Logger.LogOutputDump(s: String; aSuccess: Boolean);
 begin
+  if aSuccess and not LoggerSettings.ShowDebug then
+    exit;
   CheckEnter;
   s := CutString(s, true);  // Never truncate dumps
 
