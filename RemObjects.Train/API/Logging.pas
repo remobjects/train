@@ -135,6 +135,7 @@ type
   BaseXmlLogger = public abstract class(ILogger, IDisposable)
   private
     fTimeStack := new List<DateTime>;
+    method AppendCommandOutput(s, aStream: String);
   assembly
     method FindFailNodes(var aWork: XElement; aInput: sequence of XElement);
     fXmlData: System.Xml.Linq.XElement;
@@ -390,12 +391,31 @@ end;
 
 method BaseXmlLogger.LogCommandOutput(s: String);
 begin
-  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), Filter(s)));
+  AppendCommandOutput(s, nil);
 end;
 
 method BaseXmlLogger.LogCommandOutputError(s: String);
 begin
-  fXmlData.Add(new XElement('message', new XAttribute('kind', 'commandOutput'), new XAttribute('stream', 'stderr'), Filter(s)));
+  AppendCommandOutput(s, 'stderr');
+end;
+
+method BaseXmlLogger.AppendCommandOutput(s, aStream: String);
+begin
+  if fXmlData.LastNode is XElement then begin
+    var lLastMessage := XElement(fXmlData.LastNode);
+    if (lLastMessage.Name = 'message') and
+       (String(lLastMessage.Attribute('kind')) = 'commandOutput') and
+       (String(lLastMessage.Attribute('stream')) = aStream) then begin
+      lLastMessage.Add(new XText(RemObjects.Elements.RTL.Environment.LineBreak+Filter(s)));
+      exit;
+    end;
+  end;
+
+  var lMessage := new XElement('message', new XAttribute('kind', 'commandOutput'));
+  if assigned(aStream) then
+    lMessage.Add(new XAttribute('stream', aStream));
+  lMessage.Add(Filter(s));
+  fXmlData.Add(lMessage);
 end;
 
 method BaseXmlLogger.LogOutputDump(s: String; aSuccess: Boolean);
