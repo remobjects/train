@@ -3,6 +3,7 @@
 uses
   RemObjects.Train,
   System.Threading,
+  System.Diagnostics,
   RemObjects.Script.EcmaScript,
   RemObjects.Script.EcmaScript.Internal,
   System.Text,
@@ -65,11 +66,77 @@ type
 
   private
 
+    class method IsUsableNativeEBuild(aPath: String): Boolean;
+    begin
+      if not File.Exists(aPath) then
+        exit false;
+
+      if RemObjects.Elements.RTL.Environment.OS ≠ RemObjects.Elements.RTL.OperatingSystem.macOS then
+        exit true;
+
+      try
+        var lStartInfo := new ProcessStartInfo('/usr/bin/codesign');
+        lStartInfo.UseShellExecute := false;
+        lStartInfo.RedirectStandardOutput := true;
+        lStartInfo.RedirectStandardError := true;
+        lStartInfo.ArgumentList.Add('-v');
+        lStartInfo.ArgumentList.Add(aPath);
+        using lProcess := Process.Start(lStartInfo) do begin
+          lProcess.StandardOutput.ReadToEnd;
+          lProcess.StandardError.ReadToEnd;
+          lProcess.WaitForExit;
+          exit lProcess.ExitCode = 0;
+        end;
+      except
+        exit false;
+      end;
+    end;
+
+    class method PreferCoreEBuild(aEBuildExe: String): String;
+    begin
+      var lFolder := Path.GetDirectoryName(aEBuildExe);
+      if Path.GetFileName(lFolder):ToLowerInvariant ≠ 'core' then
+        lFolder := Path.Combine(lFolder, 'Core');
+
+      var lOS := case RemObjects.Elements.RTL.Environment.OS of
+        RemObjects.Elements.RTL.OperatingSystem.macOS: 'osx';
+        RemObjects.Elements.RTL.OperatingSystem.Linux: 'linux';
+        RemObjects.Elements.RTL.OperatingSystem.Windows: 'win';
+        else nil;
+      end;
+      var lArchitecture := case RemObjects.Elements.RTL.Environment.OSArchitecture:ToLowerInvariant of
+        'i386', 'x86': 'x86';
+        'x86_64', 'amd64': 'x64';
+        'arm': 'arm';
+        'arm64', 'aarch64': 'arm64';
+        else nil;
+      end;
+
+      if assigned(lOS) and assigned(lArchitecture) then begin
+        var lExtension := if RemObjects.Elements.RTL.Environment.OS = RemObjects.Elements.RTL.OperatingSystem.Windows then '.exe' else '';
+        var lNativeEBuild := Path.Combine(lFolder, $"EBuild-{lOS}-{lArchitecture}{lExtension}");
+        if IsUsableNativeEBuild(lNativeEBuild) then
+          exit lNativeEBuild;
+      end;
+
+      if RemObjects.Elements.RTL.Environment.OS = RemObjects.Elements.RTL.OperatingSystem.macOS then begin
+        var lUniversalEBuild := Path.Combine(lFolder, 'EBuild-osx');
+        if IsUsableNativeEBuild(lUniversalEBuild) then
+          exit lUniversalEBuild;
+      end;
+
+      var lCoreEBuild := Path.Combine(lFolder, 'EBuild.dll');
+      if File.Exists(lCoreEBuild) then
+        exit lCoreEBuild;
+
+      result := aEBuildExe;
+    end;
+
     // cloned from EBuild itself, which we don't want to reference in  Ttain
     class method FindEBuildExe: nullable String;
     begin
 
-      if (RemObjects.Elements.RTL.Environment.OS = RemObjects.Elements.RTL.OperatingSystem.macOS) /*or (Environment.OS = OperatingSystem.Linux)*/ then begin
+      if RemObjects.Elements.RTL.Environment.OS in [RemObjects.Elements.RTL.OperatingSystem.macOS, RemObjects.Elements.RTL.OperatingSystem.Linux] then begin
 
         var lPath := "/usr/local/bin/ebuild";
         if File.Exists(lPath) then begin
@@ -78,14 +145,16 @@ type
           if lEBuildScript.StartsWith('mono "') and lEBuildScript.EndsWith('" "$@"') then begin
             lPath := lEBuildScript.Substring(6, length(lEBuildScript)-12);
             if File.Exists(lPath) then
-              exit lPath;
+              exit PreferCoreEBuild(lPath);
           end
           // dotnet exec "/Users/mh/Code/Elements/Bin/Core/EBuild.dll" "$@"
           else if lEBuildScript.StartsWith('dotnet exec "') and lEBuildScript.EndsWith('" "$@"') then begin
             lPath := lEBuildScript.Substring(13, length(lEBuildScript)-19);
             if File.Exists(lPath) then
-              exit lPath;
+              exit PreferCoreEBuild(lPath);
           end;
+
+          exit lPath;
         end;
 
       end
@@ -95,22 +164,22 @@ type
           if assigned(lKey.GetValue("InstallDir"):ToString) then begin
             var lPath := Path.Combine(lKey.GetValue("InstallDir"):ToString, "Bin", "EBuild.exe");
             if assigned(lPath) and File.Exists(lPath) then
-              exit lPath;
+              exit PreferCoreEBuild(lPath);
           end;
           var lPath := lKey.GetValue("EBuild"):ToString;
           if assigned(lPath) and File.Exists(lPath) then
-            exit lPath;
+            exit PreferCoreEBuild(lPath);
         end;
         lKey := Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\RemObjects\Elements");
         if (lKey <> nil) then begin
           if assigned(lKey.GetValue("InstallDir"):ToString) then begin
             var lPath := Path.Combine(lKey.GetValue("InstallDir"):ToString, "Bin", "EBuild.exe");
             if assigned(lPath) and File.Exists(lPath) then
-              exit lPath;
+              exit PreferCoreEBuild(lPath);
           end;
           var lPath := lKey.GetValue("EBuild"):ToString;
           if assigned(lPath) and File.Exists(lPath) then
-            exit lPath;
+            exit PreferCoreEBuild(lPath);
         end;
       end;
 
@@ -129,6 +198,7 @@ type
         end;
 
         var sb := new System.Text.StringBuilder;
+        var lErrors := new System.Collections.Generic.List<String>;
         aProject := aServices.ResolveWithBase(ec, aProject);
         // For .dll (dotnet) vs .exe (mono/windows), adjust executable and arguments
         var lExe := aEBuildExe;
@@ -144,7 +214,7 @@ type
         var lExitCode := Shell.ExecuteProcess(lExe, lArgs, aServices.Engine.WorkDir, false , a-> begin
                                                                                                     if assigned(a) then begin
                                                                                                       locking sb do sb.AppendLine(a);
-                                                                                                      lLogger.LogError(a);
+                                                                                                      locking lErrors do lErrors.Add(a);
                                                                                                       if aServices.Engine.LiveOutput then
                                                                                                         aServices.Engine.Logger.LogCommandOutputError(a);
                                                                                                     end;
@@ -153,13 +223,17 @@ type
                                                                                                     if assigned(a) then begin
                                                                                                       locking sb do sb.AppendLine(a);
                                                                                                       if a:StartsWith("E:") then
-                                                                                                        lLogger.LogError("Error: "+a);
+                                                                                                        locking lErrors do lErrors.Add("Error: "+a);
                                                                                                       if aServices.Engine.LiveOutput then
                                                                                                         aServices.Engine.Logger.LogCommandOutput(a);
                                                                                                     end;
                                                                                                   end, [], nil);
 
-        lLogger.LogOutputDump(sb.ToString, lExitCode = 0);
+        if not aServices.Engine.LiveOutput then
+          lLogger.LogOutputDump(sb.ToString, lExitCode = 0);
+        locking lErrors do
+          for each lError in lErrors do
+            lLogger.LogError(lError);
         if lExitCode ≠ 0 then begin
 
           //var lErrors := new System.Text.StringBuilder;
