@@ -34,6 +34,7 @@ type
     class method runCustomEBuild(aServices: IApiRegistrationServices; ec: ExecutionContext; aEBuildExe: String; aProject: String; aOtherParameters: String): Boolean;
     begin
       aEBuildExe := aServices.ResolveWithBase(ec, aEBuildExe);
+      aEBuildExe := PreferCoreEBuild(aEBuildExe);
       result := doRunCustomEBuild(aServices, ec, aEBuildExe, aProject, aOtherParameters);
     end;
 
