@@ -80,6 +80,14 @@ type
 
   MSWinGacUtil = assembly class
   private
+    class var fFusionLock: Object := new Object;
+    class var fFusionModule: IntPtr;
+
+    [DllImport('mscoree.dll', CharSet := CharSet.Unicode, ExactSpelling := true)]
+    class method LoadLibraryShim(aDllName: String; aVersion: String; aReserved: IntPtr; out aModule: IntPtr): Int32; external;
+
+    class method EnsureFusionLoaded;
+
     [DllImport('fusion.dll')]
     class method CreateAssemblyEnum(out ppEnum: IAssemblyEnum; pUnkReserved: IntPtr; pName: IAssemblyName; &flags: AssemblyCacheFlags; pvReserved: IntPtr): System.Int32; external;
 
@@ -116,6 +124,25 @@ type
 
 implementation
 
+class method MSWinGacUtil.EnsureFusionLoaded;
+begin
+  locking fFusionLock do begin
+    if fFusionModule <> IntPtr.Zero then
+      exit;
+
+    // Core does not probe the Framework directory. The CLR shim locates the
+    // Framework 4 Fusion library for this process's architecture.
+    var lModule: IntPtr;
+    var lResult := LoadLibraryShim('fusion.dll', 'v4.0.30319', IntPtr.Zero, out lModule);
+    if (lResult < 0) or (lModule = IntPtr.Zero) then
+      raise new DllNotFoundException('Unable to load the .NET Framework 4 Fusion library for GAC operations ('+RuntimeInformation.ProcessArchitecture.ToString+'). Verify that the matching .NET Framework runtime is installed.', Marshal.GetExceptionForHR(lResult));
+
+    // Keep Fusion loaded for the process lifetime: the P/Invokes and COM
+    // interfaces below continue to use it after this method returns.
+    fFusionModule := lModule;
+  end;
+end;
+
 class method MSWinGacUtil.&Register(aName: String);
 begin
   WithCache(aCache-> begin
@@ -141,6 +168,7 @@ var
   lLen: Integer;
 begin
 
+  EnsureFusionLoaded;
   if String.IsNullOrEmpty(aDisplayName) then lName := nil
   else
     CreateAssemblyNameObject(out lName, aDisplayName, CreateAssemblyNameObjectFlags.CANOF_PARSE_DISPLAY_NAME, IntPtr.Zero);
@@ -159,8 +187,9 @@ end;
 
 class method MSWinGacUtil.WithCache(aRun: Action<IAssemblyCache>);
 begin
+  EnsureFusionLoaded;
   var lTmp: IAssemblyCache;
-  CreateAssemblyCache(out lTmp, 0);
+  Marshal.ThrowExceptionForHR(CreateAssemblyCache(out lTmp, 0));
   aRun(lTmp);
 end;
 

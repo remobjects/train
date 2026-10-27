@@ -1,0 +1,4 @@
+var names = gac.list("mscorlib");
+if (names.length == 0)
+  error("Expected mscorlib in the Framework GAC");
+log.info("PASS: public gac.list found " + names.length + " mscorlib assemblies");

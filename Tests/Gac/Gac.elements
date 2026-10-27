@@ -1,0 +1,17 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{C40DB58D-7E97-470B-9014-251C1CC74E77}</ProjectGuid>
+    <Name>GacTests</Name>
+    <AssemblyName>GacTests</AssemblyName>
+    <RootNamespace>GacTests</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETCore10.0</TargetFramework>
+    <OutputPath>Bin</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../RemObjects.Train/API/Gac.pas" />
+    <Compile Include="Program.pas" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)/RemObjects Software/Elements/RemObjects.Elements.Echoes.targets" />
+</Project>
