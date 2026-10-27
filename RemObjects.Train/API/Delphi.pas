@@ -164,14 +164,14 @@ begin
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dccosxarm64.exe')
     else if aOptions:platform:ToLower in ['winarm64ec', 'arm64ec'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin64'), 'dccarm64ec.exe')
-    else if aOptions:platform:ToLower in ['64', 'x64', 'win64'] then
+    else if aOptions:platform:ToLower in ['64', 'x64', 'win64', 'win64x'] then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc64.exe')
     else if String.IsNullOrEmpty(aOptions:platform) or (aOptions:platform:ToLower in ['32', 'x86', 'win32']) then
       lRootPath := Path.Combine(Path.Combine(lRootPath, 'Bin'), 'dcc32.exe')
     else
       raise new Exception('Unsupported platform ("win32", "win64", "osx32", "osx64", '+
                                                 '"iossimulator", "iosdevice32", "iosdevice64", "iossimarm64", '+
-                                                '"linux64", "android", "android64", "osxarm64", "winarm64ec")');
+                                                '"linux64", "android", "android64", "osxarm64", "winarm64ec", "win64x")');
   end;
   if not File.Exists(lRootPath) then raise new Exception('Delphi dcc not found: '+lRootPath+' '+aOptions:platform);
   if aServices.Engine.DryRun then exit;
