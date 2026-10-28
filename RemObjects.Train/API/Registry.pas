@@ -32,7 +32,8 @@ end;
 
 class method RegistryPlugin.registryGetValue(aServices: IApiRegistrationServices; KeyName: String; ValueName: String; DefaultValue: Object): Object;
 begin
-  exit Registry.GetValue(KeyName, ValueName, DefaultValue);
+  var value := Registry.GetValue(KeyName, ValueName, DefaultValue);
+  exit if assigned(value) then value else DefaultValue;
 end;
 
 class method RegistryPlugin.registrySetValue(aServices: IApiRegistrationServices; KeyName: String; ValueName: String; Value: Object);
