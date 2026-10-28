@@ -2,23 +2,24 @@
 title: Registry
 ---
 
-Read and write Windows registry values. **Windows-only** - these functions do nothing on macOS/Linux.
+Read and write Windows registry values. **Windows-only** - these functions require the Windows registry.
 
 ## Quick Reference
 
-* **reg.getValue(key, valueName, default)** - Read registry value
-* **reg.setValue(key, valueName, value, valueType)** - Write registry value
+* **reg.getValue(key, valueName, [default], [view])** - Read registry value
+* **reg.setValue(key, valueName, value, [view])** - Write registry value
 
 ## Reading Registry Values
 
-### reg.getValue(key, valueName, [default])
+### reg.getValue(key, valueName, [default], [view])
 
-Reads a value from the Windows registry. Returns the default value if the key or value doesn't exist (or `null` if no default provided).
+Reads a value from the Windows registry. Returns the default value if the value does not exist in an existing key (or `null` if no default is provided). A missing key returns `null`, even when a default is supplied.
 
 **Parameters:**
 - `key` - Full registry key path with hive (e.g., `"HKEY_LOCAL_MACHINE\\SOFTWARE\\..."`
 - `valueName` - Name of the value to read
-- `default` - Optional default if key/value doesn't exist
+- `default` - Optional default if the value does not exist in an existing key
+- `view` - Optional `32` or `64` for an explicit registry view; omitted or `0` uses the process default. Pass `null` for `default` when only specifying the view.
 
 ```javascript
 // Read registry value
@@ -42,14 +43,15 @@ log("API Key: " + apiKey);
 
 ## Writing Registry Values
 
-### reg.setValue(key, valueName, newValue)
+### reg.setValue(key, valueName, newValue, [view])
 
 Sets a value in the Windows registry. Creates the key if it doesn't exist.
 
 **Parameters:**
 - `key` - Full registry key path with hive
 - `valueName` - Name of the value to set
-- `newValue` - Value to write (string)
+- `newValue` - Value to write
+- `view` - Optional `32` or `64` for an explicit registry view; omitted or `0` uses the process default.
 
 ```javascript
 // Set registry value
@@ -65,6 +67,19 @@ reg.setValue(
   "InstallPath",
   "C:\\Program Files\\MyApp"
 );
+```
+
+## Selecting a Registry View
+
+The view is independent of Train's process architecture. Existing calls retain their
+process-default behavior; Train does not fall back to the other view. Values other
+than `0`, `32`, and `64` are rejected. On 32-bit Windows, Windows maps both views
+to its single registry view.
+
+```javascript
+var delphiBase = reg.getValue(
+  "HKEY_LOCAL_MACHINE\\SOFTWARE\\RemObjects\\CI2\\", "DelphiBasePath", null, 32);
+reg.setValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\MyCompany\\MyApp", "InstallDir", "C:\\Tools", 64);
 ```
 
 ## Registry Hives

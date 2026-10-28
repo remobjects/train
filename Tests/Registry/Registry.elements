@@ -1,0 +1,14 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{D2B67AD8-66DF-4EE4-82C4-7EA0F8076C25}</ProjectGuid>
+    <Name>RegistryTests</Name>
+    <AssemblyName>RegistryTests</AssemblyName>
+    <RootNamespace>RegistryTests</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETCore10.0</TargetFramework>
+    <OutputPath>Bin</OutputPath>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="Program.pas" /></ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)/RemObjects Software/Elements/RemObjects.Elements.Echoes.targets" />
+</Project>

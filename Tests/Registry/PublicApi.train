@@ -1,0 +1,22 @@
+function check(actual, expected, label) {
+  if (actual !== expected) error(label + ": got " + actual + ", expected " + expected);
+}
+check(reg.getValue(TestKey, "Seed", null, 32), "view32", "explicit 32-bit read");
+check(reg.getValue(TestKey + "\\", "Seed", null, 64), "view64", "explicit 64-bit read with trailing slash");
+check(reg.getValue(TestKey.toLowerCase(), "Seed", null, 32), "view32", "case-insensitive hive");
+check(reg.getValue(TestKey, "Seed"), DefaultSeed, "omitted view");
+check(reg.getValue(TestKey, "Seed", null, 0), DefaultSeed, "explicit default view");
+check(reg.getValue(TestKey, "Absent", "fallback", 32), "fallback", "missing value default");
+check(reg.getValue(TestKey, "Absent", null, 64), null, "missing value null");
+check(reg.getValue(TestKey + "\\Absent", "Seed", "fallback", 32), null, "missing key matches legacy behavior");
+check(reg.getValue(TestKey, "Blank", "fallback", 32), "", "empty value preserved");
+check(reg.getValue(TestKey, "", null, 32), "unnamed", "unnamed value");
+reg.setValue(TestKey, "Written", "write32", 32);
+reg.setValue(TestKey, "Written", "write64", 64);
+check(reg.getValue(TestKey, "Written", null, 32), "write32", "32-bit write");
+check(reg.getValue(TestKey, "Written", null, 64), "write64", "64-bit write");
+reg.setValue(TestKey, "DefaultWrite", "default");
+reg.setValue(TestKey, "ZeroWrite", "zero", 0);
+reg.setValue(TestKey + "\\Created", "CreatedValue", "created", 32);
+check(reg.getValue(TestKey + "\\Created", "CreatedValue", null, 32), "created", "explicit view creates key");
+check(reg.getValue(TestKey + "\\Created", "CreatedValue", null, 64), null, "no fallback to other view");
