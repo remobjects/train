@@ -1,0 +1,14 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{5581CA9A-A762-4B1E-8B68-2155DBBE8CCD}</ProjectGuid>
+    <Name>MilestoneTests</Name>
+    <AssemblyName>MilestoneTests</AssemblyName>
+    <RootNamespace>MilestoneTests</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETCore10.0</TargetFramework>
+    <OutputPath>Bin</OutputPath>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="Program.pas" /></ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)/RemObjects Software/Elements/RemObjects.Elements.Echoes.targets" />
+</Project>

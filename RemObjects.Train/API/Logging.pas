@@ -78,6 +78,8 @@ type
     class method Info(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
     [WrapAs(nil, SkipDryRun := false)]
     class method Error(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
+    [WrapAs(nil, SkipDryRun := false)]
+    class method Milestone(aServices: IApiRegistrationServices; ec: ExecutionContext; aText: String);
   end;
 
   FailMode = public (No, Yes, Recovered, Unknown);
@@ -574,6 +576,8 @@ begin
   lLog.AddValue('debug', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Debug'));
   lLog.AddValue('info', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Info'));
   aServices.RegisterValue('error', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Error'));
+  aServices.RegisterObjectValue('ci')
+    .AddValue('milestone', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Milestone'));
 end;
 
 class method LoggingRegistration.Log(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
@@ -637,6 +641,13 @@ begin
     aServices.Logger.LogInfo(aArgs[0])
   else
     aServices.Logger.LogInfo(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.Milestone(aServices: IApiRegistrationServices; ec: ExecutionContext; aText: String);
+begin
+  if length(aText:Trim) = 0 then
+    exit;
+  aServices.Logger.LogMessage('::CI2:MILESTONE|'+aText:Trim);
 end;
 
 class method LoggingRegistration.Error(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
