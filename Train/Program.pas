@@ -12,6 +12,8 @@ uses
 
 type
   ConsoleApp = class
+  private
+    class method VariableForLog(aName: String; aValue: Object): String;
   public
     class method Main(args: array of String): Integer;
     class property ShowColors: Boolean := true;
@@ -404,6 +406,22 @@ begin
   Console.Write(s);
 end;
 
+class method ConsoleApp.VariableForLog(aName: String; aValue: Object): String;
+begin
+  var lName := aName:ToLowerInvariant.Replace('_', '').Replace('-', '').Replace('.', '');
+  if lName.Contains('password') or
+     lName.Contains('passwd') or
+     lName.Contains('secret') or
+     lName.Contains('token') or
+     lName.Contains('apikey') or
+     lName.Contains('accesskey') or
+     lName.Contains('privatekey') or
+     lName.Contains('credential') or
+     lName.Contains('connectionstring') then
+    exit '[REDACTED]';
+  result := if assigned(aValue) then aValue.ToString else '';
+end;
+
 class method ConsoleApp.Main(args: array of String): Integer;
 begin
   Console.WriteLine('RemObjects Train - JavaScript-based build automation');
@@ -492,7 +510,7 @@ begin
       lRoot[el.Key] := el.Value;
 
     if LoggerSettings.ShowDebug then
-      lLogger.LogDebug(String.Format('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+a.Value).ToArray)));
+      lLogger.LogDebug(String.Format('Root Variables: '#13#10'{0}',String.Join(#13#10, lRoot.Select(a->a.Key+'='+VariableForLog(a.Key, a.Value)).ToArray)));
 
     if not String.IsNullOrEmpty(lPluginFolder) then
     begin
