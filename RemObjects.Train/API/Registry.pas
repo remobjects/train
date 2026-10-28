@@ -60,16 +60,18 @@ end;
 
 class method RegistryPlugin.registryGetValue(aServices: IApiRegistrationServices; KeyName: String; ValueName: String; DefaultValue: Object; aView: Int32): Object;
 begin
-  if aView = 0 then
-    exit Registry.GetValue(KeyName, ValueName, DefaultValue);
+  if aView = 0 then begin
+    var value := Registry.GetValue(KeyName, ValueName, DefaultValue);
+    exit if assigned(value) then value else DefaultValue;
+  end;
 
   using lBaseKey := OpenRegistryBaseKey(KeyName, aView, out var lSubKey) do
     using lKey := lBaseKey.OpenSubKey(lSubKey) do begin
-      // Match Registry.GetValue: a missing key returns nil; a missing value
-      // in an existing key returns DefaultValue.
       if not assigned(lKey) then
-        exit nil;
+        exit DefaultValue;
       result := lKey.GetValue(ValueName, DefaultValue);
+      if not assigned(result) then
+        result := DefaultValue;
     end;
 end;
 
