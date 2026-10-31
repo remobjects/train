@@ -1,0 +1,14 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{417D54EA-98A7-4EE4-9147-499C4DB7F0CA}</ProjectGuid>
+    <Name>PipelineApiTests</Name>
+    <AssemblyName>PipelineApiTests</AssemblyName>
+    <RootNamespace>PipelineApiTests</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Mode>Echoes</Mode>
+    <TargetFramework>.NETCore10.0</TargetFramework>
+    <OutputPath>Bin</OutputPath>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="Program.pas" /></ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)/RemObjects Software/Elements/RemObjects.Elements.Echoes.targets" />
+</Project>

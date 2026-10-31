@@ -69,6 +69,7 @@
     <Compile Include="API\InnoSetup.pas" />
     <Compile Include="API\Interfaces.pas" />
     <Compile Include="API\Logging.pas" />
+    <Compile Include="API\PipelineCache.pas" />
     <Compile Include="API\Mail.pas" />
     <Compile Include="API\MD5.pas" />
     <Compile Include="API\MSBuild.pas" />

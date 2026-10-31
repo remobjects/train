@@ -80,6 +80,8 @@ type
     class method Error(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
     [WrapAs(nil, SkipDryRun := false)]
     class method Milestone(aServices: IApiRegistrationServices; ec: ExecutionContext; aText: String);
+    [WrapAs(nil, SkipDryRun := true)]
+    class method ArtifactReady(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName, aRole: String);
   end;
 
   FailMode = public (No, Yes, Recovered, Unknown);
@@ -577,7 +579,11 @@ begin
   lLog.AddValue('info', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Info'));
   aServices.RegisterValue('error', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Error'));
   aServices.RegisterObjectValue('ci')
-    .AddValue('milestone', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Milestone'));
+    .AddValue('milestone', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'Milestone'))
+    .AddValue('artifactReady', MUtilities.SimpleFunction(aServices.Engine, typeOf(self), 'ArtifactReady'))
+    .AddValue('cacheKey', MUtilities.SimpleFunction(aServices.Engine, typeOf(PipelineCache), 'CacheKey'))
+    .AddValue('cacheRestore', MUtilities.SimpleFunction(aServices.Engine, typeOf(PipelineCache), 'CacheRestore'))
+    .AddValue('cacheStore', MUtilities.SimpleFunction(aServices.Engine, typeOf(PipelineCache), 'CacheStore'));
 end;
 
 class method LoggingRegistration.Log(aServices: IApiRegistrationServices; ec: ExecutionContext; params aArgs: array of String);
@@ -641,6 +647,16 @@ begin
     aServices.Logger.LogInfo(aArgs[0])
   else
     aServices.Logger.LogInfo(aArgs[0], aArgs.Skip(1).OfType<Object>().ToArray);
+end;
+
+class method LoggingRegistration.ArtifactReady(aServices: IApiRegistrationServices; ec: ExecutionContext; aFileName, aRole: String);
+begin
+  aFileName := aServices.Expand(ec, aFileName);
+  if (length(aFileName) = 0) or (aFileName <> Path.GetFileName(aFileName)) or aFileName.Contains('/') or aFileName.Contains('\') or
+     aFileName.Contains('|') or aFileName.Contains(#10) or aFileName.Contains(#13) or aFileName.StartsWith('_') or
+     not System.Text.RegularExpressions.Regex.IsMatch(coalesce(aRole, ''), '^[a-z][a-z0-9-]{0,63}$') then
+    raise new ArgumentException('Invalid finalized artifact name or role.');
+  aServices.Logger.LogMessage('::CI2:ARTIFACT|'+aRole+'|'+aFileName);
 end;
 
 class method LoggingRegistration.Milestone(aServices: IApiRegistrationServices; ec: ExecutionContext; aText: String);

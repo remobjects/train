@@ -1,0 +1,35 @@
+// Verify snapshot integrity, provenance, invalidation and finalized-artifact events through Train.
+function check(value, message) { if (!value) error(message); }
+folder.create("Source/EBuild/Source/EBuild");
+folder.create("Source/EBuild/Bin");
+folder.create("payload");
+file.write("Source/EBuild/input.pas", "source-v1");
+file.write("Source/EBuild/Source/EBuild/Info.inc", "generated-v1");
+file.write("Source/EBuild/Bin/ignored.dll", "output-v1");
+file.write("payload/library.dll", "signed-payload-v1");
+var key = ci.cacheKey("recipe-v1", ["Source/EBuild"]);
+file.write("Source/EBuild/Source/EBuild/Info.inc", "generated-v2");
+file.write("Source/EBuild/Bin/ignored.dll", "output-v2");
+check(key == ci.cacheKey("recipe-v1", ["Source/EBuild"]), "Generated files invalidated the cache");
+check(key != ci.cacheKey("recipe-v2", ["Source/EBuild"]), "Recipe changes must invalidate");
+check(ci.cacheRestore("cache", key, "destination") == null, "Cold cache should miss");
+var producer = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+ci.cacheStore("cache", key, "payload", producer, "13.0.0.1");
+var provenance = ci.cacheRestore("cache", key, "destination");
+check(provenance.indexOf(producer) >= 0 && provenance.indexOf("13.0.0.1") >= 0, "Producer identity was lost");
+check(file.read("destination/library.dll") == "signed-payload-v1", "Restored bytes differ");
+file.write("Source/EBuild/input.pas", "source-v2");
+check(key != ci.cacheKey("recipe-v1", ["Source/EBuild"]), "Source changes must invalidate");
+var snapshot = file.read("cache/"+key+"/current.txt");
+file.write("cache/"+key+"/"+snapshot+"/files/library.dll", "corruption");
+check(ci.cacheRestore("cache", key, "destination") == null, "Corrupt bytes should miss");
+check(file.read("destination/library.dll") == "signed-payload-v1", "Failed verification changed output");
+file.write("cache/"+key+"/"+snapshot+"/manifest.xml", "broken xml");
+check(ci.cacheRestore("cache", key, "destination") == null, "Malformed metadata should miss");
+ci.cacheStore("cache", key, "payload", producer, "13.0.0.2");
+check(ci.cacheRestore("cache", key, "destination").indexOf("13.0.0.2") >= 0, "Full build did not repair cache");
+var rejected = false;
+try { ci.artifactReady("../escape.zip", "compiler"); } catch (e) { rejected = true; }
+check(rejected, "Unsafe artifact name accepted");
+ci.artifactReady("Compiler.zip", "compiler");
+log("PIPELINE_TESTS_PASSED");
